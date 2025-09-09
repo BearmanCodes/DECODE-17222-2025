@@ -27,12 +27,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
-import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -68,7 +68,6 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Concept: AprilTag", group = "Concept")
-@Disabled
 public class ConceptAprilTag extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
@@ -77,6 +76,8 @@ public class ConceptAprilTag extends LinearOpMode {
      * The variable to store our instance of the AprilTag processor.
      */
     private AprilTagProcessor aprilTag;
+
+    public DrivetrainCore dtCore = new DrivetrainCore();
 
     /**
      * The variable to store our instance of the vision portal.
@@ -98,6 +99,8 @@ public class ConceptAprilTag extends LinearOpMode {
             while (opModeIsActive()) {
 
                 telemetryAprilTag();
+
+                dtCore.run(gamepad1);
 
                 // Push telemetry to the Driver Station.
                 telemetry.update();
@@ -123,6 +126,7 @@ public class ConceptAprilTag extends LinearOpMode {
      * Initialize the AprilTag processor.
      */
     private void initAprilTag() {
+        dtCore.init(hardwareMap);
 
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
@@ -166,7 +170,7 @@ public class ConceptAprilTag extends LinearOpMode {
         //builder.setCameraResolution(new Size(640, 480));
 
         // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
-        //builder.enableLiveView(true);
+        builder.enableLiveView(true);
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
         //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
