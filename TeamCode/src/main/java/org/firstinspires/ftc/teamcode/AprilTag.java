@@ -29,9 +29,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -41,6 +45,8 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -67,19 +73,38 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@Disabled
-@TeleOp(name = "Concept: AprilTag", group = "Concept")
-public class ConceptAprilTag extends LinearOpMode {
+@Config //192.168.43.1:8080/dash
+@TeleOp(name = "AprilTag", group = "Concept")
+public class AprilTag extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+
+    public ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+    public double arrLasterror, arrTotalErrors = 0;
+
+    public static boolean fwd = true;
+
+    public static double kP = 0.001;
+    public static double kI = 0;
+    public static double kD = 0.001;
 
     /**
      * The variable to store our instance of the AprilTag processor.
      */
     private AprilTagProcessor aprilTag;
 
+    public final double tpR = 1425.1;
+
+    public static double arrowErrTol = 10;
+
+    public DcMotorEx arrow;
+
     public DrivetrainCore dtCore = new DrivetrainCore();
 
+                            // GPP, PGP, PPG, Blue, Red
+    public List<Integer> valid_ids = Arrays.asList(21, 22, 23, 20, 24);
+                                            // GPP, PGP, PPG, Blue, Red.
     /**
      * The variable to store our instance of the vision portal.
      */
@@ -128,6 +153,12 @@ public class ConceptAprilTag extends LinearOpMode {
      */
     private void initAprilTag() {
         dtCore.init(hardwareMap);
+        arrow = hardwareMap.get(DcMotorEx.class, "arrow");
+        arrow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arrow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arrow.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if (fwd) arrow.setDirection(DcMotorSimple.Direction.FORWARD);
+        else arrow.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
@@ -192,6 +223,31 @@ public class ConceptAprilTag extends LinearOpMode {
 
     }   // end method initAprilTag()
 
+    public boolean PIDArrow(double arrowTarget){
+        timer.reset();
+        double arrowErr = Math.abs(arrowTarget - arrow.getCurrentPosition());
+        boolean arrowValid = arrowErr > arrowErrTol;
+        if (arrowValid) {
+            double arrP = kP * (arrowErr);
+            double arrD = kD * ((arrowErr - arrLasterror)/arrowErr) * timer.seconds();
+            arrLasterror = arrowErr;
+            arrTotalErrors += arrowErr * timer.seconds();
+            double flI = kI * arrTotalErrors;
+
+            double arrPower = Math.min(Math.max(arrP + arrD + flI, 0), 1);
+
+            arrow.setPower(arrPower);
+
+            timer.reset();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public double angular_to_ticks(double angular, boolean is_radian){
+        return is_radian ? (tpR / (2 * Math.PI)) * angular : (tpR / 360) * angular;
+    }
 
     /**
      * Add telemetry about AprilTag detections.
@@ -199,16 +255,25 @@ public class ConceptAprilTag extends LinearOpMode {
     private void telemetryAprilTag() {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-
+        
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null) {
-                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
-                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+            if (detection.metadata != null && valid_ids.contains(detection.id)) {
+                if (detection.id == 21 /* fix later */){
+                    //negative is cc
+                    double bearing = detection.ftcPose.bearing;
+                    double target = angular_to_ticks(bearing, false);
+                    double arrErr = Math.abs(target - arrow.getCurrentPosition());
+                    if (arrErr > arrowErrTol){
+                        PIDArrow(target);
+                    }
+                    telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                    telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                    telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                    telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+                }
             } else {
                 telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
                 telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
