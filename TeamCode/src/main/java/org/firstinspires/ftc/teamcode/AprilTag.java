@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -41,6 +42,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -48,6 +50,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
  * This OpMode illustrates the basics of AprilTag recognition and pose estimation,
@@ -78,8 +81,11 @@ import java.util.List;
 public class AprilTag extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    private static final long READ_PERIOD = 1;
 
     public ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+    private HuskyLens husky;
 
     public double arrLasterror, arrTotalErrors = 0;
 
@@ -94,7 +100,7 @@ public class AprilTag extends LinearOpMode {
      */
     private AprilTagProcessor aprilTag;
 
-    public final double tpR = 1425.1;
+    public static    double tpR = 1425.1;
 
     public static double arrowErrTol = 10;
 
@@ -119,14 +125,50 @@ public class AprilTag extends LinearOpMode {
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
         telemetry.update();
+        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
+
+        /*
+         * Immediately expire so that the first time through we'll do the read.
+         */
+        rateLimit.expire();
         waitForStart();
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
+                /*
+
+                //telemetryAprilTag();
+                if (!rateLimit.hasExpired()) {
+                    continue;
+                }
+                rateLimit.reset();
+
+                HuskyLens.Block[] blocks = husky.blocks();
+                telemetry.addData("Block count", blocks.length);
+                //192 on y 196.75 on x
+                for (HuskyLens.Block block : blocks) {
+                    telemetry.addData("Block", block.toString());
+                    telemetry.addData("x: ", block.x / 196.75);
+                    telemetry.addData("y: ", block.y / 192);
+                    telemetry.addData("id: ", block.id);
+                    telemetry.addData("width: ", block.width / 196.75);
+                    telemetry.addData("height: ", block.height / 192);
+                    telemetry.addData("top: ", block.top);
+                    telemetry.addData("left: ", block.left);
+                    /*
+                     * Here inside the FOR loop, you could save or evaluate specific info for the currently recognized Bounding Box:
+                     * - blocks[i].width and blocks[i].height   (size of box, in pixels)
+                     * - blocks[i].left and blocks[i].top       (edges of box)
+                     * - blocks[i].x and blocks[i].y            (center location)
+                     * - blocks[i].id                           (Color ID)
+                     *
+                     * These values have Java type int (integer).
+
+                }
+                */
+                dtCore.run(gamepad1);
 
                 telemetryAprilTag();
-
-                dtCore.run(gamepad1);
 
                 // Push telemetry to the Driver Station.
                 telemetry.update();
@@ -153,6 +195,8 @@ public class AprilTag extends LinearOpMode {
      */
     private void initAprilTag() {
         dtCore.init(hardwareMap);
+        husky = hardwareMap.get(HuskyLens.class, "husky");
+        husky.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
         arrow = hardwareMap.get(DcMotorEx.class, "arrow");
         arrow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arrow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -227,6 +271,9 @@ public class AprilTag extends LinearOpMode {
         timer.reset();
         double arrowErr = Math.abs(arrowTarget - arrow.getCurrentPosition());
         boolean arrowValid = arrowErr > arrowErrTol;
+        telemetry.addData("Pos: ", arrow.getCurrentPosition());
+        telemetry.addData("target: ", arrowTarget);
+        telemetry.addData("Err: ", arrowErr);
         if (arrowValid) {
             double arrP = kP * (arrowErr);
             double arrD = kD * ((arrowErr - arrLasterror)/arrowErr) * timer.seconds();
@@ -235,7 +282,7 @@ public class AprilTag extends LinearOpMode {
             double flI = kI * arrTotalErrors;
 
             double arrPower = Math.min(Math.max(arrP + arrD + flI, 0), 1);
-
+            telemetry.addData("Power: ", arrPower);
             arrow.setPower(arrPower);
 
             timer.reset();
@@ -261,7 +308,7 @@ public class AprilTag extends LinearOpMode {
         // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null && valid_ids.contains(detection.id)) {
-                if (detection.id == 21 /* fix later */){
+                if (detection.id == 23 /* fix later */){
                     //negative is cc
                     double bearing = detection.ftcPose.bearing;
                     double target = angular_to_ticks(bearing, false);
