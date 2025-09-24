@@ -91,9 +91,9 @@ public class AprilTag extends LinearOpMode {
 
     public static boolean fwd = true;
 
-    public static double kP = 0.001;
+    public static double kP = 0.5;
     public static double kI = 0;
-    public static double kD = 0.001;
+    public static double kD = 0.5;
 
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -166,7 +166,7 @@ public class AprilTag extends LinearOpMode {
 
                 }
                 */
-                dtCore.run(gamepad1);
+                //dtCore.run(gamepad1);
 
                 telemetryAprilTag();
 
@@ -269,6 +269,7 @@ public class AprilTag extends LinearOpMode {
 
     public boolean PIDArrow(double arrowTarget){
         timer.reset();
+        int direction = (arrowTarget - arrow.getCurrentPosition() < 0) ? -1 : 1;
         double arrowErr = Math.abs(arrowTarget - arrow.getCurrentPosition());
         boolean arrowValid = arrowErr > arrowErrTol;
         telemetry.addData("Pos: ", arrow.getCurrentPosition());
@@ -281,13 +282,14 @@ public class AprilTag extends LinearOpMode {
             arrTotalErrors += arrowErr * timer.seconds();
             double flI = kI * arrTotalErrors;
 
-            double arrPower = Math.min(Math.max(arrP + arrD + flI, 0), 1);
+            double arrPower = (arrP + arrD + flI) * direction;
             telemetry.addData("Power: ", arrPower);
             arrow.setPower(arrPower);
 
             timer.reset();
             return true;
         } else {
+            arrow.setPower(0);
             return false;
         }
     }
