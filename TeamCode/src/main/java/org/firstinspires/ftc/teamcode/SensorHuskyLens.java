@@ -65,11 +65,12 @@ public class SensorHuskyLens extends LinearOpMode {
 
     //Display: 2.0-inch IPS screen with 320*240 resolution
     //Dimension: 52mm x 44.5mm (2.05*1.75 inch)
+    //146.31 ppi
 
     private final int READ_PERIOD = 1;
 
-    public static final double BALL_WIDTH = 5.0;
-    public static final double FOCAL_COEF = 276.0;
+    public static final double BALL_WIDTH = 2.0;
+    public static final double FOCAL_COEF = 320.0;
 
     private HuskyLens huskyLens;
 
@@ -119,7 +120,7 @@ public class SensorHuskyLens extends LinearOpMode {
          *
          * Other algorithm choices for FTC might be: OBJECT_RECOGNITION, COLOR_RECOGNITION or OBJECT_CLASSIFICATION.
          */
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION);
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
 
         telemetry.update();
         waitForStart();
@@ -149,16 +150,24 @@ public class SensorHuskyLens extends LinearOpMode {
             telemetry.addData("Block count", blocks.length);
             for (int i = 0; i < blocks.length; i++) {
                 int color_id = blocks[i].id;
-                if (color_id == 1 /*purple*/) {
+                if (true/*color_id == 1 /*purple*/) {
                     double p_width = blocks[i].width;
                     double p_x = blocks[i].x;
-                    double p_y = blocks[i].y;
+                    double p_left = blocks[i].left;
                     double cam_x_center = 160;
                     double cam_y_center = 120;
-                    double x_cen_error = p_x - cam_x_center; //pos go right to reach center, neg go left.
-                    
+                    double x_cen_error = cam_x_center - p_x; //pos go right to reach center, neg go left.
+
+                    double p_hori = x_cen_error / (p_width / BALL_WIDTH);
                     double p_dist = (BALL_WIDTH * FOCAL_COEF) / p_width;
                     telemetry.addData("Distance: ", p_dist);
+                    telemetry.addData("Width: ", p_width);
+                    telemetry.addData("Height: ", blocks[i].height);
+                    telemetry.addData("Left: ", blocks[i].left);
+                    telemetry.addData("Top: ", blocks[i].top);
+                    telemetry.addData("x: ", blocks[i].x);
+                    telemetry.addData("y: ", blocks[i].y);
+                    telemetry.addData("Hori: ", p_hori);
 
                 }
 
