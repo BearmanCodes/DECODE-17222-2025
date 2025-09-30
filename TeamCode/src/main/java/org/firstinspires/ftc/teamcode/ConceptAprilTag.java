@@ -67,7 +67,6 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@Disabled
 @TeleOp(name = "Concept: AprilTag", group = "Concept")
 public class ConceptAprilTag extends LinearOpMode {
 
@@ -79,6 +78,12 @@ public class ConceptAprilTag extends LinearOpMode {
     private AprilTagProcessor aprilTag;
 
     public DrivetrainCore dtCore = new DrivetrainCore();
+    public static double WHEEL_RADIUS = 2.04724; // in
+    public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
+    public static final double TICKS_PER_REV = 537.6;
+
+
+
 
     /**
      * The variable to store our instance of the vision portal.
@@ -104,6 +109,7 @@ public class ConceptAprilTag extends LinearOpMode {
                 dtCore.run(gamepad1);
 
                 // Push telemetry to the Driver Station.
+
                 telemetry.update();
 
                 // Save CPU resources; can resume streaming when needed.
@@ -131,7 +137,6 @@ public class ConceptAprilTag extends LinearOpMode {
 
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
-
             // The following default settings are available to un-comment and edit as needed.
             .setDrawAxes(true)
                 .setDrawTagID(true)
@@ -221,5 +226,34 @@ public class ConceptAprilTag extends LinearOpMode {
         telemetry.addLine("RBE = Range, Bearing & Elevation");
 
     }   // end method telemetryAprilTag()
+
+    public static void getPositions(){
+        double center = DrivetrainCore.backleft.getCurrentPosition();
+        double left = DrivetrainCore.frontright.getCurrentPosition();
+        double right = DrivetrainCore.backright.getCurrentPosition();
+        double lateral_distance = 7.25;
+        double phi = (left - right) / lateral_distance;
+        double xc = (left + right) / 2;
+        double xp = center - (0.1 * phi);
+        //double deltaX = xc*Math.cos()
+    }
+
+    public static double encoderTicksToInches(double ticks) {
+        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+    }
+
+    public static double rpmToVelocity(double rpm) {
+        return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
+    }
+    //left 22
+    //right 23
+    //center 21
+    //Lateral Distance = 7.25in
+    //phi = (left-right)/L
+    //xc = (left + right) / 2
+    //xp = center - (F * phi)
+    //deltaX = xc*cos(theta) - xp * sin(theta)
+    //deltay = xc*sin(theta) + xp * cos(theta)
+    //phi = phi
 
 }   // end class

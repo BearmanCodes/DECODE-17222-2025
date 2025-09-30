@@ -146,6 +146,7 @@ public class SensorHuskyLens extends LinearOpMode {
              *
              * Returns an empty array if no objects are seen.
              */
+
             HuskyLens.Block[] blocks = huskyLens.blocks();
             telemetry.addData("Block count", blocks.length);
             for (int i = 0; i < blocks.length; i++) {
@@ -168,7 +169,6 @@ public class SensorHuskyLens extends LinearOpMode {
                     telemetry.addData("x: ", blocks[i].x);
                     telemetry.addData("y: ", blocks[i].y);
                     telemetry.addData("Hori: ", p_hori);
-
                 }
 
                 //Display: 2.0-inch IPS screen with 320*240 resolution
