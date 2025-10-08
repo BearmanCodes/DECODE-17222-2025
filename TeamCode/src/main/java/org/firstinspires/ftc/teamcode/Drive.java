@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class Drive extends LinearOpMode {
     //private DrivetrainCore dtCore = new DrivetrainCore();
-    private CRServo servo;
+    private CRServo Lservo, Rservo;
 
     static FtcDashboard dashboard = FtcDashboard.getInstance();
     static Telemetry dashTele = dashboard.getTelemetry();
@@ -28,16 +28,22 @@ public class Drive extends LinearOpMode {
     public static double lPower = 0.1;
     public static double rPower = 0.1;
 
+    public static double lservePower = 0.1;
+
+    public static double rservePower = 0.1;
+
 
     private DcMotorEx fly, fry;
 
     @Override
     public void runOpMode() throws InterruptedException {
         //dtCore.init(hardwareMap);
-        servo = hardwareMap.get(CRServo.class, "cr");
+        Lservo = hardwareMap.get(CRServo.class, "crL");
+        Rservo = hardwareMap.get(CRServo.class, "crR");
+
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
-        servo.setDirection(DcMotorSimple.Direction.FORWARD);
+        Lservo.setDirection(DcMotorSimple.Direction.REVERSE);
         fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -48,8 +54,12 @@ public class Drive extends LinearOpMode {
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
+                //900 is lobbing standard
+                //1100 is not lobbing standard
                 fly.setVelocity(lPower);
                 fry.setVelocity(rPower);
+                Lservo.setPower(lservePower);
+                Rservo.setPower(rservePower);
                 telemetry.addData("L Power: ", lPower);
                 telemetry.addData("L RPM: ", 6000 * lPower);
                 telemetry.addData("L Output Velocity: ", fly.getVelocity());
@@ -68,23 +78,6 @@ public class Drive extends LinearOpMode {
                 dashTele.addData("R RPM: ", 6000 * rPower);
                 dashTele.addData("R Output Velocity: ", fry.getVelocity());
                 dashTele.update();
-                if (gamepad1.x && !gamepad1.xWasPressed()){
-                    servo.setPower(1);
-                    telemetry.addLine("Should be going");
-                    telemetry.update();
-                }
-
-                if (gamepad1.y && !gamepad1.yWasPressed()){
-                    servo.setPower(-1);
-                    telemetry.addLine("Should be going back");
-                    telemetry.update();
-                }
-
-                if (gamepad1.b && !gamepad1.bWasPressed()){
-                    servo.setPower(0);
-                    telemetry.addLine("Should be going back");
-                    telemetry.update();
-                }
 
             }
         }
