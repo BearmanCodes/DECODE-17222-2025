@@ -58,7 +58,7 @@ import java.util.Locale;
  */
 
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
-@Disabled
+
 public class UtilityCameraFrameCapture extends LinearOpMode
 {
     /*
@@ -90,7 +90,7 @@ public class UtilityCameraFrameCapture extends LinearOpMode
         {
             portal = new VisionPortal.Builder()
                     .setCamera(INTERNAL_CAM_DIR)
-                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
+                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RES OLUTION_HEIGHT))
                     .build();
         }
 

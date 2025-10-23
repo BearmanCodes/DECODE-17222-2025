@@ -12,7 +12,10 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +32,11 @@ public class DrivetrainCore{
     public static DcMotorEx backright; //Declare the drivetrian motors
     public static double reducer = 1; //Change for reducing drive power
     YawPitchRollAngles robotOrientation; //IMU YPR Angles
+
+    private AprilTagProcessor aTag;
+
+    private VisionPortal visionPortal;
+
     static IMU imu; //Declare the IMU
     static IMU.Parameters imuparams; //Declare the IMU's settingsx
 
@@ -45,6 +53,15 @@ public class DrivetrainCore{
 
         imu.initialize(imuparams);
         imu.resetYaw(); //Reset the robot's current perceived position after initalizing the imu specifications.
+        aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
+                .setDrawTagID(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagOutline(true)
+                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setLensIntrinsics(1391.97, 1391.97, 947.192, 560.819)
+
+                .build();
         motorSetUp(); //Assigns all needed motor modes and settings out of view
     }
 
