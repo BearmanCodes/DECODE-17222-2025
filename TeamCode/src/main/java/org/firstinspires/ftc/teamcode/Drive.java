@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @Config
 @TeleOp
 public class Drive extends LinearOpMode {
-    //private DrivetrainCore dtCore = new DrivetrainCore();
+    private DrivetrainCore dtCore = new DrivetrainCore();
     private CRServo lServo, rServo;
 
     public ServoImplEx la;
@@ -48,8 +48,8 @@ public class Drive extends LinearOpMode {
         rServo = hardwareMap.get(CRServo.class, "crR");
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
-        fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
         la = hardwareMap.get(ServoImplEx.class, "la");
@@ -61,7 +61,7 @@ public class Drive extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()){
             while (opModeIsActive()){
-               // dtCore.run(gamepad1);
+                dtCore.run(gamepad1);
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
