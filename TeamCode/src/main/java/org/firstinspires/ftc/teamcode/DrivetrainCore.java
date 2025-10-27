@@ -11,13 +11,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -32,6 +36,7 @@ public class DrivetrainCore{
     public static DcMotorEx backright; //Declare the drivetrian motors
     public static double reducer = 1; //Change for reducing drive power
     YawPitchRollAngles robotOrientation; //IMU YPR Angles
+    public List<Integer> valid_ids = Arrays.asList(21, 22, 23, 20, 24);
 
     private AprilTagProcessor aTag;
 
@@ -60,10 +65,39 @@ public class DrivetrainCore{
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .setLensIntrinsics(1391.97, 1391.97, 947.192, 560.819)
-
                 .build();
         motorSetUp(); //Assigns all needed motor modes and settings out of view
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
+
+        builder.enableLiveView(true);
+
+        builder.addProcessor(aTag);
+
+        visionPortal = builder.build();
     }
+
+    public void AprilTagDetect(Telemetry telemetry){
+        List<AprilTagDetection> currentDetections = aTag.getDetections();
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null && valid_ids.contains(detection.id)) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+                telemetry.update();
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+                telemetry.update();
+            }
+        }   // end for() loop
+    }
+
 
     public void run(Gamepad gamepad1){ //Main running function, TeleOp's will use this function.
         double Vertical = gamepad1.left_stick_y;
@@ -75,6 +109,7 @@ public class DrivetrainCore{
         double frontRightPower = (Pivot + Vertical + Horizontal) * reducer; //Mecanum drivetrain shenanigans
         double backRightPower = (Pivot + (Vertical - Horizontal)) * reducer;
         double backLeftPower = (-Pivot + Vertical + Horizontal) * reducer;
+
         //I don't understand any of this math but it allows the mecanum wheels to, do what they do.
         frontleft.setPower(frontLeftPower);
         frontright.setPower(frontRightPower);
