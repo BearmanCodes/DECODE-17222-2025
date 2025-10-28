@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -106,7 +108,7 @@ public class ConceptAprilTag extends LinearOpMode {
 
                 telemetryAprilTag();
 
-                dtCore.run(gamepad1);
+                //dtCore.run(gamepad1);
 
                 // Push telemetry to the Driver Station.
 
@@ -133,7 +135,7 @@ public class ConceptAprilTag extends LinearOpMode {
      * Initialize the AprilTag processor.
      */
     private void initAprilTag() {
-        dtCore.init(hardwareMap);
+        //dtCore.init(hardwareMap);
 
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
@@ -144,6 +146,7 @@ public class ConceptAprilTag extends LinearOpMode {
             .setDrawTagOutline(true)
             .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
             .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setLensIntrinsics(481.985, 481.985, 334.203, 241.948)
 
             // == CAMERA CALIBRATION ==
             // If you do not manually specify calibration parameters, the SDK will attempt
@@ -161,6 +164,7 @@ public class ConceptAprilTag extends LinearOpMode {
         // Decimation = 3 ..  Detect 5" Tag from 10 feet away at 30 Frames Per Second (default)
         // Note: Decimation can be changed on-the-fly to adapt during a match.
         //aprilTag.setDecimation(3);
+        aprilTag.setDecimation(1);
 
         // Create the vision portal by using a builder.
         VisionPortal.Builder builder = new VisionPortal.Builder();
@@ -168,6 +172,7 @@ public class ConceptAprilTag extends LinearOpMode {
         // Set the camera (webcam vs. built-in RC phone camera).
         if (USE_WEBCAM) {
             builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+            builder.setCameraResolution(new Size(640, 480));
         } else {
             builder.setCamera(BuiltinCameraDirection.BACK);
         }

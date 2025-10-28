@@ -218,7 +218,7 @@ public class AprilTag extends LinearOpMode {
             // == CAMERA CALIBRATION ==
             // If you do not manually specify calibration parameters, the SDK will attempt
             // to load a predefined calibration for your camera.
-            //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
+            //.setLensIntrinsics(574.969, 574.969, 343.841, 248.688)
             // ... these parameters are fx, fy, cx, cy.
 
             .build();
