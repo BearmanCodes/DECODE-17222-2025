@@ -13,7 +13,18 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Config
@@ -41,6 +52,13 @@ public class Drive extends LinearOpMode {
 
     private DcMotorEx fly, fry;
 
+    private AprilTagProcessor aTag;
+
+    public List<Integer> valid_ids = Arrays.asList(21, 22, 23, 20, 24);
+
+    private VisionPortal visionPortal;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
         //dtCore.init(hardwareMap);
@@ -58,6 +76,28 @@ public class Drive extends LinearOpMode {
         //fully retract 0, fully extend 1
         la.setPwmEnable();
         la.setPosition(0);
+
+        aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
+                .setDrawTagID(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagOutline(true)
+                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setLensIntrinsics(481.985, 481.985, 334.203, 241.948)
+                .build();
+        aTag.setDecimation(1);
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        builder.enableLiveView(true);
+
+        builder.addProcessor(aTag);
+
+        visionPortal = builder.build();
+
+        InitFile();
         waitForStart();
         if (opModeIsActive()){
             while (opModeIsActive()){
@@ -88,8 +128,57 @@ public class Drive extends LinearOpMode {
                 dashTele.addData("R RPM: ", 6000 * rPower);
                 dashTele.addData("R Output Velocity: ", fry.getVelocity());
                 dashTele.update();
+                AprilTagDetect(telemetry);
 
             }
         }
     }
+
+    public void AprilTagDetect(Telemetry telemetry){
+        List<AprilTagDetection> currentDetections = aTag.getDetections();
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null && valid_ids.contains(detection.id)) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+                telemetry.update();
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+                telemetry.update();
+            }
+            //                             x,y,z,pitch,roll,yaw,range,bearing,elevation
+            String output = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z, detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw, detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation, lPower, rPower, laPos);
+            telemetry.addLine(output);
+            if (gamepad1.a && !gamepad1.aWasPressed()){
+                AppendData(output);
+            }
+            telemetry.update();
+        }   // end for() loop
+    }
+
+    public void InitFile(){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
+            bw.write("X,Y,Z,Pitch,Roll,Yaw,Range,Bearing,Elevation,L vel,R vel,LA Pos");
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("Error writing file.");
+        }
+    }
+
+    public void AppendData(String output){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
+            bw.newLine();
+            bw.write(output);
+            telemetry.addLine("Successfully wrote to the file.");
+            telemetry.update();
+        } catch (IOException e) {
+            telemetry.addLine("Error writing file.");
+            telemetry.update();
+        }
+    }
+
 }

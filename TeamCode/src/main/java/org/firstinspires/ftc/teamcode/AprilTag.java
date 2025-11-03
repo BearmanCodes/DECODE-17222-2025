@@ -47,6 +47,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,7 +120,11 @@ public class AprilTag extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        initAprilTag();
+        try {
+            initAprilTag();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
@@ -193,7 +198,7 @@ public class AprilTag extends LinearOpMode {
     /**
      * Initialize the AprilTag processor.
      */
-    private void initAprilTag() {
+    private void initAprilTag() throws IOException {
         dtCore.init(hardwareMap);
         husky = hardwareMap.get(HuskyLens.class, "husky");
         husky.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);

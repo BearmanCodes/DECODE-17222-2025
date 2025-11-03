@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -18,6 +20,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;   // Import the FileWriter class
+import java.io.IOException;  // Import the IOException class
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
@@ -34,6 +40,7 @@ public class DrivetrainCore{
     public static DcMotorEx frontright;
     public static DcMotorEx backleft;
     public static DcMotorEx backright; //Declare the drivetrian motors
+    public static ServoImplEx la;
     public static double reducer = 1; //Change for reducing drive power
     YawPitchRollAngles robotOrientation; //IMU YPR Angles
     public List<Integer> valid_ids = Arrays.asList(21, 22, 23, 20, 24);
@@ -45,11 +52,18 @@ public class DrivetrainCore{
     static IMU imu; //Declare the IMU
     static IMU.Parameters imuparams; //Declare the IMU's settingsx
 
-    public void init(HardwareMap hwMap){
+    public void init(HardwareMap hwMap) throws IOException {
         frontleft = hwMap.get(DcMotorEx.class, "frontleft");  //change these motor names depending on the config
         frontright = hwMap.get(DcMotorEx.class, "frontright");
         backleft = hwMap.get(DcMotorEx.class, "backleft");
         backright = hwMap.get(DcMotorEx.class, "backright");
+
+        la = hwMap.get(ServoImplEx.class, "la");
+
+        la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+        //fully retract 0, fully extend 1
+        la.setPwmEnable();
+
 
         imu = hwMap.get(IMU.class, "imu");
         imuparams = new IMU.Parameters(new RevHubOrientationOnRobot
@@ -64,9 +78,11 @@ public class DrivetrainCore{
                 .setDrawTagOutline(true)
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setLensIntrinsics(1391.97, 1391.97, 947.192, 560.819)
+                .setLensIntrinsics(481.985, 481.985, 334.203, 241.948)
                 .build();
         motorSetUp(); //Assigns all needed motor modes and settings out of view
+
+        aTag.setDecimation(1);
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
@@ -77,25 +93,6 @@ public class DrivetrainCore{
         builder.addProcessor(aTag);
 
         visionPortal = builder.build();
-    }
-
-    public void AprilTagDetect(Telemetry telemetry){
-        List<AprilTagDetection> currentDetections = aTag.getDetections();
-
-        // Step through the list of detections and display info for each one.
-        for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null && valid_ids.contains(detection.id)) {
-                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
-                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
-                telemetry.update();
-            } else {
-                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-                telemetry.update();
-            }
-        }   // end for() loop
     }
 
 
@@ -115,6 +112,25 @@ public class DrivetrainCore{
         frontright.setPower(frontRightPower);
         backleft.setPower(backLeftPower);
         backright.setPower(backRightPower);
+    }
+
+    public void InitFile(){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
+            bw.write("X,Y,Z,Pitch,Roll,Yaw,Range,Bearing,Elevation,Power,LA Pos");
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("Error writing file.");
+        }
+    }
+
+    public void AppendData(){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
+            bw.newLine();
+            bw.write("X,Y,Z,Pitch,Roll,Yaw,Range,Bearing,Elevation,Power,LA Pos");
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("Error writing file.");
+        }
     }
 
     public void allMotorPower(double power){
