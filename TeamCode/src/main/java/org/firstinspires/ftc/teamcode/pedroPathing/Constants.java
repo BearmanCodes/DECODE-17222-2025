@@ -25,10 +25,10 @@ public class Constants {
     static DcMotorSimple.Direction BR_DIR = DcMotorSimple.Direction.FORWARD;
 
     //Forward Pod (X) offset in the Y direction. Don't confuse the lettering it's weird.
-    static double FPOD_Y_OFFSET = 0; //Inches but can adjust to whatever DistanceUnit is
+    static double FPOD_Y_OFFSET = 7.025; //Inches but can adjust to whatever DistanceUnit is
 
     //Strafe Pod (Y) offset in the X direction. Don't confuse the lettering it's weird.
-    static double SPOD_X_OFFSET = 0; //Inches but can adjust to whatever DistanceUnit is
+    static double SPOD_X_OFFSET = 0.95; //Inches but can adjust to whatever DistanceUnit is
 
     static DistanceUnit OFFSET_DISTANCE_UNIT = DistanceUnit.INCH;
 
