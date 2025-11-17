@@ -47,10 +47,14 @@ public class Drive extends LinearOpMode {
 
     public static double rServoPower = 1.0;
 
+    public static double inPower = 1.0;
+
+    public static boolean inFWD = false;
+
     public static double laPos = 0;
 
 
-    private DcMotorEx fly, fry;
+    private DcMotorEx fly, fry, intake;
 
     private AprilTagProcessor aTag;
 
@@ -61,15 +65,23 @@ public class Drive extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        //dtCore.init(hardwareMap);
-        lServo = hardwareMap.get(CRServo.class, "crL");
-        rServo = hardwareMap.get(CRServo.class, "crR");
+        try {
+            dtCore.init(hardwareMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        lServo = hardwareMap.get(CRServo.class, "crl");
+        rServo = hardwareMap.get(CRServo.class, "crr");
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        intake.setDirection(inDir);
         la = hardwareMap.get(ServoImplEx.class, "la");
 
         la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
@@ -77,6 +89,7 @@ public class Drive extends LinearOpMode {
         la.setPwmEnable();
         la.setPosition(0);
 
+        /*
         aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
                 .setDrawTagID(true)
                 .setDrawCubeProjection(true)
@@ -96,6 +109,7 @@ public class Drive extends LinearOpMode {
         builder.addProcessor(aTag);
 
         visionPortal = builder.build();
+         */
 
         InitFile();
         waitForStart();
@@ -107,9 +121,12 @@ public class Drive extends LinearOpMode {
                 //rPower = gamepad1.right_trigger;
                 fly.setVelocity(lPower);
                 fry.setVelocity(rPower);
+                intake.setVelocity(inPower);
+
                 lServo.setPower(lServoPower);
                 rServo.setPower(rServoPower);
                 la.setPosition(laPos);
+
                 telemetry.addData("L Power: ", lPower);
                 telemetry.addData("L RPM: ", 6000 * lPower);
                 telemetry.addData("L Output Velocity: ", fly.getVelocity());
@@ -128,12 +145,13 @@ public class Drive extends LinearOpMode {
                 dashTele.addData("R RPM: ", 6000 * rPower);
                 dashTele.addData("R Output Velocity: ", fry.getVelocity());
                 dashTele.update();
-                AprilTagDetect(telemetry);
+                //AprilTagDetect(telemetry);
 
             }
         }
     }
 
+    /*
     public void AprilTagDetect(Telemetry telemetry){
         List<AprilTagDetection> currentDetections = aTag.getDetections();
 
@@ -159,6 +177,8 @@ public class Drive extends LinearOpMode {
             telemetry.update();
         }   // end for() loop
     }
+
+     */
 
     public void InitFile(){
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {

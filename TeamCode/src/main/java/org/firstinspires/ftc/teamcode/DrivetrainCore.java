@@ -58,41 +58,7 @@ public class DrivetrainCore{
         backleft = hwMap.get(DcMotorEx.class, "backleft");
         backright = hwMap.get(DcMotorEx.class, "backright");
 
-        la = hwMap.get(ServoImplEx.class, "la");
-
-        la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
-        //fully retract 0, fully extend 1
-        la.setPwmEnable();
-
-
-        imu = hwMap.get(IMU.class, "imu");
-        imuparams = new IMU.Parameters(new RevHubOrientationOnRobot
-                (RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
-
-        imu.initialize(imuparams);
-        imu.resetYaw(); //Reset the robot's current perceived position after initalizing the imu specifications.
-        aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
-                .setDrawTagID(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagOutline(true)
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setLensIntrinsics(481.985, 481.985, 334.203, 241.948)
-                .build();
         motorSetUp(); //Assigns all needed motor modes and settings out of view
-
-        aTag.setDecimation(1);
-
-        VisionPortal.Builder builder = new VisionPortal.Builder();
-
-        builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
-
-        builder.enableLiveView(true);
-
-        builder.addProcessor(aTag);
-
-        visionPortal = builder.build();
     }
 
 
@@ -146,7 +112,7 @@ public class DrivetrainCore{
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        frontright.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontleft.setDirection(DcMotorSimple.Direction.FORWARD); //Change these directions for your drive
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         backleft.setDirection(DcMotorSimple.Direction.FORWARD);

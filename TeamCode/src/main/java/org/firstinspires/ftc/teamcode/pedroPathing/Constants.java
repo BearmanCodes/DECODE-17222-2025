@@ -42,7 +42,7 @@ public class Constants {
     //FORWARD_VELOCITY_TUNER
     static double X_VELOCITY = 0;
     //LATERAL_VELOCITY_TUNER
-    static double Y_VELOCITY = 0;
+    static double Y_VELOCITY = -0;
     //FORWARD_ZERO_POWER_ACCELERATION
     static double X_ZERO_POWER_ACCELERATION = 0;
     //LATERAL_ZERO_POWER_ACCELERATION
