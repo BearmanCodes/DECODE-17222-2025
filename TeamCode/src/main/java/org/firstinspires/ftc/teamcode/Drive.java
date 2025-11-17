@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -40,18 +41,22 @@ public class Drive extends LinearOpMode {
 
     public ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
-    public static double lPower = 0.1;
-    public static double rPower = 0.1;
+    public static double lPower = 1100;
+    public static double rPower = 1100;
 
     public static double lServoPower = 1.0;
 
     public static double rServoPower = 1.0;
 
-    public static double inPower = 1.0;
+    public static double inPower = 750;
 
     public static boolean inFWD = false;
 
+    public static double laIter = 0.05;
+
     public static double laPos = 0;
+
+    public static boolean crStat = false;
 
 
     private DcMotorEx fly, fry, intake;
@@ -119,13 +124,32 @@ public class Drive extends LinearOpMode {
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
-                fly.setVelocity(lPower);
-                fry.setVelocity(rPower);
                 intake.setVelocity(inPower);
 
-                lServo.setPower(lServoPower);
-                rServo.setPower(rServoPower);
-                la.setPosition(laPos);
+                if (gamepad1.right_bumper && !gamepad1.rightBumperWasPressed()) {
+                    double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
+                    la.setPosition(currPos + laIter);
+                    dashTele.addData("LA Pos: ", la.getPosition());
+                    dashTele.update();
+                }
+
+                if (gamepad1.left_bumper && !gamepad1.leftBumperWasPressed()) {
+                    double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
+                    la.setPosition(currPos - laIter);
+                    dashTele.addData("LA Pos: ", la.getPosition());
+                    dashTele.update();
+                }
+
+                if (gamepad1.x && !gamepad1.xWasPressed()) {
+                    crStat = !crStat;
+                    if (crStat) {
+                        lServo.setPower(lServoPower);
+                        rServo.setPower(rServoPower);
+                    } else {
+                        lServo.setPower(0);
+                        rServo.setPower(0);
+                    }
+                }
 
                 telemetry.addData("L Power: ", lPower);
                 telemetry.addData("L RPM: ", 6000 * lPower);
