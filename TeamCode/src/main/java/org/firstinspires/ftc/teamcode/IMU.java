@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -15,11 +18,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 @Config
 @TeleOp
 public class IMU extends LinearOpMode {
+
+    public ServoImplEx la;
+
+    public static double laTYQuotienter = 30.0;
 
     Limelight3A limelight;
 
@@ -45,8 +53,36 @@ public class IMU extends LinearOpMode {
 
             Pose2D pos = odo.getPosition();
             limelight.updateRobotOrientation(pos.getHeading(AngleUnit.DEGREES));
+
             LLResult llResult = limelight.getLatestResult();
             if (llResult != null && llResult.isValid()) {
+                /*
+                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                    int id = fiducial.getFiducialId(); // The ID number of the fiducial
+                    double xPix = fiducial.getTargetXPixels(); // Where it is (left-right)
+                    double xDeg = fiducial.getTargetXDegrees();
+                    double yPix = fiducial.getTargetYPixels(); // Where it is (up-down)
+                    double yDeg = fiducial.getTargetYDegrees();
+                    telemetry.addData("xPix: ", xPix);
+                    telemetry.addData("xDeg: ", xDeg);
+                    telemetry.addData("yPix: ", yPix);
+                    telemetry.addData("yDeg: ", yDeg);
+                    dashTele.addData("xPix: ", xPix);
+                    dashTele.addData("xDeg: ", xDeg);
+                    dashTele.addData("yPix: ", yPix);
+                    dashTele.addData("yDeg: ", yDeg);
+                }
+                */
+
+                double targetOffsetAngle_Vertical = Math.round(llResult.getTy() * 100.00) / 100.00;
+                double limelightMountAngleDegrees = 0;
+                double limelightLensHeightInches = 15.5;
+                double goalHeightInches = 19.75;
+                double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+                double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+                double distanceFromLimelightToGoal = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+
                 Pose3D botpose_mt2 = llResult.getBotpose_MT2();
                 if (botpose_mt2 != null) {
                     double x = botpose_mt2.getPosition().x;
@@ -55,22 +91,32 @@ public class IMU extends LinearOpMode {
                     telemetry.addData("MT2 Location:", "(" + x + ", " + y + ", " + yaw + " )");
                     dashTele.addData("MT2 Location:", "(" + x + ", " + y + ", " + yaw + " )");
                 }
+
+                if (llResult.getTy() < 2){
+                    double laPos = 0;
+                    la.setPosition(laPos);
+                } else {
+                    int intTY = (int) llResult.getTy();
+                    double laDouble = (double) intTY / laTYQuotienter;
+                    double laPos = Math.round(laDouble * 100.00) / 100.00;
+                    la.setPosition(laPos);
+                }
+
+
                 telemetry.addData("Tx: ", llResult.getTx());
                 telemetry.addData("Ta: ", llResult.getTa());
                 telemetry.addData("Ty: ", llResult.getTy());
                 telemetry.addData("TxNC: ", llResult.getTxNC());
                 telemetry.addData("TyNC: ", llResult.getTyNC());
+                telemetry.addData("Distance: ", distanceFromLimelightToGoal);
                 dashTele.addData("Tx: ", llResult.getTx());
                 dashTele.addData("Ta: ", llResult.getTa());
                 dashTele.addData("Ty: ", llResult.getTy());
                 dashTele.addData("TxNC: ", llResult.getTxNC());
                 dashTele.addData("TyNC: ", llResult.getTyNC());
-                //String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
-                telemetry.addData("Position X: ", odo.getEncoderX());
-                telemetry.addData("Position Y: ", odo.getEncoderY());
-                dashTele.addData("Position X: ", odo.getEncoderX());
-                dashTele.addData("Position Y: ", odo.getEncoderY());
-                //dashTele.addData("Position", data);
+                dashTele.addData("Distance: ", distanceFromLimelightToGoal);
+                String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
+                dashTele.addData("Position: ", data);
 
             /*
             gets the current Velocity (x & y in mm/sec and heading in degrees/sec) and prints it.
@@ -86,6 +132,13 @@ public class IMU extends LinearOpMode {
     }
 
     public void odo_init(){
+        la = hardwareMap.get(ServoImplEx.class, "la");
+
+        la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+        //fully retract 0, fully extend 1
+        la.setPwmEnable();
+        la.setPosition(0);
+
         odo = hardwareMap.get(GoBildaPinpointDriver.class, ":3");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
