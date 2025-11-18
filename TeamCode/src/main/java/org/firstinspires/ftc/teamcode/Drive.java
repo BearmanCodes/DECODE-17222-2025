@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +34,14 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class Drive extends LinearOpMode {
     private DrivetrainCore dtCore = new DrivetrainCore();
-    private CRServo lServo, rServo;
+
+    Gamepad currentGamepad = new Gamepad();
+    Gamepad previousGamepad = new Gamepad();
+    private static final DecimalFormat dformat = new DecimalFormat("0.00");
+
+    Gamepad currentGamepad2 = new Gamepad();
+    Gamepad previousGamepad2 = new Gamepad(); //Set up gamepad variables allowing for rising edge detector
+    private CRServo lServo, rServo, tempServo;
 
     public ServoImplEx la;
 
@@ -48,15 +57,22 @@ public class Drive extends LinearOpMode {
 
     public static double rServoPower = 1.0;
 
+    public static double tempServoPower = 1.0;
+
     public static double inPower = 750;
 
     public static boolean inFWD = false;
+
+    public static boolean tempFWD = false;
 
     public static double laIter = 0.05;
 
     public static double laPos = 0;
 
     public static boolean crStat = false;
+
+    public static boolean flyStat = false;
+
 
 
     private DcMotorEx fly, fry, intake;
@@ -80,12 +96,15 @@ public class Drive extends LinearOpMode {
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+        tempServo = hardwareMap.get(CRServo.class, "temp");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        DcMotorSimple.Direction tempDir = tempFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        tempServo.setDirection(tempDir);
         intake.setDirection(inDir);
         la = hardwareMap.get(ServoImplEx.class, "la");
 
@@ -121,33 +140,50 @@ public class Drive extends LinearOpMode {
         if (opModeIsActive()){
             while (opModeIsActive()){
                 dtCore.run(gamepad1);
+                edgeDetector(gamepad1, gamepad2);
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
-                intake.setVelocity(inPower);
 
-                if (gamepad1.right_bumper && !gamepad1.rightBumperWasPressed()) {
+                inPower = gamepad1.left_trigger - gamepad1.right_trigger;
+                intake.setPower(inPower);
+
+                if (currentGamepad.dpad_up && !previousGamepad.dpad_up) {
                     double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
+
                     la.setPosition(currPos + laIter);
                     dashTele.addData("LA Pos: ", la.getPosition());
                     dashTele.update();
                 }
 
-                if (gamepad1.left_bumper && !gamepad1.leftBumperWasPressed()) {
+                if (currentGamepad.dpad_down && !previousGamepad.dpad_down) {
                     double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
                     la.setPosition(currPos - laIter);
                     dashTele.addData("LA Pos: ", la.getPosition());
                     dashTele.update();
                 }
 
-                if (gamepad1.x && !gamepad1.xWasPressed()) {
+                if (currentGamepad.x && !previousGamepad.x) {
                     crStat = !crStat;
                     if (crStat) {
                         lServo.setPower(lServoPower);
                         rServo.setPower(rServoPower);
+                        tempServo.setPower(tempServoPower);
                     } else {
                         lServo.setPower(0);
                         rServo.setPower(0);
+                        tempServo.setPower(0);
+                    }
+                }
+
+                if (currentGamepad.a && !previousGamepad.a) {
+                    flyStat = !flyStat;
+                    if (flyStat) {
+                        fly.setVelocity(lPower);
+                        fry.setVelocity(rPower);
+                    } else {
+                        fly.setPower(0);
+                        fry.setPower(0);
                     }
                 }
 
@@ -211,6 +247,13 @@ public class Drive extends LinearOpMode {
         } catch (IOException e) {
             System.out.println("Error writing file.");
         }
+    }
+
+    public void edgeDetector(Gamepad gamepad1, Gamepad gamepad2) {
+        previousGamepad.copy(currentGamepad);
+        currentGamepad.copy(gamepad1);
+        previousGamepad2.copy(currentGamepad2);
+        currentGamepad2.copy(gamepad2);
     }
 
     public void AppendData(String output){

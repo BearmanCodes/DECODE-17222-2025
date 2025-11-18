@@ -34,9 +34,9 @@ public class Constants {
 
     static String PINPOINT_IMU_NAME = "imu";
 
-    static GoBildaPinpointDriver.EncoderDirection FPOD_ENCODER_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD; //Subject have to change
+    static GoBildaPinpointDriver.EncoderDirection FPOD_ENCODER_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED; //Subject have to change
 
-    static GoBildaPinpointDriver.EncoderDirection SPOD_ENCODER_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD; //Subject to change
+    static GoBildaPinpointDriver.EncoderDirection SPOD_ENCODER_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED; //Subject to change
 
     //AUTOMATIC TUNING CONSTANTS
     //FORWARD_VELOCITY_TUNER
