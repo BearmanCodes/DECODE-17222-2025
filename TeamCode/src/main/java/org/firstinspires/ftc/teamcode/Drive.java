@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -18,6 +20,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -28,12 +33,19 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 @Config
 @TeleOp
 public class Drive extends LinearOpMode {
-    private DrivetrainCore dtCore = new DrivetrainCore();
+    public static double laTYQuotienter = 30.0;
+
+    Limelight3A limelight;
+
+    DrivetrainCore dtCore = new DrivetrainCore();
+
+    GoBildaPinpointDriver odo;
 
     Gamepad currentGamepad = new Gamepad();
     Gamepad previousGamepad = new Gamepad();
@@ -41,7 +53,7 @@ public class Drive extends LinearOpMode {
 
     Gamepad currentGamepad2 = new Gamepad();
     Gamepad previousGamepad2 = new Gamepad(); //Set up gamepad variables allowing for rising edge detector
-    private CRServo lServo, rServo, tempServo;
+    private CRServo lServo, rServo;
 
     public ServoImplEx la;
 
@@ -53,17 +65,19 @@ public class Drive extends LinearOpMode {
     public static double lPower = 1100;
     public static double rPower = 1100;
 
+    public static double intakeReducer = 0.15;
+
     public static double lServoPower = 1.0;
 
     public static double rServoPower = 1.0;
 
-    public static double tempServoPower = 1.0;
+    //public static double tempServoPower = 1.0;
 
     public static double inPower = 750;
 
     public static boolean inFWD = false;
 
-    public static boolean tempFWD = false;
+    //public static boolean tempFWD = false;
 
     public static double laIter = 0.05;
 
@@ -73,6 +87,9 @@ public class Drive extends LinearOpMode {
 
     public static boolean flyStat = false;
 
+    double limelightMountAngleDegrees = 0;
+    double limelightLensHeightInches = 15.75;
+    double goalHeightInches = 32;
 
 
     private DcMotorEx fly, fry, intake;
@@ -91,20 +108,23 @@ public class Drive extends LinearOpMode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
+
         lServo = hardwareMap.get(CRServo.class, "crl");
         rServo = hardwareMap.get(CRServo.class, "crr");
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-        tempServo = hardwareMap.get(CRServo.class, "temp");
+        //tempServo = hardwareMap.get(CRServo.class, "temp");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
-        DcMotorSimple.Direction tempDir = tempFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
-        tempServo.setDirection(tempDir);
+       // DcMotorSimple.Direction tempDir = tempFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        //tempServo.setDirection(tempDir);
         intake.setDirection(inDir);
         la = hardwareMap.get(ServoImplEx.class, "la");
 
@@ -136,17 +156,112 @@ public class Drive extends LinearOpMode {
          */
 
         InitFile();
+        init_odo();
         waitForStart();
         if (opModeIsActive()){
             while (opModeIsActive()){
                 dtCore.run(gamepad1);
                 edgeDetector(gamepad1, gamepad2);
+                odo.update();
+
+                Pose2D pos = odo.getPosition();
+                limelight.updateRobotOrientation(pos.getHeading(AngleUnit.DEGREES));
+
+                LLResult llResult = limelight.getLatestResult();
+                if (llResult != null && llResult.isValid()) {
+                /*
+                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                    int id = fiducial.getFiducialId(); // The ID number of the fiducial
+                    double xPix = fiducial.getTargetXPixels(); // Where it is (left-right)
+                    double xDeg = fiducial.getTargetXDegrees();
+                    double yPix = fiducial.getTargetYPixels(); // Where it is (up-down)
+                    double yDeg = fiducial.getTargetYDegrees();
+                    telemetry.addData("xPix: ", xPix);
+                    telemetry.addData("xDeg: ", xDeg);
+                    telemetry.addData("yPix: ", yPix);
+                    telemetry.addData("yDeg: ", yDeg);
+                    dashTele.addData("xPix: ", xPix);
+                    dashTele.addData("xDeg: ", xDeg);
+                    dashTele.addData("yPix: ", yPix);
+                    dashTele.addData("yDeg: ", yDeg);
+                }
+                */
+
+                    double targetOffsetAngle_Vertical = Math.round(llResult.getTy() * 100.00) / 100.00;
+                    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+                    double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+                    double distanceFromLimelightToGoal = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+
+                    Pose3D botpose_mt2 = llResult.getBotpose_MT2();
+                    if (botpose_mt2 != null) {
+                        telemetry.addLine("READY TO EXPORT DATA");
+                        dashTele.addLine("READY TO EXPORT DATA");
+                            double Tx = llResult.getTx();
+                            double Ty = llResult.getTy();
+                            double Ta = llResult.getTa();
+                            double Distance = distanceFromLimelightToGoal;
+                            double M2_X = botpose_mt2.getPosition().x;
+                            double M2_Y = botpose_mt2.getPosition().y;
+                            double M2_Head = botpose_mt2.getOrientation().getYaw(AngleUnit.DEGREES);
+                            double Odo_X = pos.getX(DistanceUnit.MM);
+                            double Odo_Y = pos.getY(DistanceUnit.MM);
+                            double Odo_Head = pos.getHeading(AngleUnit.DEGREES);
+                            double L_Vel = lPower;
+                            double R_Vel = rPower;
+                            double L_Vel_Measure = fly.getVelocity();
+                            double R_Vel_Measure = fry.getVelocity();
+                            double LA_Pos = la.getPosition();
+                            //GoodShot(Tx, Ty, Ta, Distance, M2_X, M2_Y, M2_Head, Odo_X, Odo_Y, Odo_Head, L_Vel, R_Vel, L_Vel_Measure, R_Vel_Measure, LA_Pos);
+                            String data = Tx + "," + Ty + "," + Ta + "," + Distance + "," + M2_X + "," + M2_Y + "," + M2_Head + "," + Odo_X + "," + Odo_Y + "," + Odo_Head + "," + L_Vel + "," + R_Vel + "," + L_Vel_Measure + "," + R_Vel_Measure + "," + LA_Pos;
+                            dashTele.addLine(data);
+                            telemetry.addLine(data);
+                    }
+
+                    /*
+                    if (llResult.getTy() < 2){
+                        double laPos = 0;
+                        la.setPosition(laPos);
+                    } else {
+                        int intTY = (int) llResult.getTy();
+                        double laDouble = (double) intTY / laTYQuotienter;
+                        double laPos = Math.round(laDouble * 100.00) / 100.00;
+                        la.setPosition(laPos);
+                    }
+                     */
+
+
+                    telemetry.addData("Tx: ", llResult.getTx());
+                    telemetry.addData("Ta: ", llResult.getTa());
+                    telemetry.addData("Ty: ", llResult.getTy());
+                    telemetry.addData("TxNC: ", llResult.getTxNC());
+                    telemetry.addData("TyNC: ", llResult.getTyNC());
+                    telemetry.addData("Distance: ", distanceFromLimelightToGoal);
+                    dashTele.addData("Tx: ", llResult.getTx());
+                    dashTele.addData("Ta: ", llResult.getTa());
+                    dashTele.addData("Ty: ", llResult.getTy());
+                    dashTele.addData("TxNC: ", llResult.getTxNC());
+                    dashTele.addData("TyNC: ", llResult.getTyNC());
+                    dashTele.addData("Distance: ", distanceFromLimelightToGoal);
+                    String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
+                    dashTele.addData("Position: ", data);
+
+            /*
+            gets the current Velocity (x & y in mm/sec and heading in degrees/sec) and prints it.
+             */
+                    String velocity = String.format(Locale.US,"{XVel: %.3f, YVel: %.3f, HVel: %.3f}", odo.getVelX(DistanceUnit.MM), odo.getVelY(DistanceUnit.MM), odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES));
+                    telemetry.addData("Velocity", velocity);
+                    telemetry.update();
+                    dashTele.addData("Velocity", velocity);
+                    dashTele.update();
+                }
+
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
 
                 inPower = gamepad1.left_trigger - gamepad1.right_trigger;
-                intake.setPower(inPower);
+                intake.setPower(inPower * intakeReducer);
 
                 if (currentGamepad.dpad_up && !previousGamepad.dpad_up) {
                     double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
@@ -168,15 +283,15 @@ public class Drive extends LinearOpMode {
                     if (crStat) {
                         lServo.setPower(lServoPower);
                         rServo.setPower(rServoPower);
-                        tempServo.setPower(tempServoPower);
+                        //tempServo.setPower(tempServoPower);
                     } else {
                         lServo.setPower(0);
                         rServo.setPower(0);
-                        tempServo.setPower(0);
+                        //tempServo.setPower(0);
                     }
                 }
 
-                if (currentGamepad.a && !previousGamepad.a) {
+                if (currentGamepad.a && !previousGamepad.a && !currentGamepad.start) {
                     flyStat = !flyStat;
                     if (flyStat) {
                         fly.setVelocity(lPower);
@@ -211,6 +326,62 @@ public class Drive extends LinearOpMode {
         }
     }
 
+    public void init_odo(){
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, ":3");
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        //telemetry.setMsTransmissionInterval(11);
+
+        limelight.pipelineSwitch(0);
+
+        /*
+         * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
+         */
+        /*
+        Set the odometry pod positions relative to the point that the odometry computer tracks around.
+        The X pod offset refers to how far sideways from the tracking point the
+        X (forward) odometry pod is. Left of the center is a positive number,
+        right of center is a negative number. the Y pod offset refers to how far forwards from
+        the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
+        backwards is a negative number.
+         */
+        odo.setOffsets(7.025, 0.95, DistanceUnit.INCH); //these are tuned for 3110-0002-0001 Product Insight #1 //CHANGE THIS
+
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+
+        /*
+        Set the direction that each of the two odometry pods count. The X (forward) pod should
+        increase when you move the robot forward. And the Y (strafe) pod should increase when
+        you move the robot to the left.
+         */
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED); //CHANGE THIS
+
+        /*
+        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
+        The IMU will automatically calibrate when first powered on, but recalibrating before running
+        the robot is a good idea to ensure that the calibration is "good".
+        resetPosAndIMU will reset the position to 0,0,0 and also recalibrate the IMU.
+        This is recommended before you run your autonomous, as a bad initial calibration can cause
+        an incorrect starting value for x, y, and heading.
+         */
+        //odo.recalibrateIMU();
+        odo.resetPosAndIMU();
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
+        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        telemetry.addData("Heading Scalar", odo.getYawScalar());
+        telemetry.update();
+        dashTele.addData("Status", "Initialized");
+        dashTele.addData("X offset", odo.getXOffset(DistanceUnit.MM));
+        dashTele.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        dashTele.addData("Heading Scalar", odo.getYawScalar());
+        dashTele.update();
+
+        limelight.start();
+    }
+
     /*
     public void AprilTagDetect(Telemetry telemetry){
         List<AprilTagDetection> currentDetections = aTag.getDetections();
@@ -242,7 +413,7 @@ public class Drive extends LinearOpMode {
 
     public void InitFile(){
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
-            bw.write("X,Y,Z,Pitch,Roll,Yaw,Range,Bearing,Elevation,L vel,R vel,LA Pos");
+            bw.write("Tx,Ty,Ta,Distance,M2 X,M2 Y,M2 Head,Odo X,Odo Y,Odo Head,L vel,R vel,L vel measure,R vel measure, LA Pos");
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("Error writing file.");
@@ -256,15 +427,24 @@ public class Drive extends LinearOpMode {
         currentGamepad2.copy(gamepad2);
     }
 
+    public void GoodShot(double Tx, double Ty, double Ta, double Distance, double M2_x, double M2_Y, double M2_Head, double Odo_X, double Odo_Y, double Odo_Head, double L_vel, double R_vel, double L_real_vel, double R_real_vel, double LA_Pos){
+        String data = Tx + "," + Ty + "," + Ta + "," + Distance + "," + M2_x + "," + M2_Y + "," + M2_Head + "," + Odo_X + "," + Odo_Y + "," + Odo_Head + "," + L_vel + "," + R_vel + "," + L_real_vel + "," + R_real_vel + "," + LA_Pos;
+        AppendData(data);
+    }
+
     public void AppendData(String output){
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("yourmom.csv"))) {
             bw.newLine();
             bw.write(output);
             telemetry.addLine("Successfully wrote to the file.");
             telemetry.update();
+            dashTele.addLine("Successfully wrote to the file.");
+            dashTele.update();
         } catch (IOException e) {
             telemetry.addLine("Error writing file.");
             telemetry.update();
+            dashTele.addLine("Error writing file.");
+            dashTele.update();
         }
     }
 
