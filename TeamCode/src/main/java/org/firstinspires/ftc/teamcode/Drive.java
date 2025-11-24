@@ -85,6 +85,8 @@ public class Drive extends LinearOpMode {
 
     public static boolean crStat = false;
 
+    public static double surge_measure = 150;
+
     public static boolean flyStat = false;
 
     double limelightMountAngleDegrees = 0;
@@ -302,6 +304,8 @@ public class Drive extends LinearOpMode {
                     }
                 }
 
+                power_surge(lPower, rPower, fly.getVelocity(), fry.getVelocity(), surge_measure);
+
                 telemetry.addData("L Power: ", lPower);
                 telemetry.addData("L RPM: ", 6000 * lPower);
                 telemetry.addData("L Output Velocity: ", fly.getVelocity());
@@ -323,6 +327,14 @@ public class Drive extends LinearOpMode {
                 //AprilTagDetect(telemetry);
 
             }
+        }
+    }
+
+    public void power_surge(double lPower, double rPower, double lMeasured, double rMeasured, double surge_measure){
+        if (lPower - lMeasured >= surge_measure && rPower - rMeasured >= surge_measure && lMeasured >= 200 && rMeasured >= 200 && lServo.getPower() > 0){
+            crStat = !crStat;
+            lServo.setPower(0);
+            rServo.setPower(0);
         }
     }
 
