@@ -80,7 +80,7 @@ public class servoTest extends LinearOpMode {
                 telemetryUpdate();
             }
             if (currentGamepad.start && !previousGamepad.start){
-                //servo1iamgoingtonewjersey.setPosition(servo1iamgoingtonewjerseyPos); //0.04 open, 0 closed
+                servo1iamgoingtonewjersey.setPosition(servo1iamgoingtonewjerseyPos); //0.04 open, 0 closed
                 servo2iamgoingtonewjersey.setPosition(servo2iamgoingtonewjerseyPos); //0.04 open, 0 closed
                 servo3iamgoingtonewjersey.setPosition(servo3iamgoingtonewjerseyPos); //0.04 open, 0 closed
                 servo4iamgoingtonewjersey.setPosition(servo4iamgoingtonewjerseyPos); //0.04 open, 0 closed

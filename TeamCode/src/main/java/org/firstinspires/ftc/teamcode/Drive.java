@@ -53,7 +53,9 @@ public class Drive extends LinearOpMode {
 
     Gamepad currentGamepad2 = new Gamepad();
     Gamepad previousGamepad2 = new Gamepad(); //Set up gamepad variables allowing for rising edge detector
-    private CRServo lServo, rServo;
+    private CRServo lServo, rServo, luigiCont;
+
+    private Servo luigiServo;
 
     public ServoImplEx la;
 
@@ -75,6 +77,10 @@ public class Drive extends LinearOpMode {
 
     public static double inPower = 750;
 
+    public static double luigiPosition = 0.5;
+
+    public static double luigiContPower = 1;
+
     public static boolean inFWD = false;
 
     //public static boolean tempFWD = false;
@@ -88,6 +94,8 @@ public class Drive extends LinearOpMode {
     public static double surge_measure = 150;
 
     public static boolean flyStat = false;
+
+    public static boolean luigiStat = false;
 
     double limelightMountAngleDegrees = 0;
     double limelightLensHeightInches = 15.75;
@@ -118,12 +126,17 @@ public class Drive extends LinearOpMode {
         fly = hardwareMap.get(DcMotorEx.class, "fly");
         fry = hardwareMap.get(DcMotorEx.class, "fry");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+        luigiServo = hardwareMap.get(Servo.class, "WEARE");
+        luigiCont = hardwareMap.get(CRServo.class, "bubba");
+        luigiServo.setPosition(0.22);
+        luigiCont.setPower(0);
         //tempServo = hardwareMap.get(CRServo.class, "temp");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        luigiCont.setDirection(DcMotorSimple.Direction.REVERSE);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
        // DcMotorSimple.Direction tempDir = tempFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
         //tempServo.setDirection(tempDir);
@@ -170,6 +183,9 @@ public class Drive extends LinearOpMode {
                 limelight.updateRobotOrientation(pos.getHeading(AngleUnit.DEGREES));
 
                 LLResult llResult = limelight.getLatestResult();
+
+
+
                 if (llResult != null && llResult.isValid()) {
                 /*
                 List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
@@ -214,10 +230,6 @@ public class Drive extends LinearOpMode {
                             double L_Vel_Measure = fly.getVelocity();
                             double R_Vel_Measure = fry.getVelocity();
                             double LA_Pos = la.getPosition();
-                            //GoodShot(Tx, Ty, Ta, Distance, M2_X, M2_Y, M2_Head, Odo_X, Odo_Y, Odo_Head, L_Vel, R_Vel, L_Vel_Measure, R_Vel_Measure, LA_Pos);
-                            String data = Tx + "," + Ty + "," + Ta + "," + Distance + "," + M2_X + "," + M2_Y + "," + M2_Head + "," + Odo_X + "," + Odo_Y + "," + Odo_Head + "," + L_Vel + "," + R_Vel + "," + L_Vel_Measure + "," + R_Vel_Measure + "," + LA_Pos;
-                            dashTele.addLine(data);
-                            telemetry.addLine(data);
                     }
 
                     /*
@@ -261,7 +273,7 @@ public class Drive extends LinearOpMode {
                 //double mPower = gamepad1.left_stick_y;
                 //lPower = gamepad1.left_trigger;
                 //rPower = gamepad1.right_trigger;
-
+                //.5
                 inPower = gamepad1.left_trigger - gamepad1.right_trigger;
                 intake.setPower(inPower * intakeReducer);
 
@@ -290,6 +302,17 @@ public class Drive extends LinearOpMode {
                         lServo.setPower(0);
                         rServo.setPower(0);
                         //tempServo.setPower(0);
+                    }
+                    }
+
+                if (currentGamepad.b && !previousGamepad.b) {
+                    luigiStat = !luigiStat;
+                    if (luigiStat) {
+                        luigiServo.setPosition(luigiPosition);
+                        luigiCont.setPower(luigiContPower);
+                    } else {
+                        luigiServo.setPosition(0.22);
+                        luigiCont.setPower(0);
                     }
                 }
 
