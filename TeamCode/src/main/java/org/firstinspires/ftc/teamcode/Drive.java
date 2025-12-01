@@ -57,7 +57,7 @@ public class Drive extends LinearOpMode {
 
     private Servo luigiServo;
 
-    public ServoImplEx la;
+    public ServoImplEx laR, laL;
 
     static FtcDashboard dashboard = FtcDashboard.getInstance();
     static Telemetry dashTele = dashboard.getTelemetry();
@@ -77,9 +77,11 @@ public class Drive extends LinearOpMode {
 
     public static double inPower = 750;
 
-    public static double luigiPosition = 0.5;
+    public static double luigiPosition = 0.526;
 
     public static double luigiContPower = 1;
+
+    public static double laInitPos = 0.2;
 
     public static boolean inFWD = false;
 
@@ -87,7 +89,10 @@ public class Drive extends LinearOpMode {
 
     public static double laIter = 0.05;
 
-    public static double laPos = 0;
+    public static double lalPos = 0;
+
+    public static double larPos = 0;
+
 
     public static boolean crStat = false;
 
@@ -119,8 +124,6 @@ public class Drive extends LinearOpMode {
             throw new RuntimeException(e);
         }
 
-
-
         lServo = hardwareMap.get(CRServo.class, "crl");
         rServo = hardwareMap.get(CRServo.class, "crr");
         fly = hardwareMap.get(DcMotorEx.class, "fly");
@@ -128,7 +131,7 @@ public class Drive extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         luigiServo = hardwareMap.get(Servo.class, "WEARE");
         luigiCont = hardwareMap.get(CRServo.class, "bubba");
-        luigiServo.setPosition(0.22);
+        luigiServo.setPosition(luigiPosition);
         luigiCont.setPower(0);
         //tempServo = hardwareMap.get(CRServo.class, "temp");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -141,12 +144,19 @@ public class Drive extends LinearOpMode {
        // DcMotorSimple.Direction tempDir = tempFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
         //tempServo.setDirection(tempDir);
         intake.setDirection(inDir);
-        la = hardwareMap.get(ServoImplEx.class, "la");
+        laR = hardwareMap.get(ServoImplEx.class, "lar");
 
-        la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+        laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
-        la.setPwmEnable();
-        la.setPosition(0);
+        laR.setPwmEnable();
+        laR.setPosition(laInitPos);
+
+        laL = hardwareMap.get(ServoImplEx.class, "lal");
+
+        laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+        //fully retract 0, fully extend 1
+        laL.setPwmEnable();
+        laL.setPosition(laInitPos);
 
         /*
         aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
@@ -229,7 +239,6 @@ public class Drive extends LinearOpMode {
                             double R_Vel = rPower;
                             double L_Vel_Measure = fly.getVelocity();
                             double R_Vel_Measure = fry.getVelocity();
-                            double LA_Pos = la.getPosition();
                     }
 
                     /*
@@ -278,17 +287,24 @@ public class Drive extends LinearOpMode {
                 intake.setPower(inPower * intakeReducer);
 
                 if (currentGamepad.dpad_up && !previousGamepad.dpad_up) {
-                    double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
+                    double currPosL = Math.round(laL.getPosition() * 100.00) / 100.00;
+                    double currPosR = Math.round(laR.getPosition() * 100.00) / 100.00;
 
-                    la.setPosition(currPos + laIter);
-                    dashTele.addData("LA Pos: ", la.getPosition());
+                    laL.setPosition(currPosL + laIter);
+                    laR.setPosition(currPosR + laIter);
+                    dashTele.addData("LAl Pos: ", laL.getPosition());
+                    dashTele.addData("LAr Pos: ", laR.getPosition());
                     dashTele.update();
                 }
 
                 if (currentGamepad.dpad_down && !previousGamepad.dpad_down) {
-                    double currPos = Math.round(la.getPosition() * 100.00) / 100.00;
-                    la.setPosition(currPos - laIter);
-                    dashTele.addData("LA Pos: ", la.getPosition());
+                    double currPosL = Math.round(laL.getPosition() * 100.00) / 100.00;
+                    double currPosR = Math.round(laR.getPosition() * 100.00) / 100.00;
+
+                    laL.setPosition(currPosL - laIter);
+                    laR.setPosition(currPosR - laIter);
+                    dashTele.addData("LAl Pos: ", laL.getPosition());
+                    dashTele.addData("LAr Pos: ", laR.getPosition());
                     dashTele.update();
                 }
 
@@ -308,10 +324,10 @@ public class Drive extends LinearOpMode {
                 if (currentGamepad.b && !previousGamepad.b) {
                     luigiStat = !luigiStat;
                     if (luigiStat) {
-                        luigiServo.setPosition(luigiPosition);
+                        //luigiServo.setPosition(luigiPosition);
                         luigiCont.setPower(luigiContPower);
                     } else {
-                        luigiServo.setPosition(0.22);
+                        //luigiServo.setPosition(0.22);
                         luigiCont.setPower(0);
                     }
                 }
