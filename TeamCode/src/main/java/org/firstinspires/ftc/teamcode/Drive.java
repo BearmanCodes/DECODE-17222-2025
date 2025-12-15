@@ -343,6 +343,7 @@ public class Drive extends LinearOpMode {
                     }
                 }
 
+
                 power_surge(lPower, rPower, fly.getVelocity(), fry.getVelocity(), surge_measure);
 
                 telemetry.addData("L Power: ", lPower);

@@ -22,8 +22,21 @@ public class DriveAutoCore {
     public IMU.Parameters imuparams;
 
     static final double TicksPerRev = 537.7;
-    static final double WheelInches = (104 / 25.4);
-    static final double TicksPerIn = TicksPerRev / (WheelInches * Math.PI);
+    static final double WheelInchesCircumference = 2 * Math.PI * (52 / 25.4);
+                                                    //12.863214014698366015752555585081
+    static final double BotInchesCircumference = 18 * Math.PI;
+                                                    //56.548667764616278292327580899031
+
+    static final double WheelRevsPerBotRev = BotInchesCircumference / WheelInchesCircumference;
+                                                    //4.396153846153846153846153846154
+
+    static final double TicksPerRadian = WheelRevsPerBotRev / (2 * Math.PI);
+
+    static final double TicksPerIn = TicksPerRev / (WheelInchesCircumference * Math.PI);
+
+    //want to go 590.952980767 ticks
+
+
 
     public void Drive(double velocity,
                       double frontLeftInches, double frontRightInches,
@@ -164,6 +177,7 @@ public class DriveAutoCore {
     public void turnCW(double vel, double inches, boolean active, long tOut) throws InterruptedException {
         inches = Math.abs(inches);
         Drive(vel, inches, -inches, inches, -inches, active, tOut);
+        //7.06858347055 inches
     }
 
     public void turnAmount(int target, boolean active, Telemetry telemetry) {
