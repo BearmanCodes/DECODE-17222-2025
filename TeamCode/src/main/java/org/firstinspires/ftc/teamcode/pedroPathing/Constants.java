@@ -16,23 +16,23 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
-    static double ROBO_MASS = 0/*KILOGRAMS*/;
+    static double ROBO_MASS = 15.5/*KILOGRAMS*/;
     static double MAX_POWER = 1;
 
-    static DcMotorSimple.Direction FL_DIR = DcMotorSimple.Direction.FORWARD;
+    static DcMotorSimple.Direction FL_DIR = DcMotorSimple.Direction.REVERSE;
     static DcMotorSimple.Direction FR_DIR = DcMotorSimple.Direction.FORWARD;
-    static DcMotorSimple.Direction BL_DIR = DcMotorSimple.Direction.FORWARD;
+    static DcMotorSimple.Direction BL_DIR = DcMotorSimple.Direction.REVERSE;
     static DcMotorSimple.Direction BR_DIR = DcMotorSimple.Direction.FORWARD;
 
     //Forward Pod (X) offset in the Y direction. Don't confuse the lettering it's weird.
-    static double FPOD_Y_OFFSET = 7.025; //Inches but can adjust to whatever DistanceUnit is
+    static double FPOD_Y_OFFSET = 7.5; //Inches but can adjust to whatever DistanceUnit is
 
     //Strafe Pod (Y) offset in the X direction. Don't confuse the lettering it's weird.
-    static double SPOD_X_OFFSET = 0.95; //Inches but can adjust to whatever DistanceUnit is
+    static double SPOD_X_OFFSET = 0.5; //Inches but can adjust to whatever DistanceUnit is
 
     static DistanceUnit OFFSET_DISTANCE_UNIT = DistanceUnit.INCH;
 
-    static String PINPOINT_IMU_NAME = "imu";
+    static String PINPOINT_IMU_NAME = ":3";
 
     static GoBildaPinpointDriver.EncoderDirection FPOD_ENCODER_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED; //Subject have to change
 

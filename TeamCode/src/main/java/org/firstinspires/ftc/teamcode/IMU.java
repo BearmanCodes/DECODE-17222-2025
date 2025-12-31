@@ -158,7 +158,7 @@ public class IMU extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(7.025, 0.95, DistanceUnit.INCH); //these are tuned for 3110-0002-0001 Product Insight #1 //CHANGE THIS
+        odo.setOffsets(7.5, 0.5, DistanceUnit.INCH); //these are tuned for 3110-0002-0001 Product Insight #1 //CHANGE THIS
 
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
