@@ -40,13 +40,13 @@ public class Constants {
 
     //AUTOMATIC TUNING CONSTANTS
     //FORWARD_VELOCITY_TUNER
-    static double X_VELOCITY = 0;
+    static double X_VELOCITY = 62.2906;
     //LATERAL_VELOCITY_TUNER
-    static double Y_VELOCITY = -0;
+    static double Y_VELOCITY = 50.7576;
     //FORWARD_ZERO_POWER_ACCELERATION
-    static double X_ZERO_POWER_ACCELERATION = 0;
+    static double X_ZERO_POWER_ACCELERATION = -37;
     //LATERAL_ZERO_POWER_ACCELERATION
-    static double Y_ZERO_POWER_ACCELERATION = 0;
+    static double Y_ZERO_POWER_ACCELERATION = -69;
 
 
 
@@ -54,6 +54,10 @@ public class Constants {
             .mass(ROBO_MASS)
             .forwardZeroPowerAcceleration(X_ZERO_POWER_ACCELERATION)
             .lateralZeroPowerAcceleration(Y_ZERO_POWER_ACCELERATION)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.07, 0, 0.0025, 0.015))
+            .headingPIDFCoefficients(new PIDFCoefficients(1.0, 0, 0.025, 0.015))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025, 0.0001, 0.001, 0.6, 0.015))
+            .centripetalScaling(0.0005);
             /* COEFFICENTS ONCE YOU TUNE TRANSITIONAL PIDF MANUTALLY .translationalPIDFCoefficients(new PIDFCoefficients())*/
             /* ONCE YOU TUNE HEADING PIDF MANUALLY .headingPIDFCoefficients(new PIDFCoefficients())*/
             /*ONCE YOU TUNE DRIVE PIDF, THIS WILL TAKE LIKE FOREVER, AHHH .drivePIDFCoefficients(new FilteredPIDFCoefficients())*/
@@ -85,7 +89,7 @@ public class Constants {
             .yVelocity(Y_VELOCITY);
 
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.45, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

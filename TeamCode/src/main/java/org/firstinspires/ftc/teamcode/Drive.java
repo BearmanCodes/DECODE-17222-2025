@@ -77,7 +77,10 @@ public class Drive extends LinearOpMode {
 
     public static double inPower = 750;
 
-    public static double luigiPosition = 0.526;
+    public static double luigiBlock = 0.515;
+
+    public static double luigiFlow = 0.19;
+
 
     public static double luigiContPower = 1;
 
@@ -100,7 +103,7 @@ public class Drive extends LinearOpMode {
 
     public static boolean flyStat = false;
 
-    public static boolean luigiStat = false;
+    public static boolean luigiStat = true;
 
     double limelightMountAngleDegrees = 0;
     double limelightLensHeightInches = 15.75;
@@ -131,8 +134,9 @@ public class Drive extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         luigiServo = hardwareMap.get(Servo.class, "WEARE");
         luigiCont = hardwareMap.get(CRServo.class, "bubba");
-        luigiServo.setPosition(luigiPosition);
+        luigiServo.setPosition(luigiBlock); //0.19 is back enough that balls fall, //0.52 is straight block
         luigiCont.setPower(0);
+
         //tempServo = hardwareMap.get(CRServo.class, "temp");
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -158,6 +162,8 @@ public class Drive extends LinearOpMode {
         laL.setPwmEnable();
         laL.setPosition(laInitPos);
 
+
+
         /*
         aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
                 .setDrawTagID(true)
@@ -180,7 +186,6 @@ public class Drive extends LinearOpMode {
         visionPortal = builder.build();
          */
 
-        InitFile();
         init_odo();
         waitForStart();
         if (opModeIsActive()){
@@ -319,16 +324,15 @@ public class Drive extends LinearOpMode {
                         rServo.setPower(0);
                         //tempServo.setPower(0);
                     }
-                    }
+                }
+
 
                 if (currentGamepad.b && !previousGamepad.b) {
                     luigiStat = !luigiStat;
                     if (luigiStat) {
-                        //luigiServo.setPosition(luigiPosition);
-                        luigiCont.setPower(luigiContPower);
+                        luigiServo.setPosition(luigiBlock);
                     } else {
-                        //luigiServo.setPosition(0.22);
-                        luigiCont.setPower(0);
+                        luigiServo.setPosition(luigiFlow);
                     }
                 }
 
@@ -363,6 +367,13 @@ public class Drive extends LinearOpMode {
                 dashTele.addData("R Power: ", rPower);
                 dashTele.addData("R RPM: ", 6000 * rPower);
                 dashTele.addData("R Output Velocity: ", fry.getVelocity());
+
+                dashTele.addData("Fl Pos: ", DrivetrainCore.frontleft.getCurrentPosition());
+                dashTele.addData("Bl Pos: ", DrivetrainCore.backleft.getCurrentPosition());
+                dashTele.addData("Fr Pos: ", DrivetrainCore.frontright.getCurrentPosition());
+                dashTele.addData("Br Pos: ", DrivetrainCore.backright.getCurrentPosition());
+
+
                 dashTele.update();
                 //AprilTagDetect(telemetry);
 
