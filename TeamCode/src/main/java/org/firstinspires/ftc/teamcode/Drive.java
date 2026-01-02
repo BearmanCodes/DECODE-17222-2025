@@ -81,7 +81,6 @@ public class Drive extends LinearOpMode {
 
     public static double luigiFlow = 0.19;
 
-
     public static double luigiContPower = 1;
 
     public static double laInitPos = 0.2;
@@ -161,8 +160,6 @@ public class Drive extends LinearOpMode {
         //fully retract 0, fully extend 1
         laL.setPwmEnable();
         laL.setPosition(laInitPos);
-
-
 
         /*
         aTag = new AprilTagProcessor.Builder().setDrawAxes(true)
