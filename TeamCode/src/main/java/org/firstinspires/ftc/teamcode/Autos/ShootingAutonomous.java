@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -14,12 +16,19 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
+@Config
 @Autonomous(name = "Shooting Autonomous", group = "Autonomous")
 @Configurable // Panels
 public class ShootingAutonomous extends OpMode {
+
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashTele = dashboard.getTelemetry();
+
+    public boolean firstTimeCR = true;
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
@@ -27,10 +36,15 @@ public class ShootingAutonomous extends OpMode {
     Timer pathTimer;
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
-    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose endPose1 = new Pose(47.460465116279074, 95.60930232558137, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
 
-    private PathChain firstPath;
+    public static int L_VEL = 900;
+
+    public static int R_VEL = 900;
+    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
+    private final Pose endPose1 = new Pose(56.515188335358445, 85.910085054678, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
+
+    private final Pose endPose2 = new Pose(57.914945321992704, 16.797083839611176, Math.toRadians(180));
+    private PathChain firstPath, endingPath;
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -56,29 +70,48 @@ public class ShootingAutonomous extends OpMode {
   }
 
   public void buildPaths(){
+        PathCallback TestCallback = new PathCallback() {
+            @Override
+            public boolean run() {
+                follower.pausePathFollowing();
+                while (!shooterAutoCore.shoot(3, dashTele)){
+                    dashTele.update();
+                }
+                follower.resumePathFollowing();
+                return true;
+            }
+
+            @Override
+            public void initialize() {
+                if (firstTimeCR) {
+                    shooterAutoCore.setCRPower(1, dashTele);
+                    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow + ShooterAutoCore.KICK_ITERATOR);
+                    firstTimeCR = false;
+                }
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public int getPathIndex() {
+                return 0;
+            }
+        };
+
         firstPath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, endPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading())
                 .build();
 
-  }
+        endingPath = follower.pathBuilder()
+                .addPath(new BezierLine(endPose1, endPose2))
+                .setLinearHeadingInterpolation(endPose1.getHeading(), endPose2.getHeading())
+                .addCallback(TestCallback)
+                .build();
 
-  public class TestCallback implements PathCallback {
-
-      @Override
-      public boolean run() {
-          return false;
-      }
-
-      @Override
-      public boolean isReady() {
-          return false;
-      }
-
-      @Override
-      public int getPathIndex() {
-          return 0;
-      }
   }
 
   @Override
@@ -88,6 +121,7 @@ public class ShootingAutonomous extends OpMode {
     //shooterAutoCore.power_surge(150);
 
     // Log values to Panels and Driver Station
+      dashTele.update();
     panelsTelemetry.debug("Path State", pathState);
     panelsTelemetry.debug("X", follower.getPose().getX());
     panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -104,15 +138,22 @@ public class ShootingAutonomous extends OpMode {
   public void autonomousPathUpdate() {
     switch (pathState){
         case 0:
-            shooterAutoCore.spinUpFlys(1100, 1100);
-            shooterAutoCore.setLauncherPos(0.55);
+            //shooterAutoCore.in();
+            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+            shooterAutoCore.setLauncherPos(ShooterAutoCore.laInitPos);
             follower.followPath(firstPath);
             setPathState(1);
             break;
         case 1:
             if (!follower.isBusy()){
-                shooterAutoCore.setCRPower(1);
-                follower.pausePathFollowing();
+                follower.followPath(endingPath);
+                setPathState(2);
+                break;
+            }
+        case 2:
+            if (!follower.isBusy()) {
+                dashTele.update();
+                shooterAutoCore.spinUpFlys(0, 0);
                 setPathState(-1);
                 break;
             }

@@ -1,18 +1,51 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import java.util.concurrent.TimeUnit;
+
+@Config
 public class ShooterAutoCore {
     public ServoImplEx laR, laL;
+
+    public Servo luigiServo;
+
+    public static double KICK_ITERATOR = 0.325;
+
+    public static double FAILSAFE_WAIT = 3500;
+
+    public long failsafeTime;
+
+    public boolean canAddShot = true;
+
+    public static double luigiBlock = 0.535;
+
+    long entry_time = 0;
+
+    public static double luigiFlow = 0.15;
+
+    public static int SHOOT_INTERMITENT_TIME_MS = 2000;
+
     public CRServo lServo, rServo;
 
+    ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
     public int shotsTaken = 0;
+
+    public static int SURGE_MEASURE = 150;
+
+    public static int RUNNING_MODIFIER = 350;
 
     public boolean hasSurged = false;
 
@@ -24,7 +57,7 @@ public class ShooterAutoCore {
 
     public DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.25;
+    public static double laInitPos = 0.55;
 
 
     public void init(HardwareMap hwMap){
@@ -37,6 +70,9 @@ public class ShooterAutoCore {
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        luigiServo = hwMap.get(Servo.class, "WEARE");
+        luigiServo.setPosition(luigiFlow); //0.19 is back enough that balls fall, //0.52 is straight block
 
         laR = hwMap.get(ServoImplEx.class, "lar");
 
@@ -73,14 +109,28 @@ public class ShooterAutoCore {
         intake.setPower(-reducer);
     }
 
-    public boolean power_surge(double surge_measure){
-        boolean leftMotorSurge = (fly.getVelocity() - load_fly_expected()) >= surge_measure;
-        boolean rightMotorSurge = (fry.getVelocity() - load_fry_expected()) >= surge_measure;
-        boolean leftMotorRunning = load_fry_expected() >= 200;
-        boolean rightMotorRunning = load_fry_expected() >= 200;
+    public boolean power_surge(double surge_measure, Telemetry tele){
+        boolean leftMotorSurge = (load_fly_expected() - fly.getVelocity()) >= surge_measure;
+        boolean rightMotorSurge = (load_fry_expected() - fry.getVelocity()) >= surge_measure;
+        boolean leftMotorRunning = fly.getVelocity() >= RUNNING_MODIFIER;
+        boolean rightMotorRunning = fry.getVelocity() >= RUNNING_MODIFIER;
         boolean leftServoRunning = lServo.getPower() > 0;
         boolean rightServoRunning = rServo.getPower() > 0;
         boolean EVERYTHING = leftMotorSurge && rightMotorSurge && leftMotorRunning && rightMotorRunning && leftServoRunning && rightServoRunning;
+        tele.addData("leftMotorSurge: ", leftMotorSurge);
+        tele.addData("fly - actual: ", load_fly_expected() - fly.getVelocity());
+        tele.addData("rightMotorSurge: ", rightMotorSurge);
+        tele.addData("fry - actual: ", load_fry_expected() - fry.getVelocity());
+        tele.addData("leftMotorRunning: ", leftMotorRunning);
+        tele.addData("Fly Vel: ", fly.getVelocity());
+        tele.addData("Fly Cutoff_Vel: ", load_fly_expected() - (surge_measure - RUNNING_MODIFIER));
+        tele.addData("rightMotorRunning: ", rightMotorRunning);
+        tele.addData("Fry Vel: ", fry.getVelocity());
+        tele.addData("Fry Cutoff_Vel: ", load_fry_expected() - (surge_measure - RUNNING_MODIFIER));
+        tele.addData("leftServoRunning: ", leftServoRunning);
+        tele.addData("rightServoRunning: ", rightServoRunning);
+        tele.addData("EVERYTHING: ", EVERYTHING);
+        tele.update();
         return EVERYTHING;
     }
 
@@ -92,9 +142,11 @@ public class ShooterAutoCore {
         return fryExpected;
     }
 
-    public void setCRPower(double power){
+    public void setCRPower(double power, Telemetry telemetry){
         lServo.setPower(power);
         rServo.setPower(power);
+        telemetry.addData("Power should be: ", power);
+        telemetry.update();
     }
 
     public void spinUpFlys(double lVel, double rVel){
@@ -109,14 +161,36 @@ public class ShooterAutoCore {
         laL.setPosition(pos);
     }
 
-    public void shoot(int shots){
-        for (int i = 0; i < shots; ){
-            setCRPower(1);
-            in();
-            if (power_surge(150)) {
-                setCRPower(0);
-                i++;
+    public boolean shoot(int shots, Telemetry tele){
+        if (shotsTaken < shots){
+            if (power_surge(SURGE_MEASURE, tele)){
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(-1, tele);
+                luigiServo.setPosition(luigiFlow);
+                stop();
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
             }
+            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS){
+                entry_time = 0;
+                //in();
+                setCRPower(1, tele);
+                luigiServo.setPosition(luigiFlow + KICK_ITERATOR);
+                canAddShot = true;
+                tele.addData("THIS WAS ENTERED: ", true);
+            }
+            tele.addData("Shots: ", shotsTaken);
+            tele.addData("entry_time: ", entry_time);
+            tele.addData("time right now: ", timer.now(TimeUnit.MILLISECONDS));
+            tele.update();
+            return false;
+        } else {
+            stop();
+            setCRPower(0, tele);
+            tele.addData("DONE: ", true);
+            return true;
         }
     }
 }

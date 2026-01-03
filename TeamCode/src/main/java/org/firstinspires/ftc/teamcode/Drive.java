@@ -83,7 +83,7 @@ public class Drive extends LinearOpMode {
 
     public static double luigiContPower = 1;
 
-    public static double laInitPos = 0.2;
+    public static double laInitPos = 0.3;
 
     public static boolean inFWD = false;
 

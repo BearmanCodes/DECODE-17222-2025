@@ -56,8 +56,6 @@ package org.firstinspires.ftc.teamcode.Autos;
       public void loop() {
         follower.update(); // Update Pedro Pathing
         autonomousPathUpdate(); // Update autonomous state machine
-        shooterAutoCore.power_surge(150);
-
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
