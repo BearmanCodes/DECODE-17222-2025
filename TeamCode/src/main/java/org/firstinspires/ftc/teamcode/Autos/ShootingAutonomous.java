@@ -7,7 +7,9 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -19,8 +21,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable // Panels
 public class ShootingAutonomous extends OpMode {
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
-
-    public IntakeAutoCore intakeAutoCore = new IntakeAutoCore();
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
   public Follower follower; // Pedro Pathing follower instance
@@ -44,16 +44,41 @@ public class ShootingAutonomous extends OpMode {
     opmodeTimer.resetTimer();
     panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
-    intakeAutoCore.init(hardwareMap);
     shooterAutoCore.init(hardwareMap);
 
     follower = Constants.createFollower(hardwareMap);
     follower.setStartingPose(startPose);
 
-    firstPath = follower.pathBuilder().addPath(new BezierLine(startPose, endPose1)).setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading()).build();
+    buildPaths();
 
     panelsTelemetry.debug("Status", "Initialized");
     panelsTelemetry.update(telemetry);
+  }
+
+  public void buildPaths(){
+        firstPath = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, endPose1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading())
+                .build();
+
+  }
+
+  public class TestCallback implements PathCallback {
+
+      @Override
+      public boolean run() {
+          return false;
+      }
+
+      @Override
+      public boolean isReady() {
+          return false;
+      }
+
+      @Override
+      public int getPathIndex() {
+          return 0;
+      }
   }
 
   @Override
@@ -87,6 +112,7 @@ public class ShootingAutonomous extends OpMode {
         case 1:
             if (!follower.isBusy()){
                 shooterAutoCore.setCRPower(1);
+                follower.pausePathFollowing();
                 setPathState(-1);
                 break;
             }

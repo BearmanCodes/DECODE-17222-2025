@@ -17,7 +17,6 @@ package org.firstinspires.ftc.teamcode.Autos;
     public class PedroAutonomous extends OpMode {
       private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
-        public IntakeAutoCore intakeAutoCore = new IntakeAutoCore();
 
         public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
       public Follower follower; // Pedro Pathing follower instance
@@ -42,7 +41,6 @@ package org.firstinspires.ftc.teamcode.Autos;
         opmodeTimer.resetTimer();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        intakeAutoCore.init(hardwareMap);
         shooterAutoCore.init(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
@@ -78,14 +76,14 @@ package org.firstinspires.ftc.teamcode.Autos;
       public void autonomousPathUpdate() {
         switch (pathState){
             case 0:
-                intakeAutoCore.in();
+                shooterAutoCore.in();
                 follower.followPath(firstPath);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()){
                     setPathState(-1);
-                    intakeAutoCore.stop();
+                    shooterAutoCore.stop();
                     break;
                 }
         }

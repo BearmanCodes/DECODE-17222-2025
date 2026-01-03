@@ -12,6 +12,14 @@ public class ShooterAutoCore {
     public ServoImplEx laR, laL;
     public CRServo lServo, rServo;
 
+    public int shotsTaken = 0;
+
+    public boolean hasSurged = false;
+
+    public static DcMotorEx intake;
+
+    public static double reducer = 0.15;
+
     public static double flyExpected, fryExpected;
 
     public DcMotorEx fly, fry;
@@ -43,13 +51,29 @@ public class ShooterAutoCore {
         //fully retract 0, fully extend 1
         laL.setPwmEnable();
         laL.setPosition(laInitPos);
+
+        intake = hwMap.get(DcMotorEx.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     //spinupFlys(1100)
         //setLauncherPos(0.42)
             //setCRPower(1)
 
-    public void power_surge(double surge_measure){
+    public void in(){
+        intake.setPower(reducer);
+    }
+
+    public void stop(){
+        intake.setPower(0);
+    }
+
+    public void out(){
+        intake.setPower(-reducer);
+    }
+
+    public boolean power_surge(double surge_measure){
         boolean leftMotorSurge = (fly.getVelocity() - load_fly_expected()) >= surge_measure;
         boolean rightMotorSurge = (fry.getVelocity() - load_fry_expected()) >= surge_measure;
         boolean leftMotorRunning = load_fry_expected() >= 200;
@@ -57,9 +81,7 @@ public class ShooterAutoCore {
         boolean leftServoRunning = lServo.getPower() > 0;
         boolean rightServoRunning = rServo.getPower() > 0;
         boolean EVERYTHING = leftMotorSurge && rightMotorSurge && leftMotorRunning && rightMotorRunning && leftServoRunning && rightServoRunning;
-        if (EVERYTHING){
-            setCRPower(0);
-        }
+        return EVERYTHING;
     }
 
     public double load_fly_expected(){
@@ -85,5 +107,16 @@ public class ShooterAutoCore {
     public void setLauncherPos(double pos){
         laR.setPosition(pos);
         laL.setPosition(pos);
+    }
+
+    public void shoot(int shots){
+        for (int i = 0; i < shots; ){
+            setCRPower(1);
+            in();
+            if (power_surge(150)) {
+                setCRPower(0);
+                i++;
+            }
+        }
     }
 }
