@@ -29,13 +29,15 @@ public class ShooterAutoCore {
 
     public boolean canAddShot = true;
 
-    public static double luigiBlock = 0.535;
+    public static double luigiBlock = 0.47;
 
     long entry_time = 0;
 
     public static double luigiFlow = 0.15;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 2000;
+    public static int SHOOT_INTERMITENT_TIME_MS = 1500;
+
+    public static int SHOOT_INTAKE_TIME_MS = 750;
 
     public CRServo lServo, rServo;
 
@@ -51,13 +53,13 @@ public class ShooterAutoCore {
 
     public static DcMotorEx intake;
 
-    public static double reducer = 0.15;
+    public static double reducer = 1;
 
     public static double flyExpected, fryExpected;
 
     public DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.55;
+    public static double laInitPos = 0.53;
 
 
     public void init(HardwareMap hwMap){
@@ -177,7 +179,37 @@ public class ShooterAutoCore {
                 entry_time = 0;
                 //in();
                 setCRPower(1, tele);
-                luigiServo.setPosition(luigiFlow + KICK_ITERATOR);
+                luigiServo.setPosition(luigiBlock);
+                canAddShot = true;
+                tele.addData("THIS WAS ENTERED: ", true);
+            }
+            tele.addData("Shots: ", shotsTaken);
+            tele.addData("entry_time: ", entry_time);
+            tele.addData("time right now: ", timer.now(TimeUnit.MILLISECONDS));
+            tele.update();
+            return false;
+        } else {
+            stop();
+            setCRPower(0, tele);
+            tele.addData("DONE: ", true);
+            return true;
+        }
+    }
+
+    public boolean intakeShoot(int shots, Telemetry tele){
+        luigiServo.setPosition(luigiBlock);
+        if (shotsTaken < shots){
+            if (power_surge(SURGE_MEASURE, tele)){
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(0, tele);
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
+            }
+            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTAKE_TIME_MS){
+                entry_time = 0;
+                setCRPower(1, tele);
                 canAddShot = true;
                 tele.addData("THIS WAS ENTERED: ", true);
             }

@@ -13,23 +13,25 @@ public class ShootingTest extends LinearOpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
-    public static int L_VEL, R_VEL = 850;
+    public static int L_VEL = 900;
+
+    public static int R_VEL = 900;
 
     Telemetry dashTele = dashboard.getTelemetry();
-
 
     ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
 
     @Override
     public void runOpMode() throws InterruptedException {
         shooterAutoCore.init(hardwareMap);
+        shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
         waitForStart();
-        shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow + ShooterAutoCore.KICK_ITERATOR);
+        shooterAutoCore.in();
+        //shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow + ShooterAutoCore.KICK_ITERATOR);
         shooterAutoCore.setCRPower(1, dashTele);
-        //shooterAutoCore.in();
         while (!isStopRequested()){
-            shooterAutoCore.shoot(3, dashTele);
+            shooterAutoCore.intakeShoot(3, dashTele);
         }
     }
 }

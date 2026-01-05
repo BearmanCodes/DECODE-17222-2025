@@ -28,7 +28,15 @@ public class ShootingAutonomous extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashTele = dashboard.getTelemetry();
 
+    public static boolean HOLD_END = true;
+
+    public static double PICKUP_POWER = 0.45;
+
+    public static double ROLLBACK_POWER = 0.75;
+
     public boolean firstTimeCR = true;
+
+    public boolean secondTimeCR = true;
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
@@ -41,10 +49,17 @@ public class ShootingAutonomous extends OpMode {
 
     public static int R_VEL = 900;
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose endPose1 = new Pose(56.515188335358445, 85.910085054678, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
 
-    private final Pose endPose2 = new Pose(57.914945321992704, 16.797083839611176, Math.toRadians(180));
-    private PathChain firstPath, endingPath;
+    private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135));
+
+    private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
+
+    private final Pose collectBalls1 = new Pose(19, 78.25, Math.toRadians(0));
+
+    private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481);
+
+    private PathChain firstPath, endingPath, secondBarragePath, homePath;
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -70,13 +85,16 @@ public class ShootingAutonomous extends OpMode {
   }
 
   public void buildPaths(){
-        PathCallback TestCallback = new PathCallback() {
+        PathCallback FirstShoot = new PathCallback() {
             @Override
             public boolean run() {
                 follower.pausePathFollowing();
                 while (!shooterAutoCore.shoot(3, dashTele)){
                     dashTele.update();
                 }
+                shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                shooterAutoCore.in();
+                follower.setMaxPower(PICKUP_POWER);
                 follower.resumePathFollowing();
                 return true;
             }
@@ -85,7 +103,7 @@ public class ShootingAutonomous extends OpMode {
             public void initialize() {
                 if (firstTimeCR) {
                     shooterAutoCore.setCRPower(1, dashTele);
-                    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow + ShooterAutoCore.KICK_ITERATOR);
+                    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                     firstTimeCR = false;
                 }
             }
@@ -101,15 +119,61 @@ public class ShootingAutonomous extends OpMode {
             }
         };
 
+      PathCallback SecondShoot = new PathCallback() {
+          @Override
+          public boolean run() {
+              follower.pausePathFollowing();
+              while (!shooterAutoCore.intakeShoot(3, dashTele)){
+                  dashTele.update();
+              }
+              follower.setMaxPower(1);
+              stop();
+              shooterAutoCore.setCRPower(0, dashTele);
+              shooterAutoCore.spinUpFlys(0, 0);
+              follower.resumePathFollowing();
+              return true;
+          }
+
+          @Override
+          public void initialize() {
+              if (secondTimeCR) {
+                  shooterAutoCore.in();
+                  shooterAutoCore.setCRPower(1, dashTele);
+                  secondTimeCR = false;
+              }
+          }
+
+          @Override
+          public boolean isReady() {
+              return true;
+          }
+
+          @Override
+          public int getPathIndex() {
+              return 0;
+          }
+      };
+
         firstPath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, endPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading())
                 .build();
 
         endingPath = follower.pathBuilder()
-                .addPath(new BezierLine(endPose1, endPose2))
-                .setLinearHeadingInterpolation(endPose1.getHeading(), endPose2.getHeading())
-                .addCallback(TestCallback)
+                .addPath(new BezierCurve(endPose1, collectBalls1ControlPoint, collectBalls1))
+                .setConstantHeadingInterpolation(collectBalls1.getHeading())
+                .addCallback(FirstShoot)
+                .build();
+
+        secondBarragePath = follower.pathBuilder()
+                .addPath(new BezierLine(collectBalls1, endPose2))
+                .setLinearHeadingInterpolation(collectBalls1.getHeading(), endPose2.getHeading())
+                .build();
+
+        homePath = follower.pathBuilder()
+                .addPath(new BezierLine(endPose2, homePose))
+                .setLinearHeadingInterpolation(endPose2.getHeading(), homePose.getHeading())
+                .addCallback(SecondShoot)
                 .build();
 
   }
@@ -152,8 +216,16 @@ public class ShootingAutonomous extends OpMode {
             }
         case 2:
             if (!follower.isBusy()) {
+                follower.setMaxPower(ROLLBACK_POWER);
+                follower.followPath(secondBarragePath);
                 dashTele.update();
-                shooterAutoCore.spinUpFlys(0, 0);
+                setPathState(3);
+                break;
+            }
+        case 3:
+            if (!follower.isBusy()){
+                follower.followPath(homePath);
+                dashTele.update();
                 setPathState(-1);
                 break;
             }
