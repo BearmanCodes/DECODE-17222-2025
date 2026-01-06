@@ -9,7 +9,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
@@ -18,13 +17,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.opencv.core.Mat;
 
 
 @Config
-@Autonomous(name = "Shooting Autonomous", group = "Autonomous")
+@Autonomous(name = "Shoot Far Autonomous", group = "Autonomous")
 @Configurable // Panels
-public class ShootingAutonomous extends OpMode {
+public class ShootFarAutonomous extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -52,11 +50,11 @@ public class ShootingAutonomous extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 900;
+    public static int L_VEL = 1000;
 
-    public static int R_VEL = 900;
+    public static int R_VEL = 1000;
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose endPose1 = new Pose(61.4605376476378, 15.104509488804135, 2); // Highest (First Set) of Artifacts from the Spike Mark.
 
     private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135 + HEADING_OFFSET));
 
@@ -222,23 +220,12 @@ public class ShootingAutonomous extends OpMode {
             break;
         case 1:
             if (!follower.isBusy()){
-                follower.followPath(endingPath);
-                setPathState(2);
-                break;
-            }
-        case 2:
-            if (!follower.isBusy()) {
-                follower.setMaxPower(ROLLBACK_POWER);
-                follower.followPath(secondBarragePath);
-                dashTele.update();
-                setPathState(3);
-                break;
-            }
-        case 3:
-            if (!follower.isBusy()){
-                shooterAutoCore.spinUpFlys(0, 0);
-                dashTele.update();
-                //PoseStorage.currentPose = follower.getPose();
+                shooterAutoCore.setCRPower(1, dashTele);
+                shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                while (!shooterAutoCore.shoot(3, dashTele)){
+                    dashTele.update();
+                }
+                //follower.followPath(endingPath);
                 setPathState(-1);
                 break;
             }
