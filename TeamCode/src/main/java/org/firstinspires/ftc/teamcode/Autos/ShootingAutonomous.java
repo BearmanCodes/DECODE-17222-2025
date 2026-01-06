@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.opencv.core.Mat;
 
 
 @Config
@@ -26,7 +27,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class ShootingAutonomous extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
+
+    public static int PATH_INDEX = 1;
     Telemetry dashTele = dashboard.getTelemetry();
+
+    public static int INTAKE_POWER_OFFSET = 100;
+
+    public static int HEADING_OFFSET = 8;
 
     public static boolean HOLD_END = true;
 
@@ -51,9 +58,13 @@ public class ShootingAutonomous extends OpMode {
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
 
-    private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135));
+    private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135 + HEADING_OFFSET));
 
-    private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
+    //private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
+
+    private final Pose homePose = new Pose(19, 53, Math.toRadians(0));
+
+    private final Pose homePoseCtrlPoint = new Pose(52.880315917375455, 53.464155528554066);
 
     private final Pose collectBalls1 = new Pose(19, 78.25, Math.toRadians(0));
 
@@ -95,6 +106,7 @@ public class ShootingAutonomous extends OpMode {
                 shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                 shooterAutoCore.in();
                 follower.setMaxPower(PICKUP_POWER);
+                shooterAutoCore.spinUpFlys(L_VEL - INTAKE_POWER_OFFSET, R_VEL - INTAKE_POWER_OFFSET);
                 follower.resumePathFollowing();
                 return true;
             }
@@ -126,8 +138,8 @@ public class ShootingAutonomous extends OpMode {
               while (!shooterAutoCore.intakeShoot(3, dashTele)){
                   dashTele.update();
               }
-              follower.setMaxPower(1);
-              stop();
+              follower.setMaxPower(PICKUP_POWER);
+              shooterAutoCore.in();
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -137,6 +149,7 @@ public class ShootingAutonomous extends OpMode {
           @Override
           public void initialize() {
               if (secondTimeCR) {
+                  shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
                   secondTimeCR = false;
@@ -150,7 +163,7 @@ public class ShootingAutonomous extends OpMode {
 
           @Override
           public int getPathIndex() {
-              return 0;
+              return PATH_INDEX;
           }
       };
 
@@ -168,11 +181,10 @@ public class ShootingAutonomous extends OpMode {
         secondBarragePath = follower.pathBuilder()
                 .addPath(new BezierLine(collectBalls1, endPose2))
                 .setLinearHeadingInterpolation(collectBalls1.getHeading(), endPose2.getHeading())
-                .build();
-
-        homePath = follower.pathBuilder()
-                .addPath(new BezierLine(endPose2, homePose))
-                .setLinearHeadingInterpolation(endPose2.getHeading(), homePose.getHeading())
+                .addPath(new BezierCurve(endPose2, homePoseCtrlPoint, homePose))
+                //.addPath(new BezierLine(endPose2, homePose))
+                //.setLinearHeadingInterpolation(endPose2.getHeading(), homePose.getHeading())
+                .setConstantHeadingInterpolation(homePose.getHeading())
                 .addCallback(SecondShoot)
                 .build();
 
@@ -224,7 +236,7 @@ public class ShootingAutonomous extends OpMode {
             }
         case 3:
             if (!follower.isBusy()){
-                follower.followPath(homePath);
+                shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);
                 break;

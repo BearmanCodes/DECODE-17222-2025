@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.Autos;
+    import com.acmerobotics.dashboard.FtcDashboard;
     import com.pedropathing.util.Timer;
     import com.qualcomm.robotcore.eventloop.opmode.OpMode;
     import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
     import com.bylazar.configurables.annotations.Configurable;
     import com.bylazar.telemetry.TelemetryManager;
     import com.bylazar.telemetry.PanelsTelemetry;
+
+    import org.firstinspires.ftc.robotcore.external.Telemetry;
     import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
     import com.pedropathing.geometry.BezierCurve;
     import com.pedropathing.follower.Follower;
@@ -17,8 +20,14 @@ package org.firstinspires.ftc.teamcode.Autos;
     public class PedroAutonomous extends OpMode {
       private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
+        private FtcDashboard dashboard = FtcDashboard.getInstance();
 
+        private Telemetry dashTele = dashboard.getTelemetry();
         public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+
+        public static int L_VEL = 1100;
+
+        public static int R_VEL = 1100;
       public Follower follower; // Pedro Pathing follower instance
         Timer pathTimer;
         Timer opmodeTimer;
@@ -42,6 +51,7 @@ package org.firstinspires.ftc.teamcode.Autos;
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         shooterAutoCore.init(hardwareMap);
+        shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -56,6 +66,10 @@ package org.firstinspires.ftc.teamcode.Autos;
       public void loop() {
         follower.update(); // Update Pedro Pathing
         autonomousPathUpdate(); // Update autonomous state machine
+          dashTele.addData("Pose X: ", follower.getPose().getX());
+          dashTele.addData("Pose Y: ", follower.getPose().getY());
+          dashTele.addData("Pose Heading: ", follower.getPose().getHeading());
+          dashTele.update();
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
@@ -67,17 +81,25 @@ package org.firstinspires.ftc.teamcode.Autos;
       @Override
       public void start() {
             opmodeTimer.resetTimer();
+            dashTele.addData("Pose X: ", follower.getPose().getX());
+            dashTele.addData("Pose Y: ", follower.getPose().getY());
+            dashTele.addData("Pose Heading: ", follower.getPose().getHeading());
+            dashTele.update();
+            shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+            shooterAutoCore.setCRPower(1, dashTele);
             setPathState(0);
+
       }
   
 
       public void autonomousPathUpdate() {
         switch (pathState){
             case 0:
-                shooterAutoCore.in();
-                follower.followPath(firstPath);
-                setPathState(1);
-                break;
+                shooterAutoCore.shoot(3, dashTele);
+                dashTele.addData("Pose X: ", follower.getPose().getX());
+                dashTele.addData("Pose Y: ", follower.getPose().getY());
+                dashTele.addData("Pose Heading: ", follower.getPose().getHeading());
+                dashTele.update();
             case 1:
                 if (!follower.isBusy()){
                     setPathState(-1);
