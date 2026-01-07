@@ -85,6 +85,7 @@ public class ShootingAutonomous extends OpMode {
     panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     shooterAutoCore.init(hardwareMap);
+    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow);
 
     follower = Constants.createFollower(hardwareMap);
     follower.setStartingPose(startPose);

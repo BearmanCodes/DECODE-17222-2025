@@ -24,12 +24,23 @@ public class ShootingHopperTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         shooterAutoCore.init(hardwareMap);
+        shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow);
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
         waitForStart();
-        shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
-        shooterAutoCore.setCRPower(1, dashTele);
+
         while (!isStopRequested()){
-            shooterAutoCore.shoot(3, dashTele);
+            shooterAutoCore.updateLaPos(gamepad1, dashTele);
+            shooterAutoCore.updateLuigiBlock(gamepad1, dashTele);
+            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+            if (gamepad1.xWasPressed()){
+                shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                shooterAutoCore.setCRPower(1, dashTele);
+                while (!isStopRequested() && !shooterAutoCore.shoot(3, dashTele)) {
+                    shooterAutoCore.updateLaPos(gamepad1, dashTele);
+                    shooterAutoCore.updateLuigiBlock(gamepad1, dashTele);
+                    dashTele.update();
+                }
+            }
         }
     }
 }

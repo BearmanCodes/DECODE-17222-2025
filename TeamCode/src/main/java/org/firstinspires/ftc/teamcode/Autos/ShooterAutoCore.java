@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -74,7 +75,7 @@ public class ShooterAutoCore {
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
-        luigiServo.setPosition(luigiFlow); //0.19 is back enough that balls fall, //0.52 is straight block
+        //luigiServo.setPosition(luigiFlow); //0.19 is back enough that balls fall, //0.52 is straight block
 
         laR = hwMap.get(ServoImplEx.class, "lar");
 
@@ -111,6 +112,29 @@ public class ShooterAutoCore {
         intake.setPower(-reducer);
     }
 
+    public void updateLuigiBlock(Gamepad gpad1, Telemetry tele){
+        if (gpad1.aWasPressed()){
+            luigiBlock += 0.01;
+        }
+        if (gpad1.bWasPressed()){
+            luigiBlock -= 0.01;
+        }
+        tele.addData("LuigiBlock: ", luigiBlock);
+        tele.update();
+    }
+
+    public void updateLaPos(Gamepad gpad1, Telemetry tele){
+        if (gpad1.dpadUpWasPressed()){
+            laInitPos += 0.01;
+        }
+        if (gpad1.dpadDownWasPressed()){
+            laInitPos -= 0.01;
+        }
+        setLauncherPos(laInitPos);
+        tele.addData("Launcher Pos: ", laInitPos);
+        tele.update();
+    }
+
     public boolean power_surge(double surge_measure, Telemetry tele){
         boolean leftMotorSurge = (load_fly_expected() - fly.getVelocity()) >= surge_measure;
         boolean rightMotorSurge = (load_fry_expected() - fry.getVelocity()) >= surge_measure;
@@ -119,20 +143,6 @@ public class ShooterAutoCore {
         boolean leftServoRunning = lServo.getPower() > 0;
         boolean rightServoRunning = rServo.getPower() > 0;
         boolean EVERYTHING = leftMotorSurge && rightMotorSurge && leftMotorRunning && rightMotorRunning && leftServoRunning && rightServoRunning;
-        tele.addData("leftMotorSurge: ", leftMotorSurge);
-        tele.addData("fly - actual: ", load_fly_expected() - fly.getVelocity());
-        tele.addData("rightMotorSurge: ", rightMotorSurge);
-        tele.addData("fry - actual: ", load_fry_expected() - fry.getVelocity());
-        tele.addData("leftMotorRunning: ", leftMotorRunning);
-        tele.addData("Fly Vel: ", fly.getVelocity());
-        tele.addData("Fly Cutoff_Vel: ", load_fly_expected() - (surge_measure - RUNNING_MODIFIER));
-        tele.addData("rightMotorRunning: ", rightMotorRunning);
-        tele.addData("Fry Vel: ", fry.getVelocity());
-        tele.addData("Fry Cutoff_Vel: ", load_fry_expected() - (surge_measure - RUNNING_MODIFIER));
-        tele.addData("leftServoRunning: ", leftServoRunning);
-        tele.addData("rightServoRunning: ", rightServoRunning);
-        tele.addData("EVERYTHING: ", EVERYTHING);
-        tele.update();
         return EVERYTHING;
     }
 
@@ -147,8 +157,6 @@ public class ShooterAutoCore {
     public void setCRPower(double power, Telemetry telemetry){
         lServo.setPower(power);
         rServo.setPower(power);
-        telemetry.addData("Power should be: ", power);
-        telemetry.update();
     }
 
     public void spinUpFlys(double lVel, double rVel){
@@ -181,11 +189,7 @@ public class ShooterAutoCore {
                 setCRPower(1, tele);
                 luigiServo.setPosition(luigiBlock);
                 canAddShot = true;
-                tele.addData("THIS WAS ENTERED: ", true);
             }
-            tele.addData("Shots: ", shotsTaken);
-            tele.addData("entry_time: ", entry_time);
-            tele.addData("time right now: ", timer.now(TimeUnit.MILLISECONDS));
             tele.update();
             return false;
         } else {
@@ -193,7 +197,6 @@ public class ShooterAutoCore {
             setCRPower(0, tele);
             shotsTaken = 0;
             canAddShot = true;
-            tele.addData("DONE: ", true);
             return true;
         }
     }
@@ -213,17 +216,12 @@ public class ShooterAutoCore {
                 entry_time = 0;
                 setCRPower(1, tele);
                 canAddShot = true;
-                tele.addData("THIS WAS ENTERED: ", true);
             }
-            tele.addData("Shots: ", shotsTaken);
-            tele.addData("entry_time: ", entry_time);
-            tele.addData("time right now: ", timer.now(TimeUnit.MILLISECONDS));
             tele.update();
             return false;
         } else {
             stop();
             setCRPower(0, tele);
-            tele.addData("DONE: ", true);
             return true;
         }
     }
