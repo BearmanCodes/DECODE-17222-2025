@@ -238,7 +238,6 @@ public class ShootingAutonomous extends OpMode {
             if (!follower.isBusy()){
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
-                //PoseStorage.currentPose = follower.getPose();
                 setPathState(-1);
                 break;
             }

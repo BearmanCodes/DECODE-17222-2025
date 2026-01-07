@@ -166,7 +166,6 @@ public class ShooterAutoCore {
     public boolean shoot(int shots, Telemetry tele){
         if (shotsTaken < shots){
             if (power_surge(SURGE_MEASURE, tele)){
-                tele.update();
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
                 setCRPower(-1, tele);
                 luigiServo.setPosition(luigiFlow);
@@ -183,7 +182,6 @@ public class ShooterAutoCore {
                 luigiServo.setPosition(luigiBlock);
                 canAddShot = true;
                 tele.addData("THIS WAS ENTERED: ", true);
-                tele.update();
             }
             tele.addData("Shots: ", shotsTaken);
             tele.addData("entry_time: ", entry_time);
@@ -195,7 +193,6 @@ public class ShooterAutoCore {
             setCRPower(0, tele);
             shotsTaken = 0;
             canAddShot = true;
-            tele.update();
             tele.addData("DONE: ", true);
             return true;
         }
