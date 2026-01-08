@@ -3,16 +3,22 @@ package org.firstinspires.ftc.teamcode.Autos;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
@@ -35,6 +41,12 @@ public class PracticeTeleOp extends OpMode {
 
     private Supplier<PathChain> pathChain;
 
+    private Limelight3A camera;
+
+    private boolean following = false;
+
+    private Pose TARGET_LOCATION = new Pose();
+
     private ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
 
     private FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -44,6 +56,11 @@ public class PracticeTeleOp extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
+        camera = hardwareMap.get(Limelight3A.class, "limelight");
+        camera.setPollRateHz(100);
+        camera.start();
+        camera.pipelineSwitch(0);
+        camera.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         follower.setStartingPose(startingPose);
         follower.update();
 
@@ -64,6 +81,17 @@ public class PracticeTeleOp extends OpMode {
     public void loop() {
         follower.update();
         dashTele.update();
+        LLResult result = camera.getLatestResult();
+        if (result != null && result.isValid()){
+            Pose3D botpose = result.getBotpose_MT2();
+            if (botpose != null){
+                double mt2X = botpose.getPosition().x;
+                double mt2Y = botpose.getPosition().y;
+                double mt2Heading = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
+                follower.setPose(new Pose(mt2X, mt2Y, mt2Heading, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
+            }
+        }
+
         if (!automatedDrive) {
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
@@ -96,11 +124,15 @@ public class PracticeTeleOp extends OpMode {
                 dashTele.update();
                 if (gamepad1.circleWasPressed() || gamepad2.xWasPressed()) {
                     follower.startTeleOpDrive(true);
+                    ShooterAutoCore.shotsTaken = 0;
                     gamepad1.rumbleBlips(3);
                     automatedDrive = false;
                     break;
                 }
             }
+            follower.startTeleOpDrive(true);
+            gamepad1.rumbleBlips(3);
+            automatedDrive = false;
         }
     }
 
