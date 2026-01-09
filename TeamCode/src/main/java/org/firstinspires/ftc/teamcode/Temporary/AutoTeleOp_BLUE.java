@@ -11,24 +11,30 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.opencv.core.Mat;
 
 import java.util.function.Supplier;
 
 @Config
 @TeleOp
-public class AutoTeleOp extends OpMode {
+public class AutoTeleOp_BLUE extends OpMode {
     public static Follower follower;
+
+    public static double inPower;
 
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
 
     public static Pose startingPose;
+
+    public static DcMotorEx intake;
+
+    public static double intakeReducer = 0.15;
 
     public static boolean automatedDrive = false;
 
@@ -37,7 +43,7 @@ public class AutoTeleOp extends OpMode {
     public static double FAILSAFE_STICK_TRIGGER = 0.5;
 
     enum GAMEPAD_COLORS {
-            RED,
+        RED,
         GREEN,
         BLUE
     }
@@ -48,11 +54,19 @@ public class AutoTeleOp extends OpMode {
 
     private Telemetry dashTele = dashboard.getTelemetry();
 
+    public static boolean inFWD = false;
+
 
     @Override
     public void init() {
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        intake.setDirection(inDir);
+
+
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == defaultStartingPose ? startingPose : PoseStorage.currentPose);
+        follower.setStartingPose(defaultStartingPose);
         TempShooterAutoCore.init(hardwareMap);
         follower.update();
         pathChain = () -> follower.pathBuilder()
@@ -68,6 +82,10 @@ public class AutoTeleOp extends OpMode {
 
     @Override
     public void loop() {
+
+        follower.update();
+        dashTele.update();
+        telemetry.update();
         ModeCore.autoShootHandler(gamepad2, ModeCore.ALLIANCE.BLUE);
         if (gamepad2.rightBumperWasPressed()) {
             ModeCore.deliveryCurrentMethod = ModeCore.BALL_DELIVERY_METHOD.HOPPER;
@@ -82,8 +100,14 @@ public class AutoTeleOp extends OpMode {
 
         if (!automatedDrive) {
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            inPower = gamepad1.left_trigger - gamepad1.right_trigger;
+            intake.setPower(inPower * intakeReducer);
             setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
+            telemetry.addData("Automated Drive: ", automatedDrive);
+            telemetry.update();
         }
+        telemetry.addData("Automated Drive: ", automatedDrive);
+        telemetry.update();
 
         if (gamepad2.startWasPressed()) {
             if (targetPose != null){
@@ -99,6 +123,8 @@ public class AutoTeleOp extends OpMode {
 
         if (automatedDrive){
             setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
+            telemetry.addData("Automated Drive: ", automatedDrive);
+            telemetry.update();
             if (gamepad1.circleWasPressed()){
                 follower.startTeleOpDrive(true);
                 gamepad1.rumbleBlips(3);
@@ -110,14 +136,22 @@ public class AutoTeleOp extends OpMode {
                     TempShooterAutoCore.setCRPower(1);
                     TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
                     while (!TempShooterAutoCore.shoot(3, dashTele)) {
-                        //gamepad_led
+                        setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                         follower.update();
                         dashTele.update();
-                        if (STICK_PANIC_FAILSAFE()) break;
+                        if (STICK_PANIC_FAILSAFE()) {
+                            TempShooterAutoCore.shotsTaken = 0;
+                            follower.startTeleOpDrive(true);
+                            gamepad1.rumbleBlips(3);
+                            gamepad2.rumbleBlips(3);
+                            automatedDrive = false;
+                            break;
+                        }
                     }
                     TempShooterAutoCore.shotsTaken = 0;
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(3);
+                    gamepad2.rumbleBlips(3);
                     automatedDrive = false;
                 }
             }
@@ -137,21 +171,23 @@ public class AutoTeleOp extends OpMode {
     }
 
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
-        switch (oneColor) {
-            case RED:
-                gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
-            case BLUE:
-                gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-            case GREEN:
-                gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        if (oneColor == GAMEPAD_COLORS.RED) {
+            gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        switch (twoColor) {
-            case RED:
-                gamepad2.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
-            case BLUE:
-                gamepad2.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-            case GREEN:
-                gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        if (oneColor == GAMEPAD_COLORS.BLUE) {
+            gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+        }
+        if (oneColor == GAMEPAD_COLORS.GREEN) {
+            gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        }
+        if (twoColor == GAMEPAD_COLORS.RED) {
+            gamepad2.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
+        }
+        if (twoColor == GAMEPAD_COLORS.BLUE) {
+            gamepad2.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
+        }
+        if (twoColor == GAMEPAD_COLORS.GREEN) {
+            gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
     }
 }

@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.Temporary;
 
-import com.pedropathing.follower.Follower;
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-
+@Config
 public class ModeCore {
 
     public static double platformHeight;
@@ -45,17 +44,26 @@ public class ModeCore {
         INTAKE
     }
 
+    public static enum DRIVE_MODE {
+        MANUAL_DRIVE,
+        AUTOMATED_DRIVE,
+        SHOOT_MODE
+    }
     private static Pose BLUE_HOPPER_LINECLOSE = new Pose(56.515188335358445, 88, Math.toRadians(135));
+
+    private static Pose RED_HOPPER_LINECLOSE = new Pose(88.5, 88, Math.toRadians(45));
 
 
     public ALLIANCE currentAlliance;
 
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;
 
-    public static BALL_DELIVERY_METHOD deliveryCurrentMethod;
+    public static BALL_DELIVERY_METHOD deliveryCurrentMethod = BALL_DELIVERY_METHOD.HOPPER;
+
+    public static DRIVE_MODE currentDriveMode = DRIVE_MODE.MANUAL_DRIVE;
 
     public static void autoShootHandler(Gamepad gamepad2, ALLIANCE currentAlliance){
-        if (gamepad2.xWasPressed()){
+        if (gamepad2.squareWasPressed()){
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
             determineShotVariables(currentAlliance, deliveryCurrentMethod, desiredLocation);
         }
@@ -82,7 +90,7 @@ public class ModeCore {
                                 flySpeed = 900;
                                 servoPosition = LUIGI_HOPPER_LOAD;
                                 prepareForShot(platformHeight, flySpeed, servoPosition);
-                                AutoTeleOp.targetPose = BLUE_HOPPER_LINECLOSE;
+                                AutoTeleOp_BLUE.targetPose = BLUE_HOPPER_LINECLOSE;
                                 break;
                         }
                         break;
@@ -105,6 +113,31 @@ public class ModeCore {
                 }
                 break;
             case RED:
+                switch (deliveryMethod){
+                    case HOPPER:
+                        switch (location){
+                            case IN_FAR:
+                                break;
+                            case IN_CLOSE:
+                                break;
+                            case LEFT_FAR:
+                                break;
+                            case LINE_FAR:
+                                break;
+                            case RIGHT_FAR:
+                                break;
+                            case LINE_CLOSE:
+                                platformHeight = 0.53;
+                                flySpeed = 900;
+                                servoPosition = LUIGI_HOPPER_LOAD;
+                                prepareForShot(platformHeight, flySpeed, servoPosition);
+                                AutoTeleOp_RED.targetPose = RED_HOPPER_LINECLOSE;
+                                break;
+                        }
+                        break;
+                    case INTAKE:
+                        break;
+                }
                 break;
         }
     }

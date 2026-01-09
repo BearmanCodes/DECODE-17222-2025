@@ -201,6 +201,27 @@ public class TempShooterAutoCore {
         }
     }
 
+    public static void shoot_RED(Telemetry tele) {
+        setCRPower(1);
+        luigiServo.setPosition(luigiBlock);
+        if (power_surge(SURGE_MEASURE, tele)) {
+            entry_time = timer.now(TimeUnit.MILLISECONDS);
+            setCRPower(-1);
+            luigiServo.setPosition(luigiFlow);
+            stop();
+        }
+    }
+
+    public static void RED_SURGE(Telemetry tele){
+        if (power_surge(SURGE_MEASURE, tele)) {
+            entry_time = timer.now(TimeUnit.MILLISECONDS);
+            setCRPower(-1);
+            luigiServo.setPosition(luigiFlow);
+            stop();
+        }
+    }
+
+
     public boolean intakeShoot(int shots, Telemetry tele){
         luigiServo.setPosition(luigiBlock);
         if (shotsTaken < shots){

@@ -60,6 +60,7 @@ public class PracticeTeleOp extends OpMode {
         camera.setPollRateHz(100);
         camera.start();
         camera.pipelineSwitch(0);
+
         camera.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         follower.setStartingPose(startingPose);
         follower.update();
@@ -81,16 +82,25 @@ public class PracticeTeleOp extends OpMode {
     public void loop() {
         follower.update();
         dashTele.update();
+        camera.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
         LLResult result = camera.getLatestResult();
         if (result != null && result.isValid()){
             Pose3D botpose = result.getBotpose_MT2();
             if (botpose != null){
                 double mt2X = botpose.getPosition().x;
                 double mt2Y = botpose.getPosition().y;
-                double mt2Heading = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
+                double mt2Heading = follower.getHeading();
+                telemetry.addData("MT2 Pose X: ", mt2X);
+                telemetry.addData("MT2 Pose Y: ", mt2Y);
                 follower.setPose(new Pose(mt2X, mt2Y, mt2Heading, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
             }
         }
+
+        telemetry.addData("Current Pose X: ", follower.getPose().getX());
+        telemetry.addData("Current Pose Y: ", follower.getPose().getY());
+        telemetry.addData("Current Pose Heading: ", follower.getPose().getHeading());
+        telemetry.update();
+
 
         if (!automatedDrive) {
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
