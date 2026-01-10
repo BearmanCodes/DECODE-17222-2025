@@ -100,7 +100,7 @@ public class TempShooterAutoCore {
         //setLauncherPos(0.42)
             //setCRPower(1)
 
-    public void in(){
+    public static void in(){
         intake.setPower(reducer);
     }
 
@@ -217,6 +217,26 @@ public class TempShooterAutoCore {
             entry_time = timer.now(TimeUnit.MILLISECONDS);
             setCRPower(-1);
             luigiServo.setPosition(luigiFlow);
+            stop();
+        }
+    }
+
+    public static void intake_SHOOT(Telemetry tele, double ServoPos) {
+        in();
+        setCRPower(1);
+        if (power_surge(SURGE_MEASURE, tele)) {
+            entry_time = timer.now(TimeUnit.MILLISECONDS);
+            setCRPower(0);
+            luigiServo.setPosition(ServoPos);
+            stop();
+        }
+    }
+
+    public static void intake_SURGE(Telemetry tele, double ServoPos){
+        if (power_surge(SURGE_MEASURE, tele)) {
+            entry_time = timer.now(TimeUnit.MILLISECONDS);
+            setCRPower(0);
+            luigiServo.setPosition(ServoPos);
             stop();
         }
     }

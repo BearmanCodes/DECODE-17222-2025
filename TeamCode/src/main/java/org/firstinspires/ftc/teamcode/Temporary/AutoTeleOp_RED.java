@@ -57,14 +57,19 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static boolean inFWD = false;
 
+    public static boolean BLUE_ALLIANCE = false;
+
+    public static ModeCore.ALLIANCE currAlliance;
+
 
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+        currAlliance = BLUE_ALLIANCE ? ModeCore.ALLIANCE.BLUE : ModeCore.ALLIANCE.RED;
         intake.setDirection(inDir);
-
+        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(defaultStartingPose);
@@ -87,7 +92,7 @@ public class AutoTeleOp_RED extends OpMode {
         dashTele.addData("Current Mode: ", ModeCore.currentDriveMode);
         dashTele.update();
         telemetry.update();
-        ModeCore.autoShootHandler(gamepad2, ModeCore.ALLIANCE.RED);
+        ModeCore.autoShootHandler(gamepad2, currAlliance);
         if (gamepad2.rightBumperWasPressed()) {
             ModeCore.deliveryCurrentMethod = ModeCore.BALL_DELIVERY_METHOD.HOPPER;
             TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);
@@ -123,12 +128,23 @@ public class AutoTeleOp_RED extends OpMode {
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                 telemetry.addData("Automated Drive: ", automatedDrive);
                 telemetry.update();
-                if (gamepad1.circleWasPressed()){
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()){
+                    TempShooterAutoCore.spinUpFlys(0, 0);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(3);
                     gamepad2.rumbleBlips(3);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
+                }
+                if (gamepad2.startWasPressed()) {
+                    if (targetPose != null){
+                        gamepad1.rumbleBlips(1);
+                        gamepad2.rumbleBlips(1);
+                        follower.followPath(pathChain.get());
+                    }
+                    else {
+                        gamepad2.rumbleBlips(4);
+                    }
                 }
                 if (gamepad2.dpadUpWasPressed()){
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.SHOOT_MODE;
@@ -136,22 +152,44 @@ public class AutoTeleOp_RED extends OpMode {
                 }
                 break;
             case SHOOT_MODE:
-                if (gamepad2.dpadDownWasPressed()){
-                    if (ModeCore.deliveryCurrentMethod == ModeCore.BALL_DELIVERY_METHOD.HOPPER) {
+                if (ModeCore.deliveryCurrentMethod == ModeCore.BALL_DELIVERY_METHOD.HOPPER){
+                    if (gamepad2.dpadDownWasPressed()) {
                         TempShooterAutoCore.shoot_RED(telemetry);
                         follower.update();
                         dashTele.update();
                     }
+                    TempShooterAutoCore.RED_SURGE(telemetry);
                 }
-                TempShooterAutoCore.RED_SURGE(telemetry);
-                if (gamepad1.circleWasPressed()) {
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()) {
                     TempShooterAutoCore.setCRPower(0);
+                    TempShooterAutoCore.spinUpFlys(0, 0);
+
                     TempShooterAutoCore.shotsTaken = 0;
                     TempShooterAutoCore.canAddShot = true;
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(3);
                     gamepad2.rumbleBlips(3);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
+                    break;
+                }
+                if (ModeCore.deliveryCurrentMethod == ModeCore.BALL_DELIVERY_METHOD.INTAKE){
+                    if (gamepad2.dpadDownWasPressed()) {
+                        TempShooterAutoCore.intake_SHOOT(telemetry, ModeCore.servoPosition);
+                        follower.update();
+                        dashTele.update();
+                    }
+                    TempShooterAutoCore.intake_SURGE(telemetry, ModeCore.servoPosition);
+                    if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()) {
+                        TempShooterAutoCore.spinUpFlys(0, 0);
+                        TempShooterAutoCore.setCRPower(0);
+                        TempShooterAutoCore.shotsTaken = 0;
+                        TempShooterAutoCore.canAddShot = true;
+                        follower.startTeleOpDrive(true);
+                        gamepad1.rumbleBlips(3);
+                        gamepad2.rumbleBlips(3);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
+                        break;
+                    }
                     break;
                 }
                 break;

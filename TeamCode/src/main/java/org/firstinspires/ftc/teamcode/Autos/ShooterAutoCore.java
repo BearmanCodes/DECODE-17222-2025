@@ -222,6 +222,8 @@ public class ShooterAutoCore {
         } else {
             stop();
             setCRPower(0, tele);
+            shotsTaken = 0;
+            canAddShot = true;
             return true;
         }
     }
