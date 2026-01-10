@@ -18,15 +18,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
+import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.concurrent.TimeUnit;
 
 
 @Config
-@Autonomous(name = "Shooting Far Auto", group = "Autonomous")
+@Autonomous(name = "BLUE Shooting FAR", group = "BLUE")
 @Configurable // Panels
-public class ShootFarAuto extends OpMode {
+public class BLUEshootingFAR extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -60,17 +61,14 @@ public class ShootFarAuto extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 900;
+    public static int L_VEL = 1000;
 
-    public static int R_VEL = 900;
+    public static int R_VEL = 1000;
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(61.5, 11.5, Math.toRadians(100)); // Highest (First Set) of Artifacts from the Spike Mark.
-
-    private final Pose collectBalls1 = new Pose(19.5, 32, Math.toRadians(0));
-
+    private final Pose shootFar1 = new Pose(62, 11.5, Math.toRadians(100)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(0));
     private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 31.29701834862384);
-    private final Pose shootFar2 = new Pose(60, 11.5, Math.toRadians(115));
-
+    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(100));
     private final Pose parkingPose = new Pose(38.75, 33.5, Math.toRadians(90));
 
     private PathChain firstPath, collect1Path, thirdPath, parkingPath;
@@ -130,6 +128,7 @@ public class ShootFarAuto extends OpMode {
                     dashTele.addData("Timer: ", hey.now(TimeUnit.MILLISECONDS));
                     follower.update();
                     dashTele.update();
+                    ShooterAutoCore.failsafeTimer.reset();
                     shooterAutoCore.setCRPower(1, dashTele);
                     shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                     firstTimeCR = false;
@@ -165,6 +164,7 @@ public class ShootFarAuto extends OpMode {
           public void initialize() {
               if (secondTimeCR) {
                   follower.resumePathFollowing();
+                  ShooterAutoCore.failsafeTimer.reset();
                   shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
@@ -259,6 +259,7 @@ public class ShootFarAuto extends OpMode {
             }
         case 4:
             if (!follower.isBusy()) {
+                PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);

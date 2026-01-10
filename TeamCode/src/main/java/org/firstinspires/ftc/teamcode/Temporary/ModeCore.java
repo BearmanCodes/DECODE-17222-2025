@@ -53,8 +53,8 @@ public class ModeCore {
     public static double RED_HOPPER_LINE_CLOSE_LAUNCHER = 0.52; //0.53
     public static int RED_HOPPER_LINE_CLOSE_VELS = 900; //900
 
-    public static double RED_INTAKE_LINE_CLOSE_LAUNCHER = 0.45; //0.53
-    public static int RED_INTAKE_LINE_CLOSE_VELS = 1000; //900
+    public static double RED_INTAKE_LINE_CLOSE_LAUNCHER = 0.52; //0.53
+    public static int RED_INTAKE_LINE_CLOSE_VELS = 800; //900
     public static double RED_INTAKE_LINE_CLOSE_SERVO = 0.47;
 
 
@@ -94,14 +94,14 @@ public class ModeCore {
     public static double RED_HOPPER_RIGHT_FAR_LAUNCHER = 0.47;
     public static int RED_HOPPER_RIGHT_FAR_VELS = 1000;
 
-    public static double BLUE_HOPPER_FAR_LEFT_X = 60;
+    public static double BLUE_HOPPER_FAR_LEFT_X = 62;
     public static double BLUE_HOPPER_FAR_LEFT_Y = 11.5;
-    public static double BLUE_HOPPER_FAR_LEFT_Heading = 115;
+    public static double BLUE_HOPPER_FAR_LEFT_Heading = 105;
 
     private Pose RED_HOPPER_RIGHT_FAR = new Pose(RED_HOPPER_FAR_RIGHT_X, RED_HOPPER_FAR_RIGHT_Y, Math.toRadians(RED_HOPPER_FAR_RIGHT_Heading));
-    public static double RED_HOPPER_FAR_RIGHT_X = (72 - BLUE_HOPPER_FAR_LEFT_X) + 72;
-    public static double RED_HOPPER_FAR_RIGHT_Y = BLUE_HOPPER_FAR_LEFT_Y;
-    public static double RED_HOPPER_FAR_RIGHT_Heading = 180 - BLUE_HOPPER_FAR_LEFT_Heading;
+    public static double RED_HOPPER_FAR_RIGHT_X = 84;
+    public static double RED_HOPPER_FAR_RIGHT_Y = 11.5;
+    public static double RED_HOPPER_FAR_RIGHT_Heading = 65;
 
     public static int RED_HOPPER_FAR_RIGHT_VELS = 1000;
 
@@ -150,8 +150,8 @@ public class ModeCore {
     public static double RED_INTAKE_LEFT_FAR_SERVO = 0.47;
 
     public static double BLUE_INTAKE_LINE_CLOSE_LAUNCHER = 0.53;
-    public static int BLUE_INTAKE_LINE_CLOSE_VELS = 950;
-    public static double BLUE_INTAKE_LINE_CLOSE_SERVO = 0.53;
+    public static int BLUE_INTAKE_LINE_CLOSE_VELS = 800;
+    public static double BLUE_INTAKE_LINE_CLOSE_SERVO = 0.47;
 
 
 

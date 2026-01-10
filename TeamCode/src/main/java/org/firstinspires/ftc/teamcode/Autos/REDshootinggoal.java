@@ -6,11 +6,9 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.PoseConverter;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
@@ -18,14 +16,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.opencv.core.Mat;
 
 
 @Config
-@Autonomous(name = "Shooting Autonomous", group = "Autonomous")
+@Autonomous(name = "RED Shooting GOAL", group = "RED")
 @Configurable // Panels
-public class ShootingAutonomous extends OpMode {
+public class REDshootinggoal extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -56,20 +54,19 @@ public class ShootingAutonomous extends OpMode {
     public static int L_VEL = 900;
 
     public static int R_VEL = 900;
-    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
-
-    private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135 + HEADING_OFFSET));
+    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose endPose1 = new Pose(90, 85, Math.toRadians(45)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose endPose2 = new Pose(90, 85, Math.toRadians(45 - HEADING_OFFSET));
 
     //private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
 
-    private final Pose homePose = new Pose(19, 53, Math.toRadians(0));
+    private final Pose homePose = new Pose(125, 53, Math.toRadians(180));
 
-    private final Pose homePoseCtrlPoint = new Pose(52.880315917375455, 53.464155528554066);
+    private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
 
-    private final Pose collectBalls1 = new Pose(19, 78.25, Math.toRadians(0));
+    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
 
-    private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481);
+    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
 
     private PathChain firstPath, endingPath, secondBarragePath, homePath;
 
@@ -116,6 +113,7 @@ public class ShootingAutonomous extends OpMode {
             @Override
             public void initialize() {
                 if (firstTimeCR) {
+                    ShooterAutoCore.failsafeTimer.reset();
                     shooterAutoCore.setCRPower(1, dashTele);
                     shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                     firstTimeCR = false;
@@ -151,6 +149,7 @@ public class ShootingAutonomous extends OpMode {
           @Override
           public void initialize() {
               if (secondTimeCR) {
+                  ShooterAutoCore.failsafeTimer.reset();
                   shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
@@ -238,6 +237,7 @@ public class ShootingAutonomous extends OpMode {
             }
         case 3:
             if (!follower.isBusy()){
+                PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);

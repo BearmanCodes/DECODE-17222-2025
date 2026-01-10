@@ -39,6 +39,8 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static boolean automatedDrive = false;
 
+    public static boolean useDefaultPose = false;
+
     public static Pose targetPose;
 
     public static double FAILSAFE_STICK_TRIGGER = 0.5;
@@ -72,7 +74,8 @@ public class AutoTeleOp_RED extends OpMode {
         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(defaultStartingPose);
+        startingPose = useDefaultPose ? defaultStartingPose : PoseStorage.currentPose;
+        follower.setStartingPose(startingPose);
         TempShooterAutoCore.init(hardwareMap);
         follower.update();
         pathChain = () -> follower.pathBuilder()
@@ -103,6 +106,12 @@ public class AutoTeleOp_RED extends OpMode {
             TempShooterAutoCore.setLauncherPos(ModeCore.INTAKE_LOAD_PLATFORM_HEIGHT);
             TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_INTAKE_LOAD);
         }
+        if (gamepad2.dpadUpWasPressed()){
+            ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.SHOOT_MODE;
+            setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
+            gamepad1.rumbleBlips(3);
+            gamepad2.rumbleBlips(1);
+        }
         switch (ModeCore.currentDriveMode){
             case MANUAL_DRIVE:
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
@@ -128,7 +137,7 @@ public class AutoTeleOp_RED extends OpMode {
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                 telemetry.addData("Automated Drive: ", automatedDrive);
                 telemetry.update();
-                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()){
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()){
                     TempShooterAutoCore.spinUpFlys(0, 0);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(3);
@@ -160,10 +169,9 @@ public class AutoTeleOp_RED extends OpMode {
                     }
                     TempShooterAutoCore.RED_SURGE(telemetry);
                 }
-                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()) {
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()) {
                     TempShooterAutoCore.setCRPower(0);
                     TempShooterAutoCore.spinUpFlys(0, 0);
-
                     TempShooterAutoCore.shotsTaken = 0;
                     TempShooterAutoCore.canAddShot = true;
                     follower.startTeleOpDrive(true);
@@ -172,6 +180,16 @@ public class AutoTeleOp_RED extends OpMode {
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
+                if (gamepad2.startWasPressed()) {
+                    if (targetPose != null){
+                        gamepad1.rumbleBlips(1);
+                        gamepad2.rumbleBlips(1);
+                        follower.followPath(pathChain.get());
+                    }
+                    else {
+                        gamepad2.rumbleBlips(4);
+                    }
+                }
                 if (ModeCore.deliveryCurrentMethod == ModeCore.BALL_DELIVERY_METHOD.INTAKE){
                     if (gamepad2.dpadDownWasPressed()) {
                         TempShooterAutoCore.intake_SHOOT(telemetry, ModeCore.servoPosition);
@@ -179,7 +197,7 @@ public class AutoTeleOp_RED extends OpMode {
                         dashTele.update();
                     }
                     TempShooterAutoCore.intake_SURGE(telemetry, ModeCore.servoPosition);
-                    if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed()) {
+                    if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()) {
                         TempShooterAutoCore.spinUpFlys(0, 0);
                         TempShooterAutoCore.setCRPower(0);
                         TempShooterAutoCore.shotsTaken = 0;
@@ -197,7 +215,7 @@ public class AutoTeleOp_RED extends OpMode {
     }
 
     private  boolean STICK_PANIC_FAILSAFE(){
-        boolean one_left_y = Math.abs(gamepad1.left_stick_y) > FAILSAFE_STICK_TRIGGER || gamepad1.circleWasPressed();
+        boolean one_left_y = Math.abs(gamepad1.left_stick_y) > FAILSAFE_STICK_TRIGGER;
         boolean one_left_x = Math.abs(gamepad1.left_stick_x) > FAILSAFE_STICK_TRIGGER;
         boolean one_right_y = Math.abs(gamepad1.right_stick_y) > FAILSAFE_STICK_TRIGGER;
         boolean one_right_x = Math.abs(gamepad1.right_stick_x) > FAILSAFE_STICK_TRIGGER;
@@ -205,15 +223,7 @@ public class AutoTeleOp_RED extends OpMode {
         boolean two_left_x = Math.abs(gamepad2.left_stick_x) > FAILSAFE_STICK_TRIGGER;
         boolean two_right_y = Math.abs(gamepad2.right_stick_y) > FAILSAFE_STICK_TRIGGER;
         boolean two_right_x = Math.abs(gamepad2.right_stick_x) > FAILSAFE_STICK_TRIGGER;
-        if (one_left_y || one_left_x || one_right_y || one_right_x || two_left_y || two_left_x || two_right_y || two_right_x) {
-            TempShooterAutoCore.shotsTaken = 0;
-            follower.startTeleOpDrive(true);
-            gamepad1.rumbleBlips(3);
-            gamepad2.rumbleBlips(3);
-            automatedDrive = false;
-            return true;
-        }
-        return false;
+        return one_left_y || one_left_x || one_right_y || one_right_x;
     }
 
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){

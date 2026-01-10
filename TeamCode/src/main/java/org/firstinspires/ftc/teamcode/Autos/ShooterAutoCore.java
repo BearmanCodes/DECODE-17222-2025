@@ -24,7 +24,7 @@ public class ShooterAutoCore {
 
     public static double KICK_ITERATOR = 0.325;
 
-    public static double FAILSAFE_WAIT = 3500;
+    public static long FAILSAFE_WAIT = 3500;
 
     public long failsafeTime;
 
@@ -49,6 +49,8 @@ public class ShooterAutoCore {
     public static int SURGE_MEASURE = 150;
 
     public static int RUNNING_MODIFIER = 350;
+
+    public static ElapsedTime failsafeTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public boolean hasSurged = false;
 
@@ -182,13 +184,26 @@ public class ShooterAutoCore {
                     shotsTaken++;
                     canAddShot = false;
                 }
+                failsafeTimer.reset();
             }
-            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS){
+            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS) {
                 entry_time = 0;
                 //in();
                 setCRPower(1, tele);
                 luigiServo.setPosition(luigiBlock);
                 canAddShot = true;
+                failsafeTimer.reset();
+            }
+            if (failsafeTimer.time(TimeUnit.MILLISECONDS) > FAILSAFE_WAIT && canAddShot) {
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(-1, tele);
+                luigiServo.setPosition(luigiFlow);
+                stop();
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
+                failsafeTimer.reset();
             }
             tele.update();
             return false;
@@ -202,7 +217,6 @@ public class ShooterAutoCore {
     }
 
     public boolean intakeShoot(int shots, Telemetry tele){
-        luigiServo.setPosition(luigiBlock);
         if (shotsTaken < shots){
             if (power_surge(SURGE_MEASURE, tele)){
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
@@ -211,11 +225,22 @@ public class ShooterAutoCore {
                     shotsTaken++;
                     canAddShot = false;
                 }
+                failsafeTimer.reset();
             }
             if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTAKE_TIME_MS){
                 entry_time = 0;
                 setCRPower(1, tele);
                 canAddShot = true;
+                failsafeTimer.reset();
+            }
+            if (failsafeTimer.time(TimeUnit.MILLISECONDS) >= FAILSAFE_WAIT && canAddShot){
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(0, tele);
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
+                failsafeTimer.reset();
             }
             tele.update();
             return false;
