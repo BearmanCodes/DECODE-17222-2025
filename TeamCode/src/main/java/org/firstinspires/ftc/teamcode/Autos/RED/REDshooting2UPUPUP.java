@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos;
+package org.firstinspires.ftc.teamcode.Autos.RED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -14,33 +14,24 @@ import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
+import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
 import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.concurrent.TimeUnit;
-
 
 @Config
-@Autonomous(name = "BLUE Shooting FAR", group = "BLUE")
+@Autonomous(name = "RED Shooting TWO UP UP UP", group = "RED")
 @Configurable // Panels
-public class BLUEshootingFAR extends OpMode {
+public class REDshooting2UPUPUP extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
-
-    ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-
-    public static long myEntryTime = 0;
 
     public static int PATH_INDEX = 1;
     Telemetry dashTele = dashboard.getTelemetry();
 
     public static int INTAKE_POWER_OFFSET = 100;
-
-    public static long TIMEOUT = 3000;
 
     public static int HEADING_OFFSET = 8;
 
@@ -53,6 +44,8 @@ public class BLUEshootingFAR extends OpMode {
     public boolean firstTimeCR = true;
 
     public boolean secondTimeCR = true;
+
+    public boolean thirdTimeCR = true;
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
@@ -61,17 +54,27 @@ public class BLUEshootingFAR extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 1000;
+    public static int L_VEL = 900;
 
-    public static int R_VEL = 1000;
-    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(62, 11.5, Math.toRadians(100)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(0));
-    private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 31.29701834862384);
-    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(100));
-    private final Pose parkingPose = new Pose(38.75, 33.5, Math.toRadians(90));
+    public static int R_VEL = 900;
+    private final Pose startPose = new Pose(104, 134.75, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose endPose1 = new Pose(90, 85, Math.toRadians(45)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose endPose2 = new Pose(90, 85, Math.toRadians(45 - HEADING_OFFSET));
 
-    private PathChain firstPath, collect1Path, thirdPath, parkingPath;
+    //private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
+
+    private final Pose homePose = new Pose(125, 53, Math.toRadians(180));
+
+    private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
+
+    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
+
+    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
+
+    private final Pose collectBalls3 = new Pose(125, 33, Math.toRadians(180));
+    private final Pose collectBalls3CtrlPoint = new Pose(78.74311926605503, 31.422018348623862);
+
+    private PathChain firstPath, endingPath, secondBarragePath, homePath, thirdBarragePath;
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -108,7 +111,7 @@ public class BLUEshootingFAR extends OpMode {
                 shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                 shooterAutoCore.in();
                 follower.setMaxPower(PICKUP_POWER);
-                shooterAutoCore.spinUpFlys(L_VEL, R_VEL );
+                shooterAutoCore.spinUpFlys(L_VEL - INTAKE_POWER_OFFSET, R_VEL - INTAKE_POWER_OFFSET);
                 follower.resumePathFollowing();
                 return true;
             }
@@ -116,18 +119,6 @@ public class BLUEshootingFAR extends OpMode {
             @Override
             public void initialize() {
                 if (firstTimeCR) {
-                    ElapsedTime hey = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-                    hey.reset();
-                    follower.pausePathFollowing();
-                    while (hey.time(TimeUnit.MILLISECONDS) < TIMEOUT){
-                        dashTele.addData("Timer: ", hey.now(TimeUnit.MILLISECONDS));
-                        follower.update();
-                        dashTele.update();
-                    }
-                    follower.resumePathFollowing();
-                    dashTele.addData("Timer: ", hey.now(TimeUnit.MILLISECONDS));
-                    follower.update();
-                    dashTele.update();
                     ShooterAutoCore.failsafeTimer.reset();
                     shooterAutoCore.setCRPower(1, dashTele);
                     shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
@@ -151,9 +142,10 @@ public class BLUEshootingFAR extends OpMode {
           public boolean run() {
               follower.pausePathFollowing();
               while (!shooterAutoCore.intakeShoot(3, dashTele)){
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
                   dashTele.update();
               }
+              follower.setMaxPower(PICKUP_POWER);
+              shooterAutoCore.in();
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -163,9 +155,8 @@ public class BLUEshootingFAR extends OpMode {
           @Override
           public void initialize() {
               if (secondTimeCR) {
-                  follower.resumePathFollowing();
                   ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
+                  shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
                   secondTimeCR = false;
@@ -179,30 +170,75 @@ public class BLUEshootingFAR extends OpMode {
 
           @Override
           public int getPathIndex() {
-              return 0;
+              return PATH_INDEX;
+          }
+      };
+
+      PathCallback ThirdShoot = new PathCallback() {
+          @Override
+          public boolean run() {
+              follower.pausePathFollowing();
+              while (!shooterAutoCore.intakeShoot(3, dashTele)){
+                  dashTele.update();
+              }
+              follower.setMaxPower(1);
+              shooterAutoCore.in();
+              shooterAutoCore.setCRPower(0, dashTele);
+              shooterAutoCore.spinUpFlys(0, 0);
+              follower.resumePathFollowing();
+              return true;
+          }
+
+          @Override
+          public void initialize() {
+              if (thirdTimeCR) {
+                  ShooterAutoCore.failsafeTimer.reset();
+                  shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                  shooterAutoCore.in();
+                  shooterAutoCore.setCRPower(1, dashTele);
+                  secondTimeCR = false;
+              }
+          }
+
+          @Override
+          public boolean isReady() {
+              return true;
+          }
+
+          @Override
+          public int getPathIndex() {
+              return PATH_INDEX;
           }
       };
 
         firstPath = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootFar1))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootFar1.getHeading())
+                .addPath(new BezierLine(startPose, endPose1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading())
                 .build();
 
-        collect1Path = follower.pathBuilder()
-                .addPath(new BezierCurve(shootFar1, collectBalls1ControlPoint1, collectBalls1))
+        endingPath = follower.pathBuilder()
+                .addPath(new BezierCurve(endPose1, collectBalls1ControlPoint, collectBalls1))
                 .setConstantHeadingInterpolation(collectBalls1.getHeading())
                 .addCallback(FirstShoot)
                 .build();
 
-        thirdPath = follower.pathBuilder()
-                .addPath(new BezierLine(collectBalls1, shootFar2))
-                .setLinearHeadingInterpolation(collectBalls1.getHeading(), shootFar2.getHeading())
+        secondBarragePath = follower.pathBuilder()
+                .addPath(new BezierLine(collectBalls1, endPose2))
+                .setLinearHeadingInterpolation(collectBalls1.getHeading(), endPose2.getHeading())
+                .addPath(new BezierCurve(endPose2, homePoseCtrlPoint, homePose))
+                //.addPath(new BezierLine(endPose2, homePose))
+                //.setLinearHeadingInterpolation(endPose2.getHeading(), homePose.getHeading())
+                .setConstantHeadingInterpolation(homePose.getHeading())
+                .addCallback(SecondShoot)
                 .build();
 
-        parkingPath = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar2, parkingPose))
-                .setLinearHeadingInterpolation(shootFar2.getHeading(), parkingPose.getHeading())
-                .addCallback(SecondShoot)
+        thirdBarragePath = follower.pathBuilder()
+                .addPath(new BezierLine(homePose, endPose2))
+                .setLinearHeadingInterpolation(homePose.getHeading(), endPose2.getHeading())
+                .addPath(new BezierCurve(endPose2, collectBalls3CtrlPoint, collectBalls3))
+                .setConstantHeadingInterpolation(collectBalls3.getHeading())
+                .addCallback(ThirdShoot)
+                .addParametricCallback(0.3, () -> follower.setMaxPower(PICKUP_POWER))
                 .build();
 
   }
@@ -233,39 +269,43 @@ public class BLUEshootingFAR extends OpMode {
         case 0:
             //shooterAutoCore.in();
             shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-            shooterAutoCore.setLauncherPos(ModeCore.BLUE_HOPPER_FAR_LEFT_LAUNCHER);
+            shooterAutoCore.setLauncherPos(ShooterAutoCore.laInitPos);
             follower.followPath(firstPath);
             setPathState(1);
             break;
         case 1:
             if (!follower.isBusy()){
-                follower.followPath(collect1Path);
+                follower.followPath(endingPath);
                 setPathState(2);
                 break;
             }
         case 2:
             if (!follower.isBusy()) {
                 follower.setMaxPower(ROLLBACK_POWER);
-                follower.followPath(thirdPath);
+                follower.followPath(secondBarragePath);
                 dashTele.update();
                 setPathState(3);
                 break;
             }
         case 3:
             if (!follower.isBusy()){
-                follower.followPath(parkingPath);
-                setPathState(4);
-                break;
-            }
-        case 4:
-            if (!follower.isBusy()) {
+                follower.setMaxPower(ROLLBACK_POWER);
+                follower.followPath(thirdBarragePath);
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);
                 break;
             }
+        case 4:
+            PoseStorage.currentPose = follower.getPose();
+            shooterAutoCore.spinUpFlys(0, 0);
+            dashTele.update();
+            setPathState(-1);
+            break;
     }
   }
+
+
 }
     

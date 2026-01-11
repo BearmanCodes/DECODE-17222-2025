@@ -135,7 +135,7 @@ public class ModeCore {
 
     public static double BLUE_HOPPER_LINE_CLOSE_LAUNCHER = 0.53;
 
-    public static double RED_INTAKE_RIGHT_FAR_SERVO = 0.47;
+    public static double RED_INTAKE_RIGHT_FAR_SERVO = 0.45;
 
     public static  double BLUE_INTAKE_RIGHT_FAR_SERVO = 0.47;
 
@@ -143,7 +143,7 @@ public class ModeCore {
 
     public static double BLUE_INTAKE_LEFT_FAR_LAUNCHER = 0.47;
     public static int BLUE_INTAKE_LEFT_FAR_VELS = 1000;
-    public static double BLUE_INTAKE_LEFT_FAR_SERVO = 0.47;
+    public static double BLUE_INTAKE_LEFT_FAR_SERVO = 0.45;
 
     public static double RED_INTAKE_LEFT_FAR_LAUNCHER = 0.47;
     public static int RED_INTAKE_LEFT_FAR_VELS = 1000;

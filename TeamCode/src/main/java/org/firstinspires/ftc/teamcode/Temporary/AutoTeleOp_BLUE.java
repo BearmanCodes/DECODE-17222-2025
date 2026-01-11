@@ -51,6 +51,8 @@ public class AutoTeleOp_BLUE extends OpMode {
         BLUE
     }
 
+    public static double luigiServoIntakeOffset = 0;
+
     public static Supplier<PathChain> pathChain;
 
     private FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -111,6 +113,18 @@ public class AutoTeleOp_BLUE extends OpMode {
             setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
             gamepad1.rumbleBlips(3);
             gamepad2.rumbleBlips(1);
+        }
+        if (gamepad1.rightBumperWasPressed()) {
+            luigiServoIntakeOffset += 0.01;
+            double currPos = Math.round(TempShooterAutoCore.luigiServo.getPosition() * 100.00) / 100.00;
+            TempShooterAutoCore.luigiServo.setPosition(currPos + 0.01);
+            dashTele.update();
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            luigiServoIntakeOffset -= 0.01;
+            double currPos = Math.round(TempShooterAutoCore.luigiServo.getPosition() * 100.00) / 100.00;
+            TempShooterAutoCore.luigiServo.setPosition(currPos - 0.01);
+            dashTele.update();
         }
         switch (ModeCore.currentDriveMode){
             case MANUAL_DRIVE:
@@ -192,7 +206,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 }
                 if (ModeCore.deliveryCurrentMethod == ModeCore.BALL_DELIVERY_METHOD.INTAKE){
                     if (gamepad2.dpadDownWasPressed()) {
-                        TempShooterAutoCore.intake_SHOOT(telemetry, ModeCore.servoPosition);
+                        TempShooterAutoCore.intake_SHOOT(telemetry, ModeCore.servoPosition + luigiServoIntakeOffset);
                         follower.update();
                         dashTele.update();
                     }

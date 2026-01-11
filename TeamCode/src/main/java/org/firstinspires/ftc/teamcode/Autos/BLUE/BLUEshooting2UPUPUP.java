@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos;
+package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -16,14 +16,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
 import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "BLUE Shooting UPUPUP", group = "BLUE")
+@Autonomous(name = "BLUE Shooting TWO UP UP UP", group = "BLUE")
 @Configurable // Panels
-public class BLUEshootingupupup extends OpMode {
+public class BLUEshooting2UPUPUP extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -43,6 +44,8 @@ public class BLUEshootingupupup extends OpMode {
     public boolean firstTimeCR = true;
 
     public boolean secondTimeCR = true;
+
+    public boolean thirdTimeCR = true;
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
@@ -56,7 +59,6 @@ public class BLUEshootingupupup extends OpMode {
     public static int R_VEL = 900;
     private final Pose startPose = new Pose(40, 134.75, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
-
     private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135 + HEADING_OFFSET));
 
     //private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
@@ -69,7 +71,10 @@ public class BLUEshootingupupup extends OpMode {
 
     private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481);
 
-    private PathChain firstPath, endingPath, secondBarragePath, homePath;
+    private final Pose collectBalls3 = new Pose(19.5, 33, Math.toRadians(0));
+    private final Pose collectBalls3CtrlPoint = new Pose(75, 29);
+
+    private PathChain firstPath, endingPath, secondBarragePath, homePath, thirdBarragePath;
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -169,6 +174,43 @@ public class BLUEshootingupupup extends OpMode {
           }
       };
 
+      PathCallback ThirdShoot = new PathCallback() {
+          @Override
+          public boolean run() {
+              follower.pausePathFollowing();
+              while (!shooterAutoCore.intakeShoot(3, dashTele)){
+                  dashTele.update();
+              }
+              follower.setMaxPower(1);
+              shooterAutoCore.in();
+              shooterAutoCore.setCRPower(0, dashTele);
+              shooterAutoCore.spinUpFlys(0, 0);
+              follower.resumePathFollowing();
+              return true;
+          }
+
+          @Override
+          public void initialize() {
+              if (thirdTimeCR) {
+                  ShooterAutoCore.failsafeTimer.reset();
+                  shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                  shooterAutoCore.in();
+                  shooterAutoCore.setCRPower(1, dashTele);
+                  secondTimeCR = false;
+              }
+          }
+
+          @Override
+          public boolean isReady() {
+              return true;
+          }
+
+          @Override
+          public int getPathIndex() {
+              return PATH_INDEX;
+          }
+      };
+
         firstPath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, endPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), endPose1.getHeading())
@@ -188,6 +230,15 @@ public class BLUEshootingupupup extends OpMode {
                 //.setLinearHeadingInterpolation(endPose2.getHeading(), homePose.getHeading())
                 .setConstantHeadingInterpolation(homePose.getHeading())
                 .addCallback(SecondShoot)
+                .build();
+
+        thirdBarragePath = follower.pathBuilder()
+                .addPath(new BezierLine(homePose, endPose2))
+                .setLinearHeadingInterpolation(homePose.getHeading(), endPose2.getHeading())
+                .addPath(new BezierCurve(endPose2, collectBalls3CtrlPoint, collectBalls3))
+                .setConstantHeadingInterpolation(collectBalls3.getHeading())
+                .addCallback(ThirdShoot)
+                .addParametricCallback(0.3, () -> follower.setMaxPower(PICKUP_POWER))
                 .build();
 
   }
@@ -238,12 +289,20 @@ public class BLUEshootingupupup extends OpMode {
             }
         case 3:
             if (!follower.isBusy()){
+                follower.setMaxPower(ROLLBACK_POWER);
+                follower.followPath(thirdBarragePath);
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);
                 break;
             }
+        case 4:
+            PoseStorage.currentPose = follower.getPose();
+            shooterAutoCore.spinUpFlys(0, 0);
+            dashTele.update();
+            setPathState(-1);
+            break;
     }
   }
 

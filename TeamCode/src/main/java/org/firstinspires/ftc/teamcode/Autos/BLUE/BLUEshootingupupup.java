@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos;
+package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -16,14 +16,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
 import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED Shooting GOAL", group = "RED")
+@Autonomous(name = "BLUE Shooting UPUPUP", group = "BLUE")
 @Configurable // Panels
-public class REDshootinggoal extends OpMode {
+public class BLUEshootingupupup extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -54,19 +55,20 @@ public class REDshootinggoal extends OpMode {
     public static int L_VEL = 900;
 
     public static int R_VEL = 900;
-    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose endPose1 = new Pose(90, 85, Math.toRadians(45)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose endPose2 = new Pose(90, 85, Math.toRadians(45 - HEADING_OFFSET));
+    private final Pose startPose = new Pose(40, 134.75, Math.toRadians(180)); // Start Pose of our robot.
+    private final Pose endPose1 = new Pose(56.515188335358445, 88, Math.toRadians(135)); // Highest (First Set) of Artifacts from the Spike Mark.
+
+    private final Pose endPose2 = new Pose(56.515188335358445, 88, Math.toRadians(135 + HEADING_OFFSET));
 
     //private final Pose homePose = new Pose(56.13001215066828, 55.822600243013355, Math.toRadians(90));
 
-    private final Pose homePose = new Pose(125, 53, Math.toRadians(180));
+    private final Pose homePose = new Pose(19, 53, Math.toRadians(0));
 
-    private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
+    private final Pose homePoseCtrlPoint = new Pose(52.880315917375455, 53.464155528554066);
 
-    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
+    private final Pose collectBalls1 = new Pose(19, 78.25, Math.toRadians(0));
 
-    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
+    private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481);
 
     private PathChain firstPath, endingPath, secondBarragePath, homePath;
 
