@@ -67,9 +67,9 @@ public class REDshooting2UPUPUP extends OpMode {
 
     private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
 
-    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
+    private final Pose collectBalls1 = new Pose(125, 81.5, Math.toRadians(180));
 
-    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
+    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902 + 3.25);
 
     private final Pose collectBalls3 = new Pose(125, 33, Math.toRadians(180));
     private final Pose collectBalls3CtrlPoint = new Pose(78.74311926605503, 31.422018348623862);
@@ -141,7 +141,7 @@ public class REDshooting2UPUPUP extends OpMode {
           @Override
           public boolean run() {
               follower.pausePathFollowing();
-              while (!shooterAutoCore.intakeShoot(3, dashTele)){
+              while (!shooterAutoCore.intakeShoot(2, dashTele)){
                   dashTele.update();
               }
               follower.setMaxPower(PICKUP_POWER);
@@ -178,7 +178,7 @@ public class REDshooting2UPUPUP extends OpMode {
           @Override
           public boolean run() {
               follower.pausePathFollowing();
-              while (!shooterAutoCore.intakeShoot(3, dashTele)){
+              while (!shooterAutoCore.intakeShoot(2, dashTele)){
                   dashTele.update();
               }
               follower.setMaxPower(1);
@@ -264,6 +264,13 @@ public class REDshooting2UPUPUP extends OpMode {
         setPathState(0);
   }
 
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
+
   public void autonomousPathUpdate() {
     switch (pathState){
         case 0:
@@ -294,15 +301,17 @@ public class REDshooting2UPUPUP extends OpMode {
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
-                setPathState(-1);
+                setPathState(4);
                 break;
             }
         case 4:
-            PoseStorage.currentPose = follower.getPose();
-            shooterAutoCore.spinUpFlys(0, 0);
-            dashTele.update();
-            setPathState(-1);
-            break;
+            if (!follower.isBusy()) {
+                PoseStorage.currentPose = follower.getPose();
+                shooterAutoCore.spinUpFlys(0, 0);
+                dashTele.update();
+                setPathState(-1);
+                break;
+            }
     }
   }
 

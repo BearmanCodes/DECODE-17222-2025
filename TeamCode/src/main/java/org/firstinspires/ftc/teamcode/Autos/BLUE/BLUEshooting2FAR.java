@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 
 @Config
-@Autonomous(name = "BLUE Shooting PARK FAR", group = "BLUE")
+@Autonomous(name = "BLUE Shooting 2 FAR", group = "BLUE")
 @Configurable // Panels
-public class BLUEshootingPARKFAR extends OpMode {
+public class BLUEshooting2FAR extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -36,18 +36,22 @@ public class BLUEshootingPARKFAR extends OpMode {
 
     public static long myEntryTime = 0;
 
+    public static double INTAKE_SERVO_OFFSET = 0.03;
+
     public static int PATH_INDEX = 1;
     Telemetry dashTele = dashboard.getTelemetry();
 
-    public static int INTAKE_POWER_OFFSET = 100;
+    public static int INTAKE_POWER_OFFSET = 65;
 
     public static long TIMEOUT = 5000;
 
-    public static int HEADING_OFFSET = -29;
+    public static double HEADING_OFFSET = -14;
+
+    public static double INTAKE_HEADING_OFFSET = 11.25;
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.45;
+    public static double PICKUP_POWER = 0.55;
 
     public static double ROLLBACK_POWER = 0.75;
 
@@ -67,9 +71,9 @@ public class BLUEshootingPARKFAR extends OpMode {
     public static int R_VEL = 975;
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(62, 11.5, Math.toRadians(110 + HEADING_OFFSET)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(0));
-    private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 31.29701834862384);
-    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(100));
+    private final Pose collectBalls1 = new Pose(19.5, 35, Math.toRadians(0));
+    private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 33.29701834862384);
+    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(110 + INTAKE_HEADING_OFFSET));
     private final Pose parkingPose = new Pose(38.75, 33.5, Math.toRadians(90));
 
     private final Pose cornerPose = new Pose(13.5, 11.5, Math.toRadians(180));
@@ -111,7 +115,7 @@ public class BLUEshootingPARKFAR extends OpMode {
                 shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
                 shooterAutoCore.in();
                 follower.setMaxPower(PICKUP_POWER);
-                shooterAutoCore.spinUpFlys(L_VEL, R_VEL );
+                shooterAutoCore.spinUpFlys(L_VEL - INTAKE_POWER_OFFSET, R_VEL - INTAKE_POWER_OFFSET);
                 follower.resumePathFollowing();
                 return true;
             }
@@ -154,9 +158,10 @@ public class BLUEshootingPARKFAR extends OpMode {
           public boolean run() {
               follower.pausePathFollowing();
               while (!shooterAutoCore.intakeShoot(3, dashTele)){
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
+                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO + INTAKE_SERVO_OFFSET);
                   dashTele.update();
               }
+              follower.setMaxPower(1);
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -192,8 +197,8 @@ public class BLUEshootingPARKFAR extends OpMode {
                 .build();
 
         collect1Path = follower.pathBuilder()
-                .addPath(new BezierCurve(shootFar1, cornerPose))
-                .setConstantHeadingInterpolation(cornerPose.getHeading())
+                .addPath(new BezierCurve(shootFar1, collectBalls1ControlPoint1, collectBalls1))
+                .setConstantHeadingInterpolation(collectBalls1.getHeading())
                 .addCallback(FirstShoot)
                 .build();
 
@@ -203,8 +208,8 @@ public class BLUEshootingPARKFAR extends OpMode {
                 .build();
 
         parkingPath = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar2, parkingPose))
-                .setLinearHeadingInterpolation(shootFar2.getHeading(), parkingPose.getHeading())
+                .addPath(new BezierLine(shootFar2, cornerPose))
+                .setLinearHeadingInterpolation(shootFar2.getHeading(), cornerPose.getHeading())
                 .addCallback(SecondShoot)
                 .build();
 
@@ -254,6 +259,20 @@ public class BLUEshootingPARKFAR extends OpMode {
                 break;
             }
         case 2:
+            if (!follower.isBusy()){
+                follower.setMaxPower(ROLLBACK_POWER);
+                follower.followPath(thirdPath);
+                setPathState(3);
+                break;
+            }
+        case 3:
+            if (!follower.isBusy()){
+
+                follower.followPath(parkingPath);
+                setPathState(4);
+                break;
+            }
+        case 4:
             if (!follower.isBusy()) {
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);

@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
+import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
 import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -31,7 +32,7 @@ public class REDshooting2Goal extends OpMode {
     public static int PATH_INDEX = 1;
     Telemetry dashTele = dashboard.getTelemetry();
 
-    public static int INTAKE_POWER_OFFSET = 100;
+    public static int INTAKE_POWER_OFFSET = 0;
 
     public static int HEADING_OFFSET = 8;
 
@@ -67,9 +68,9 @@ public class REDshooting2Goal extends OpMode {
 
     private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
 
-    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
+    private final Pose collectBalls1 = new Pose(125, 81.5, Math.toRadians(180));
 
-    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
+    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902 + 3.25);
 
     private final Pose collectBalls3 = new Pose(125, 33, Math.toRadians(180));
     private final Pose collectBalls3CtrlPoint = new Pose(78.74311926605503, 31.422018348623862);
@@ -183,6 +184,7 @@ public class REDshooting2Goal extends OpMode {
               }
               follower.setMaxPower(1);
               shooterAutoCore.in();
+              shooterAutoCore.canAddShot = true;
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -193,7 +195,7 @@ public class REDshooting2Goal extends OpMode {
           public void initialize() {
               if (thirdTimeCR) {
                   ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                  shooterAutoCore.luigiServo.setPosition(ModeCore.RED_INTAKE_RIGHT_FAR_SERVO);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
                   secondTimeCR = false;
@@ -264,6 +266,13 @@ public class REDshooting2Goal extends OpMode {
         setPathState(0);
   }
 
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
+
   public void autonomousPathUpdate() {
     switch (pathState){
         case 0:
@@ -294,15 +303,17 @@ public class REDshooting2Goal extends OpMode {
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
-                setPathState(-1);
+                setPathState(4);
                 break;
             }
         case 4:
-            PoseStorage.currentPose = follower.getPose();
-            shooterAutoCore.spinUpFlys(0, 0);
-            dashTele.update();
-            setPathState(-1);
-            break;
+            if (!follower.isBusy()) {
+                PoseStorage.currentPose = follower.getPose();
+                shooterAutoCore.spinUpFlys(0, 0);
+                dashTele.update();
+                setPathState(-1);
+                break;
+            }
     }
   }
 

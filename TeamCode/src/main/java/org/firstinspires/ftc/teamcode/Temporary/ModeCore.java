@@ -153,6 +153,8 @@ public class ModeCore {
     public static int BLUE_INTAKE_LINE_CLOSE_VELS = 800;
     public static double BLUE_INTAKE_LINE_CLOSE_SERVO = 0.47;
 
+    public static double HEADING_OFFSET = -8;
+
 
 
     public static double BLUE_INTAKE_FAR_LEFT_SERVO = 0.47;
@@ -163,7 +165,7 @@ public class ModeCore {
 
     private static Pose BLUE_HOPPER_LINECLOSE = new Pose(56.515188335358445, 88, Math.toRadians(135));
 
-    private static Pose RED_HOPPER_LINECLOSE = new Pose(90, 85, Math.toRadians(45));
+    private static Pose RED_HOPPER_LINECLOSE = new Pose(90, 85, Math.toRadians(45 + HEADING_OFFSET));
     public ALLIANCE currentAlliance;
 
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;

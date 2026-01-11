@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos.BLUE;
+package org.firstinspires.ftc.teamcode.Autos.RED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 
 @Config
-@Autonomous(name = "BLUE Shooting PARK FAR", group = "BLUE")
+@Autonomous(name = "RED Shooting TWO FAR", group = "RED")
 @Configurable // Panels
-public class BLUEshootingPARKFAR extends OpMode {
+public class REDshooting2FAR extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -43,11 +43,11 @@ public class BLUEshootingPARKFAR extends OpMode {
 
     public static long TIMEOUT = 5000;
 
-    public static int HEADING_OFFSET = -29;
+    public static int HEADING_OFFSET = 13;
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.45;
+    public static double PICKUP_POWER = 0.65;
 
     public static double ROLLBACK_POWER = 0.75;
 
@@ -63,16 +63,15 @@ public class BLUEshootingPARKFAR extends OpMode {
   private int pathState; // Current autonomous path state (state machine)
 
     public static int L_VEL = 975;
-
     public static int R_VEL = 975;
-    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(62, 11.5, Math.toRadians(110 + HEADING_OFFSET)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(0));
-    private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 31.29701834862384);
-    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(100));
-    private final Pose parkingPose = new Pose(38.75, 33.5, Math.toRadians(90));
+    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose shootFar1 = new Pose(84, 11.5, Math.toRadians(75 + HEADING_OFFSET)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose collectBalls1 = new Pose(125, 37, Math.toRadians(180));
+    private final Pose collectBalls1ControlPoint1 = new Pose(68.7, 37);
+    private final Pose shootFar2 = new Pose(84, 11.5, Math.toRadians(65));
 
-    private final Pose cornerPose = new Pose(13.5, 11.5, Math.toRadians(180));
+    private final Pose cornerPose = new Pose(130.5, 11.5, Math.toRadians(0));
+    private final Pose parkingPose = new Pose(105.25, 33.5, Math.toRadians(90));
 
     private PathChain firstPath, collect1Path, thirdPath, parkingPath;
 
@@ -157,6 +156,7 @@ public class BLUEshootingPARKFAR extends OpMode {
                   shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
                   dashTele.update();
               }
+              follower.setMaxPower(1);
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -192,8 +192,8 @@ public class BLUEshootingPARKFAR extends OpMode {
                 .build();
 
         collect1Path = follower.pathBuilder()
-                .addPath(new BezierCurve(shootFar1, cornerPose))
-                .setConstantHeadingInterpolation(cornerPose.getHeading())
+                .addPath(new BezierCurve(shootFar1, collectBalls1ControlPoint1, collectBalls1))
+                .setConstantHeadingInterpolation(collectBalls1.getHeading())
                 .addCallback(FirstShoot)
                 .build();
 
@@ -255,10 +255,25 @@ public class BLUEshootingPARKFAR extends OpMode {
             }
         case 2:
             if (!follower.isBusy()) {
+                if (!follower.isBusy()){
+                    follower.setMaxPower(ROLLBACK_POWER);
+                    follower.followPath(thirdPath);
+                    setPathState(3);
+                    break;
+                }
+            }
+        case 3:
+            if (!follower.isBusy()) {
+                follower.followPath(parkingPath);
+                setPathState(4);
+                break;
+            }
+        case 4:
+            if (!follower.isBusy()){
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
-                setPathState(-1);
+                setPathState(3);
                 break;
             }
     }

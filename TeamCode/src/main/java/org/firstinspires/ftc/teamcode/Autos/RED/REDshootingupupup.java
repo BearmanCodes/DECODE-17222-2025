@@ -65,9 +65,9 @@ public class REDshootingupupup extends OpMode {
 
     private final Pose homePoseCtrlPoint = new Pose(87.18185314412477, 49.24722708372812);
 
-    private final Pose collectBalls1 = new Pose(125, 78.25, Math.toRadians(180));
+    private final Pose collectBalls1 = new Pose(125, 81.5, Math.toRadians(180));
 
-    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902);
+    private final Pose collectBalls1ControlPoint = new Pose(73.059026559147, 76.58559532700902 + 3.25);
 
     private PathChain firstPath, endingPath, secondBarragePath, homePath;
 
@@ -212,6 +212,13 @@ public class REDshootingupupup extends OpMode {
         opmodeTimer.resetTimer();
         setPathState(0);
   }
+
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
 
   public void autonomousPathUpdate() {
     switch (pathState){

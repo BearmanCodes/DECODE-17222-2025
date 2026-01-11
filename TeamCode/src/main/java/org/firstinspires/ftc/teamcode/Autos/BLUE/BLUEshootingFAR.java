@@ -229,6 +229,13 @@ public class BLUEshootingFAR extends OpMode {
         setPathState(0);
   }
 
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
+
   public void autonomousPathUpdate() {
     switch (pathState){
         case 0:

@@ -44,7 +44,7 @@ public class REDshootingPARKFAR extends OpMode {
 
     public static long TIMEOUT = 5000;
 
-    public static int HEADING_OFFSET = 8;
+    public static int HEADING_OFFSET = 25;
 
     public static boolean HOLD_END = true;
 
@@ -63,10 +63,10 @@ public class REDshootingPARKFAR extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 1000;
-    public static int R_VEL = 1000;
+    public static int L_VEL = 975;
+    public static int R_VEL = 975;
     private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(84, 11.5, Math.toRadians(65)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose shootFar1 = new Pose(84, 11.5, Math.toRadians(75 + HEADING_OFFSET)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(180));
     private final Pose collectBalls1ControlPoint1 = new Pose(69.7, 31.29701834862384);
     private final Pose shootFar2 = new Pose(84, 11.5, Math.toRadians(65));
@@ -230,6 +230,13 @@ public class REDshootingPARKFAR extends OpMode {
         opmodeTimer.resetTimer();
         setPathState(0);
   }
+
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
 
   public void autonomousPathUpdate() {
     switch (pathState){

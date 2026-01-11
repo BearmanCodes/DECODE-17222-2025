@@ -53,6 +53,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double luigiServoIntakeOffset = 0;
 
+    public static double PATH_HEADING_OFFSET = 0;
+
     public static Supplier<PathChain> pathChain;
 
     private FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -82,7 +84,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower.update();
         pathChain = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, targetPose.getHeading(), 0.8))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET), 0.8))
                 .build();
     }
 
@@ -114,17 +116,37 @@ public class AutoTeleOp_BLUE extends OpMode {
             gamepad1.rumbleBlips(3);
             gamepad2.rumbleBlips(1);
         }
-        if (gamepad1.rightBumperWasPressed()) {
+        if (gamepad1.dpadUpWasPressed()) {
             luigiServoIntakeOffset += 0.01;
             double currPos = Math.round(TempShooterAutoCore.luigiServo.getPosition() * 100.00) / 100.00;
             TempShooterAutoCore.luigiServo.setPosition(currPos + 0.01);
             dashTele.update();
         }
-        if (gamepad1.leftBumperWasPressed()) {
+        if (gamepad1.dpadDownWasPressed()) {
             luigiServoIntakeOffset -= 0.01;
             double currPos = Math.round(TempShooterAutoCore.luigiServo.getPosition() * 100.00) / 100.00;
             TempShooterAutoCore.luigiServo.setPosition(currPos - 0.01);
             dashTele.update();
+        }
+        if (gamepad1.rightBumperWasPressed()) {
+            PATH_HEADING_OFFSET -= 1;
+            follower.turn(Math.toRadians(1), false);
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            PATH_HEADING_OFFSET += 1;
+            follower.turn(Math.toRadians(1), true);
+        }
+        if (gamepad2.circleWasPressed()) {
+            TempShooterAutoCore.setCRPower(0);
+        }
+        if (gamepad2.crossWasPressed()) {
+            TempShooterAutoCore.setCRPower(1);
+        }
+        if (gamepad2.triangleWasPressed()) {
+            TempShooterAutoCore.setCRPower(-1);
+        }
+        if (gamepad1.crossWasPressed()) {
+            TempShooterAutoCore.spinUpFlys(0, 0);
         }
         switch (ModeCore.currentDriveMode){
             case MANUAL_DRIVE:
@@ -152,7 +174,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 telemetry.addData("Automated Drive: ", automatedDrive);
                 telemetry.update();
                 if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()){
-                    TempShooterAutoCore.spinUpFlys(0, 0);
+                    //TempShooterAutoCore.spinUpFlys(0, 0);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(3);
                     gamepad2.rumbleBlips(3);
@@ -185,7 +207,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 }
                 if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()) {
                     TempShooterAutoCore.setCRPower(0);
-                    TempShooterAutoCore.spinUpFlys(0, 0);
+                    //TempShooterAutoCore.spinUpFlys(0, 0);
                     TempShooterAutoCore.shotsTaken = 0;
                     TempShooterAutoCore.canAddShot = true;
                     follower.startTeleOpDrive(true);
@@ -212,7 +234,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                     }
                     TempShooterAutoCore.intake_SURGE(telemetry, ModeCore.servoPosition);
                     if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()) {
-                        TempShooterAutoCore.spinUpFlys(0, 0);
+                        //TempShooterAutoCore.spinUpFlys(0, 0);
                         TempShooterAutoCore.setCRPower(0);
                         TempShooterAutoCore.shotsTaken = 0;
                         TempShooterAutoCore.canAddShot = true;

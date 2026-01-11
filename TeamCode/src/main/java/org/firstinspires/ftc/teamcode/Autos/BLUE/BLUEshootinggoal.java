@@ -65,9 +65,9 @@ public class BLUEshootinggoal extends OpMode {
 
     private final Pose homePoseCtrlPoint = new Pose(52.880315917375455, 53.464155528554066);
 
-    private final Pose collectBalls1 = new Pose(19, 78.25, Math.toRadians(0));
+    private final Pose collectBalls1 = new Pose(19, 81.5, Math.toRadians(0));
 
-    private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481);
+    private final Pose collectBalls1ControlPoint = new Pose(64.69205408208279, 78.5613608748481 + 3.25);
 
     private PathChain firstPath, endingPath, secondBarragePath, homePath;
 
@@ -212,6 +212,13 @@ public class BLUEshootinggoal extends OpMode {
         opmodeTimer.resetTimer();
         setPathState(0);
   }
+
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
 
   public void autonomousPathUpdate() {
     switch (pathState){
