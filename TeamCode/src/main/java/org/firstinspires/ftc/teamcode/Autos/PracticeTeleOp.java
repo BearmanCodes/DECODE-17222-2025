@@ -105,7 +105,6 @@ public class PracticeTeleOp extends OpMode {
         if (!automatedDrive) {
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
-
         handleGamepadLED();
 
         if (gamepad2.bWasPressed()) {

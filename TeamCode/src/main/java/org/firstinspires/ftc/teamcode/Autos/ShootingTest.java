@@ -31,6 +31,9 @@ public class ShootingTest extends LinearOpMode {
         //shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow + ShooterAutoCore.KICK_ITERATOR);
         shooterAutoCore.setCRPower(1, dashTele);
         while (!isStopRequested()){
+            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+            shooterAutoCore.setLauncherPos(ShooterAutoCore.laInitPos);
+            shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
             shooterAutoCore.intakeShoot(3, dashTele);
         }
     }

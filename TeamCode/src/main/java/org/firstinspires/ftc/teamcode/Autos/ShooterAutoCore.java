@@ -30,7 +30,7 @@ public class ShooterAutoCore {
 
     public boolean canAddShot = true;
 
-    public static double luigiBlock = 0.47;
+    public static double luigiBlock = 0.52;
 
     long entry_time = 0;
 
@@ -233,19 +233,9 @@ public class ShooterAutoCore {
                 canAddShot = true;
                 failsafeTimer.reset();
             }
-            if (failsafeTimer.time(TimeUnit.MILLISECONDS) >= FAILSAFE_WAIT && canAddShot){
-                entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(0, tele);
-                if (canAddShot){
-                    shotsTaken++;
-                    canAddShot = false;
-                }
-                failsafeTimer.reset();
-            }
             tele.update();
             return false;
         } else {
-            stop();
             setCRPower(0, tele);
             shotsTaken = 0;
             canAddShot = true;

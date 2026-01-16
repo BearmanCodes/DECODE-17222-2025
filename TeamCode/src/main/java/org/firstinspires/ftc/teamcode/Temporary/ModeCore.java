@@ -44,9 +44,9 @@ public class ModeCore {
 
     public static double LUIGI_HOPPER_SHOOT = 0.47;
 
-    public static double LUIGI_INTAKE_LOAD = 0.47;
+    public static double LUIGI_INTAKE_LOAD = 0.52;
 
-    public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.4;
+    public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.32;
 
     public static double INTAKE_LOAD_PLATFORM_HEIGHT = 0.5;
 
@@ -55,7 +55,7 @@ public class ModeCore {
 
     public static double RED_INTAKE_LINE_CLOSE_LAUNCHER = 0.52; //0.53
     public static int RED_INTAKE_LINE_CLOSE_VELS = 800; //900
-    public static double RED_INTAKE_LINE_CLOSE_SERVO = 0.47;
+    public static double RED_INTAKE_LINE_CLOSE_SERVO = 0.52;
 
 
     public static enum ALLIANCE {
@@ -118,7 +118,7 @@ public class ModeCore {
     public static int BLUE_HOPPER_LINE_CLOSE_VELS = 900;
 
     public static double RED_HOPPER_FAR_RIGHT_LAUNCHER = 0.45;
-    public static double BLUE_HOPPER_FAR_LEFT_LAUNCHER = 0.45;
+    public static double BLUE_HOPPER_FAR_LEFT_LAUNCHER = 0.52;
 
 
     public static double BLUE_HOPPER_IN_FAR_LAUNCHER = 0.45;
@@ -143,7 +143,7 @@ public class ModeCore {
 
     public static double BLUE_INTAKE_LEFT_FAR_LAUNCHER = 0.47;
     public static int BLUE_INTAKE_LEFT_FAR_VELS = 1000;
-    public static double BLUE_INTAKE_LEFT_FAR_SERVO = 0.45;
+    public static double BLUE_INTAKE_LEFT_FAR_SERVO = 0.538;
 
     public static double RED_INTAKE_LEFT_FAR_LAUNCHER = 0.47;
     public static int RED_INTAKE_LEFT_FAR_VELS = 1000;
@@ -151,7 +151,7 @@ public class ModeCore {
 
     public static double BLUE_INTAKE_LINE_CLOSE_LAUNCHER = 0.53;
     public static int BLUE_INTAKE_LINE_CLOSE_VELS = 800;
-    public static double BLUE_INTAKE_LINE_CLOSE_SERVO = 0.47;
+    public static double BLUE_INTAKE_LINE_CLOSE_SERVO = 0.52;
 
     public static double HEADING_OFFSET = -8;
 

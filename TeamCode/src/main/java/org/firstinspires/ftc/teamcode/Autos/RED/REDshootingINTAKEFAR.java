@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 
 @Config
-@Autonomous(name = "RED Shooting TWO FAR", group = "RED")
+@Autonomous(name = "RED Shooting INTAKE FAR", group = "RED")
 @Configurable // Panels
-public class REDshooting2FAR extends OpMode {
+public class REDshootingINTAKEFAR extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -43,11 +43,11 @@ public class REDshooting2FAR extends OpMode {
 
     public static long TIMEOUT = 5000;
 
-    public static int HEADING_OFFSET = 13;
+    public static int HEADING_OFFSET = 8;
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.65;
+    public static double PICKUP_POWER = 0.45;
 
     public static double ROLLBACK_POWER = 0.75;
 
@@ -62,15 +62,13 @@ public class REDshooting2FAR extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 950;
-    public static int R_VEL = 1150;
+    public static int L_VEL = 1000;
+    public static int R_VEL = 1000;
     private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(84, 11.5, Math.toRadians(75 + HEADING_OFFSET)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(125, 37, Math.toRadians(180));
-    private final Pose collectBalls1ControlPoint1 = new Pose(68.7, 37);
+    private final Pose shootFar1 = new Pose(84, 11.5, Math.toRadians(65)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(180));
+    private final Pose collectBalls1ControlPoint1 = new Pose(69.7, 31.29701834862384);
     private final Pose shootFar2 = new Pose(84, 11.5, Math.toRadians(65));
-
-    private final Pose cornerPose = new Pose(130.5, 11.5, Math.toRadians(0));
     private final Pose parkingPose = new Pose(105.25, 33.5, Math.toRadians(90));
 
     private PathChain firstPath, collect1Path, thirdPath, parkingPath;
@@ -156,7 +154,6 @@ public class REDshooting2FAR extends OpMode {
                   shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
                   dashTele.update();
               }
-              follower.setMaxPower(1);
               shooterAutoCore.setCRPower(0, dashTele);
               shooterAutoCore.spinUpFlys(0, 0);
               follower.resumePathFollowing();
@@ -255,25 +252,24 @@ public class REDshooting2FAR extends OpMode {
             }
         case 2:
             if (!follower.isBusy()) {
-                if (!follower.isBusy()){
-                    follower.setMaxPower(ROLLBACK_POWER);
-                    follower.followPath(thirdPath);
-                    setPathState(3);
-                    break;
-                }
+                follower.setMaxPower(ROLLBACK_POWER);
+                follower.followPath(thirdPath);
+                dashTele.update();
+                setPathState(3);
+                break;
             }
         case 3:
-            if (!follower.isBusy()) {
+            if (!follower.isBusy()){
                 follower.followPath(parkingPath);
                 setPathState(4);
                 break;
             }
         case 4:
-            if (!follower.isBusy()){
+            if (!follower.isBusy()) {
                 PoseStorage.currentPose = follower.getPose();
                 shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
-                setPathState(3);
+                setPathState(-1);
                 break;
             }
     }
