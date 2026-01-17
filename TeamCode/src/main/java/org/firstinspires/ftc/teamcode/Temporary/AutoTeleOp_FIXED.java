@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 public class AutoTeleOp_FIXED extends OpMode {
     public static Follower follower;
 
-    public static double inPower;
+    public static double inPower = 0;
 
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
 
@@ -34,7 +34,7 @@ public class AutoTeleOp_FIXED extends OpMode {
 
     public static DcMotorEx intake;
 
-    public static double intakeReducer = 0.15;
+    public static double intakeReducer = 0.75;
 
     public static boolean automatedDrive = false;
 
@@ -60,17 +60,24 @@ public class AutoTeleOp_FIXED extends OpMode {
 
     private Telemetry dashTele = dashboard.getTelemetry();
 
+    public static double lastSign;
+
     public static boolean inFWD = false;
+
+    public static double intakeGamepad;
 
     public static boolean BLUE_ALLIANCE = true;
 
-    public static boolean INTAKE_RUN = false;
+    public static boolean INTAKE_RUN_LEFT = false;
+
+    public static boolean INTAKE_RUN_RIGHT = false;
+
 
     public static ModeCore.ALLIANCE currAlliance;
 
     public static double INTAKE_THRESHOLD = 0.15;
 
-    public static boolean IS_ROBOT_CENTRIC = false;
+    public static boolean IS_ROBOT_CENTRIC = true;
 
 
     @Override
@@ -131,8 +138,23 @@ public class AutoTeleOp_FIXED extends OpMode {
             }
             TempShooterAutoCore.intake_SURGE(telemetry, 0.52);
         }
-            inPower = gamepad1.left_trigger - gamepad1.right_trigger;
-            intake.setPower(inPower * intakeReducer);
+        if (gamepad1.leftBumperWasPressed()) {
+            INTAKE_RUN_LEFT = !INTAKE_RUN_LEFT;
+            if (INTAKE_RUN_LEFT) {
+                inPower = intakeReducer;
+            } else {
+                inPower = 0;
+            }
+        }
+        if (gamepad1.rightBumperWasPressed()) {
+            INTAKE_RUN_RIGHT = !INTAKE_RUN_RIGHT;
+            if (INTAKE_RUN_RIGHT) {
+                inPower = -intakeReducer;
+            } else {
+                inPower = 0;
+            }
+        }
+        intake.setPower(inPower);
             switch (ModeCore.currentDriveMode) {
                 case MANUAL_DRIVE:
                     follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, IS_ROBOT_CENTRIC);

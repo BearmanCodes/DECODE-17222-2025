@@ -41,15 +41,15 @@ public class BLUEshootingFAR extends OpMode {
 
     public static int INTAKE_POWER_OFFSET = 100;
 
-    public static long TIMEOUT = 5000;
+    public static double TIMEOUT = 2500;
 
     public static int HEADING_OFFSET = 8;
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.45;
+    public static double PICKUP_POWER = 0.4;
 
-    public static double ROLLBACK_POWER = 0.75;
+    public static double ROLLBACK_POWER = 1;
 
     public boolean firstTimeCR = true;
 
@@ -62,17 +62,34 @@ public class BLUEshootingFAR extends OpMode {
     Timer opmodeTimer;
   private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 1000;
+    public static int L_VEL = 975;
 
-    public static int R_VEL = 1000;
+    public static int R_VEL = 1125;
+
+    public static double SHOOT_FAR_POS_X = 61.5;
+    public static double SHOOT_FAR_POS_Y = 12.0;
+
+    public static double SHOOT_FAR_POS_HEADING = 110;
+
+    public static double SHOOT_FAR_2_POS_X = 61.5;
+    public static double SHOOT_FAR_2_POS_Y = 12.0;
+
+    public static double SHOOT_FAR_2_HEADING = 115;
+
+    public static double COLLECT_BALLS_X = 13.5;
+    public static double COLLECT_BALLS_Y = 35;
+
+    public static double COLLECT_BALLS_CONTROL_X = 67.42;
+
+    public static double COLLECT_BALLS_CONTROL_Y = 39.12;
+
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(62, 11.5, Math.toRadians(100)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(19.5, 33, Math.toRadians(0));
-    private final Pose collectBalls1ControlPoint1 = new Pose(69.62385321100919, 31.29701834862384);
-    private final Pose shootFar2 = new Pose(62, 11.5, Math.toRadians(100));
-    private final Pose parkingPose = new Pose(38.75, 33.5, Math.toRadians(90));
-
-    private PathChain firstPath, collect1Path, thirdPath, parkingPath;
+    private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(0));
+    private final Pose collectBalls1ControlPoint1 = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
+    private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
+    private final Pose parkingPose = new Pose(13.5, 11.5, Math.toRadians(180));
+    private PathChain firstPath, collect1Path, goBack, shootThenPark;
 
     public void setPathState(int pState) {
         pathState = pState;
@@ -87,7 +104,7 @@ public class BLUEshootingFAR extends OpMode {
     panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     shooterAutoCore.init(hardwareMap);
-    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow);
+    shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
 
     follower = Constants.createFollower(hardwareMap);
     follower.setStartingPose(startPose);
@@ -106,10 +123,10 @@ public class BLUEshootingFAR extends OpMode {
                 while (!shooterAutoCore.shoot(3, dashTele)){
                     dashTele.update();
                 }
-                shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
                 shooterAutoCore.in();
                 follower.setMaxPower(PICKUP_POWER);
-                shooterAutoCore.spinUpFlys(L_VEL, R_VEL );
+                shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
                 follower.resumePathFollowing();
                 return true;
             }
@@ -117,21 +134,9 @@ public class BLUEshootingFAR extends OpMode {
             @Override
             public void initialize() {
                 if (firstTimeCR) {
-                    ElapsedTime hey = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-                    hey.reset();
-                    follower.pausePathFollowing();
-                    while (hey.time(TimeUnit.MILLISECONDS) < TIMEOUT){
-                        dashTele.addData("Timer: ", hey.now(TimeUnit.MILLISECONDS));
-                        follower.update();
-                        dashTele.update();
-                    }
-                    follower.resumePathFollowing();
-                    dashTele.addData("Timer: ", hey.now(TimeUnit.MILLISECONDS));
-                    follower.update();
-                    dashTele.update();
                     ShooterAutoCore.failsafeTimer.reset();
                     shooterAutoCore.setCRPower(1, dashTele);
-                    shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiBlock);
+                    shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
                     firstTimeCR = false;
                 }
             }
@@ -151,12 +156,13 @@ public class BLUEshootingFAR extends OpMode {
           @Override
           public boolean run() {
               follower.pausePathFollowing();
-              while (!shooterAutoCore.intakeShoot(3, dashTele)){
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
+              while (!shooterAutoCore.shoot(3, dashTele)){
                   dashTele.update();
               }
-              shooterAutoCore.setCRPower(0, dashTele);
-              shooterAutoCore.spinUpFlys(0, 0);
+              shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+              shooterAutoCore.stop();
+              follower.setMaxPower(1);
+              shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
               follower.resumePathFollowing();
               return true;
           }
@@ -164,11 +170,9 @@ public class BLUEshootingFAR extends OpMode {
           @Override
           public void initialize() {
               if (secondTimeCR) {
-                  follower.resumePathFollowing();
                   ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
-                  shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
+                  shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
                   secondTimeCR = false;
               }
           }
@@ -195,17 +199,16 @@ public class BLUEshootingFAR extends OpMode {
                 .addCallback(FirstShoot)
                 .build();
 
-        thirdPath = follower.pathBuilder()
+        goBack = follower.pathBuilder()
                 .addPath(new BezierLine(collectBalls1, shootFar2))
                 .setLinearHeadingInterpolation(collectBalls1.getHeading(), shootFar2.getHeading())
                 .build();
 
-        parkingPath = follower.pathBuilder()
+        shootThenPark = follower.pathBuilder()
                 .addPath(new BezierLine(shootFar2, parkingPose))
                 .setLinearHeadingInterpolation(shootFar2.getHeading(), parkingPose.getHeading())
                 .addCallback(SecondShoot)
                 .build();
-
   }
 
   @Override
@@ -213,7 +216,7 @@ public class BLUEshootingFAR extends OpMode {
     follower.update(); // Update Pedro Pathing
     autonomousPathUpdate(); // Update autonomous state machine
     //shooterAutoCore.power_surge(150);
-
+    telemetry.addData("Path State: ", pathState);
     // Log values to Panels and Driver Station
       dashTele.update();
     panelsTelemetry.debug("Path State", pathState);
@@ -226,7 +229,8 @@ public class BLUEshootingFAR extends OpMode {
   @Override
   public void start() {
         opmodeTimer.resetTimer();
-        setPathState(0);
+      shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+      setPathState(0);
   }
 
     @Override
@@ -246,33 +250,32 @@ public class BLUEshootingFAR extends OpMode {
             setPathState(1);
             break;
         case 1:
-            if (!follower.isBusy()){
+            if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
                 follower.followPath(collect1Path);
                 setPathState(2);
-                break;
             }
+            break;
         case 2:
             if (!follower.isBusy()) {
                 follower.setMaxPower(ROLLBACK_POWER);
-                follower.followPath(thirdPath);
-                dashTele.update();
+                follower.followPath(goBack);
+                pathTimer.resetTimer();
                 setPathState(3);
-                break;
             }
+            break;
         case 3:
-            if (!follower.isBusy()){
-                follower.followPath(parkingPath);
+            if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
+                follower.followPath(shootThenPark);
                 setPathState(4);
-                break;
             }
+            break;
         case 4:
             if (!follower.isBusy()) {
                 PoseStorage.currentPose = follower.getPose();
-                shooterAutoCore.spinUpFlys(0, 0);
                 dashTele.update();
                 setPathState(-1);
-                break;
             }
+            break;
     }
   }
 }

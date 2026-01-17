@@ -30,11 +30,11 @@ public class ShooterAutoCore {
 
     public boolean canAddShot = true;
 
-    public static double luigiBlock = 0.52;
+    public static double luigiBlock = 0.35;
 
     long entry_time = 0;
 
-    public static double luigiFlow = 0.15;
+    public static double luigiFlow = 0.065;
 
     public static int SHOOT_INTERMITENT_TIME_MS = 1500;
 
@@ -56,13 +56,13 @@ public class ShooterAutoCore {
 
     public static DcMotorEx intake;
 
-    public static double reducer = 1;
+    public static double reducer = 0.75;
 
     public static double flyExpected, fryExpected;
 
     public DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.53;
+    public static double laInitPos = 0.32;
 
 
     public void init(HardwareMap hwMap){
@@ -122,7 +122,6 @@ public class ShooterAutoCore {
             luigiBlock -= 0.01;
         }
         tele.addData("LuigiBlock: ", luigiBlock);
-        tele.update();
     }
 
     public void updateLaPos(Gamepad gpad1, Telemetry tele){
@@ -134,7 +133,6 @@ public class ShooterAutoCore {
         }
         setLauncherPos(laInitPos);
         tele.addData("Launcher Pos: ", laInitPos);
-        tele.update();
     }
 
     public boolean power_surge(double surge_measure, Telemetry tele){
@@ -177,9 +175,8 @@ public class ShooterAutoCore {
         if (shotsTaken < shots){
             if (power_surge(SURGE_MEASURE, tele)){
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(-1, tele);
+                setCRPower(0, tele);
                 luigiServo.setPosition(luigiFlow);
-                stop();
                 if (canAddShot){
                     shotsTaken++;
                     canAddShot = false;
@@ -196,9 +193,8 @@ public class ShooterAutoCore {
             }
             if (failsafeTimer.time(TimeUnit.MILLISECONDS) > FAILSAFE_WAIT && canAddShot) {
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(-1, tele);
+                setCRPower(0, tele);
                 luigiServo.setPosition(luigiFlow);
-                stop();
                 if (canAddShot){
                     shotsTaken++;
                     canAddShot = false;
@@ -208,7 +204,6 @@ public class ShooterAutoCore {
             tele.update();
             return false;
         } else {
-            stop();
             setCRPower(0, tele);
             shotsTaken = 0;
             canAddShot = true;

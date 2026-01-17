@@ -40,9 +40,9 @@ public class ModeCore {
 
     public static double servoPosition;
 
-    public static double LUIGI_HOPPER_LOAD = 0.15;
+    public static double LUIGI_HOPPER_LOAD = 0.065;
 
-    public static double LUIGI_HOPPER_SHOOT = 0.47;
+    public static double LUIGI_HOPPER_SHOOT = 0.35;
 
     public static double LUIGI_INTAKE_LOAD = 0.52;
 
@@ -118,7 +118,7 @@ public class ModeCore {
     public static int BLUE_HOPPER_LINE_CLOSE_VELS = 900;
 
     public static double RED_HOPPER_FAR_RIGHT_LAUNCHER = 0.45;
-    public static double BLUE_HOPPER_FAR_LEFT_LAUNCHER = 0.52;
+    public static double BLUE_HOPPER_FAR_LEFT_LAUNCHER = 0.34;
 
 
     public static double BLUE_HOPPER_IN_FAR_LAUNCHER = 0.45;

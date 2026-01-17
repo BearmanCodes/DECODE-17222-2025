@@ -30,7 +30,7 @@ public class TempShooterAutoCore {
 
     public static boolean canAddShot = true;
 
-    public static double luigiBlock = 0.47;
+    public static double luigiBlock = 0.35;
 
     static long entry_time = 0;
 
@@ -60,7 +60,7 @@ public class TempShooterAutoCore {
 
     public static DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.53;
+    public static double laInitPos = 0.32;
 
 
     public static void init(HardwareMap hwMap){
