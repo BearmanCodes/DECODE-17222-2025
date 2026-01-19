@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Temporary;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.gamepad.GamepadPluginConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -47,7 +48,8 @@ public class AutoTeleOp_FIXED extends OpMode {
     enum GAMEPAD_COLORS {
         RED,
         GREEN,
-        BLUE
+        BLUE,
+        PURPLE
     }
 
     public static double luigiServoIntakeOffset = 0;
@@ -187,13 +189,13 @@ public class AutoTeleOp_FIXED extends OpMode {
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
         if (oneColor == GAMEPAD_COLORS.RED) {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        }
+        } //if bad :(
         if (oneColor == GAMEPAD_COLORS.BLUE) {
             gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
-        }
+        } //working
         if (oneColor == GAMEPAD_COLORS.GREEN) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
-        }
+        } //if successful
         if (twoColor == GAMEPAD_COLORS.RED) {
             gamepad2.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
@@ -203,5 +205,11 @@ public class AutoTeleOp_FIXED extends OpMode {
         if (twoColor == GAMEPAD_COLORS.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
+        if (oneColor == GAMEPAD_COLORS.PURPLE){
+            gamepad1.setLedColor(255,0,255, Gamepad.LED_DURATION_CONTINUOUS);
+        } //default
+        if (twoColor == GAMEPAD_COLORS.PURPLE){
+            gamepad2.setLedColor(255,0,255, Gamepad.LED_DURATION_CONTINUOUS);
+        }  //default
     }
 }

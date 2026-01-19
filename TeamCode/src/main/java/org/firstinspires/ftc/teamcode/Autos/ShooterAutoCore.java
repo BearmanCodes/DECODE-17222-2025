@@ -46,6 +46,22 @@ public class ShooterAutoCore {
 
     public static int shotsTaken = 0;
 
+    public static double LP = 161;
+
+    public static double LI = 0.5;
+
+    public static double LD = 0.5;
+
+    public static double LF = 12.5;
+
+    public static double RP = 161;
+
+    public static double RI = 0.5;
+
+    public static double RD = 0.5;
+
+    public static double RF = 12.5;
+
     public static int SURGE_MEASURE = 150;
 
     public static int RUNNING_MODIFIER = 350;
@@ -73,6 +89,8 @@ public class ShooterAutoCore {
 
         fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
+        fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
 

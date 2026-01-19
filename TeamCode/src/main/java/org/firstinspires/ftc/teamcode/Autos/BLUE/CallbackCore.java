@@ -24,13 +24,10 @@ public class CallbackCore implements PathCallback {
 
     private int pathIndex;
 
-    CallbackCore(Builder builder, Follower follow, ShooterAutoCore shooterAutoCore, Telemetry tele){
+    CallbackCore(Follower follow, ShooterAutoCore shooterAutoCore, Telemetry tele){
         this.shooterCore = shooterAutoCore;
         this.telemetry = tele;
         this.follower = follow;
-        this.runIntakeAfter = builder.runIntakeAfter;
-        this.nextFlyVel = builder.nextFlyVel;
-        this.nextFryVel = builder.nextFryVel;
     }
     public CallbackCore setRunIntakeAfter(boolean argRunIntakeAfter){
         this.runIntakeAfter = argRunIntakeAfter;
@@ -46,24 +43,6 @@ public class CallbackCore implements PathCallback {
     public CallbackCore setPathIndex(int argPathIndex) {
         this.pathIndex = argPathIndex;
         return this;
-    }
-
-    public static class Builder {
-        private boolean runIntakeAfter;
-        private int nextFlyVel;
-        private int nextFryVel;
-        public Builder runIntakeAfter(boolean argRunIntakeAfter){
-            this.runIntakeAfter = argRunIntakeAfter;
-            return this;
-        }
-        public Builder nextFlySpeeds(int argNextFlyVel, int argNextFryVel){
-            this.nextFlyVel = argNextFlyVel;
-            this.nextFryVel = argNextFryVel;
-            return this;
-        }
-        public CallbackCore build(Follower follow, ShooterAutoCore shooterAutoCore, Telemetry tele) {
-            return new CallbackCore(this, follow, shooterAutoCore, tele);
-        }
     }
 
     @Override

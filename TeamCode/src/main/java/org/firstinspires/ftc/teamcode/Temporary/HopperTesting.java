@@ -28,6 +28,7 @@ public class HopperTesting extends LinearOpMode {
 
     public static int R_VEL = 1175;
     //RED 1225
+
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
                                             //BLUE X: 88.08 Y: 13.61 H: 71.02 DEG LAUNCHER POS: .32. RED X:  Y: H: 35.5 DEG LAUNCHER POS:
 

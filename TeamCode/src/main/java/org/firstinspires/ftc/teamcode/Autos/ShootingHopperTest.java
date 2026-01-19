@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Autonomous
 public class ShootingHopperTest extends LinearOpMode {
 
+
+
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static int L_VEL = 1100;
@@ -35,6 +37,7 @@ public class ShootingHopperTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         shooterAutoCore.init(hardwareMap);
+
         shooterAutoCore.luigiServo.setPosition(ShooterAutoCore.luigiFlow);
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
         waitForStart();

@@ -48,11 +48,11 @@ public class ModeCore {
     //LAUNCHER POS
     public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.32;
 
-    public static double BLUE_LEFT_FAR_LAUNCHER = 0.34; //changed name
+    public static double BLUE_LEFT_FAR_LAUNCHER = 0.33; //changed name
     public static double RED_LEFT_FAR_LAUNCHER = 0.47;
 
     public static double BLUE_RIGHT_FAR_LAUNCHER = 0.47;
-    public static double RED_RIGHT_FAR_LAUNCHER = 0.47;
+    public static double RED_RIGHT_FAR_LAUNCHER = 0.32;
 
     public static double BLUE_LINE_CLOSE_LAUNCHER = 0.53;
     public static double RED_LINE_CLOSE_LAUNCHER = 0.52; //0.53
