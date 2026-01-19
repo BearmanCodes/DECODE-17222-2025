@@ -77,7 +77,6 @@ public class ShooterAutoCore {
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
-        //luigiServo.setPosition(luigiFlow); //0.19 is back enough that balls fall, //0.52 is straight block
 
         laR = hwMap.get(ServoImplEx.class, "lar");
 

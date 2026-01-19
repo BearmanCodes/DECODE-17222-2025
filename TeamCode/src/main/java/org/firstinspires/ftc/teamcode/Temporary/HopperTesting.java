@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Temporary;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -21,16 +22,12 @@ public class HopperTesting extends LinearOpMode {
 
     public static Follower follower;
 
-    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static int L_VEL = 975;
     //RED 1000
 
     public static int R_VEL = 1175;
     //RED 1225
-
-    Telemetry dashTele = dashboard.getTelemetry();
-
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
                                             //BLUE X: 88.08 Y: 13.61 H: 71.02 DEG LAUNCHER POS: .32. RED X:  Y: H: 35.5 DEG LAUNCHER POS:
 
@@ -48,12 +45,13 @@ public class HopperTesting extends LinearOpMode {
 
     public static double KICK_SERVO_POS = 0.35;
 
-    public static double MEET_SPEED_TOL = 30;
+    public static double MEET_SPEED_TOL = 15;
 
     public static double LUIGI_HOPPER_LOAD = 0.065;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(LUIGI_HOPPER_LOAD);
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
@@ -66,10 +64,10 @@ public class HopperTesting extends LinearOpMode {
         while (!isStopRequested()){
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
             follower.update();
-            dashTele.update();
             telemetry.update();
-            shooterAutoCore.updateLaPos(gamepad1, dashTele);
-            shooterAutoCore.updateLuigiBlock(gamepad1, dashTele);
+            telemetry.update();
+            shooterAutoCore.updateLaPos(gamepad1, telemetry);
+            shooterAutoCore.updateLuigiBlock(gamepad1, telemetry);
             shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
             if (shooterAutoCore.load_fly_expected() - shooterAutoCore.fly.getVelocity() >= SURGE_TOLERANCE && shooterAutoCore.load_fry_expected() - shooterAutoCore.fry.getVelocity() >= SURGE_TOLERANCE) {
                 timer.reset();
@@ -77,18 +75,17 @@ public class HopperTesting extends LinearOpMode {
             }
             if (hasShot) {
                 if (shooterAutoCore.load_fly_expected() - shooterAutoCore.fly.getVelocity() <= MEET_SPEED_TOL && shooterAutoCore.load_fry_expected() - shooterAutoCore.fry.getVelocity() <= MEET_SPEED_TOL){
-                    dashTele.addData("Time: ", timer.time(TimeUnit.MILLISECONDS));
-                    dashTele.update();
+                    telemetry.addData("Time: ", timer.time(TimeUnit.MILLISECONDS));
                     hasShot = false;
                     timer.reset();
                 }
             }
             if (gamepad1.crossWasPressed()){
-                shooterAutoCore.setCRPower(1, dashTele);
+                shooterAutoCore.setCRPower(1, telemetry);
                 shooterAutoCore.luigiServo.setPosition(KICK_SERVO_POS);
             }
             if (gamepad1.triangleWasPressed()) {
-                shooterAutoCore.setCRPower(0, dashTele);
+                shooterAutoCore.setCRPower(0, telemetry);
                 shooterAutoCore.luigiServo.setPosition(0.065);
             }
             dualTele("Follower X: ", follower.getPose().getX());
@@ -103,6 +100,5 @@ public class HopperTesting extends LinearOpMode {
     }
     public void dualTele(String caption, Object data){
         telemetry.addData(caption, data);
-        dashTele.addData(caption, data);
     }
 }

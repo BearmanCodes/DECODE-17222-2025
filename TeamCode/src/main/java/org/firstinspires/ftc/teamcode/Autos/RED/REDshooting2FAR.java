@@ -153,7 +153,6 @@ public class REDshooting2FAR extends OpMode {
           public boolean run() {
               follower.pausePathFollowing();
               while (!shooterAutoCore.intakeShoot(3, dashTele)){
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
                   dashTele.update();
               }
               follower.setMaxPower(1);
@@ -168,7 +167,7 @@ public class REDshooting2FAR extends OpMode {
               if (secondTimeCR) {
                   follower.resumePathFollowing();
                   ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.BLUE_INTAKE_LEFT_FAR_SERVO);
+                  shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
                   secondTimeCR = false;
@@ -243,7 +242,7 @@ public class REDshooting2FAR extends OpMode {
         case 0:
             //shooterAutoCore.in();
             shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-            shooterAutoCore.setLauncherPos(ModeCore.BLUE_HOPPER_FAR_LEFT_LAUNCHER);
+            shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
             follower.followPath(firstPath);
             setPathState(1);
             break;

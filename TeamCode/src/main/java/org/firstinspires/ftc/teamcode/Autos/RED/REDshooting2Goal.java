@@ -195,7 +195,7 @@ public class REDshooting2Goal extends OpMode {
           public void initialize() {
               if (thirdTimeCR) {
                   ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.RED_INTAKE_RIGHT_FAR_SERVO);
+                  shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
                   shooterAutoCore.in();
                   shooterAutoCore.setCRPower(1, dashTele);
                   secondTimeCR = false;

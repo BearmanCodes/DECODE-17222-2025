@@ -115,79 +115,75 @@ public class BLUEshootingFAR extends OpMode {
     panelsTelemetry.update(telemetry);
   }
 
-  public void buildPaths(){
-        PathCallback FirstShoot = new PathCallback() {
-            @Override
-            public boolean run() {
-                follower.pausePathFollowing();
-                while (!shooterAutoCore.shoot(3, dashTele)){
-                    dashTele.update();
-                }
-                shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-                shooterAutoCore.in();
-                follower.setMaxPower(PICKUP_POWER);
+    @Override
+    public void stop(){
+        PoseStorage.currentPose = follower.getPose();
+        shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
+    }
+
+    @Override
+    public void start() {
+        opmodeTimer.resetTimer();
+        shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        setPathState(0);
+    }
+
+    @Override
+    public void loop() {
+        follower.update(); // Update Pedro Pathing
+        autonomousPathUpdate(); // Update autonomous state machine
+        //shooterAutoCore.power_surge(150);
+        telemetry.addData("Path State: ", pathState);
+        // Log values to Panels and Driver Station
+        dashTele.update();
+        panelsTelemetry.debug("Path State", pathState);
+        panelsTelemetry.debug("X", follower.getPose().getX());
+        panelsTelemetry.debug("Y", follower.getPose().getY());
+        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.update(telemetry);
+    }
+
+    public void autonomousPathUpdate() {
+        switch (pathState){
+            case 0:
+                //shooterAutoCore.in();
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-                follower.resumePathFollowing();
-                return true;
-            }
-
-            @Override
-            public void initialize() {
-                if (firstTimeCR) {
-                    ShooterAutoCore.failsafeTimer.reset();
-                    shooterAutoCore.setCRPower(1, dashTele);
-                    shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
-                    firstTimeCR = false;
+                shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
+                follower.followPath(firstPath);
+                setPathState(1);
+                break;
+            case 1:
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
+                    follower.followPath(collect1Path);
+                    setPathState(2);
                 }
-            }
+                break;
+            case 2:
+                if (!follower.isBusy()) {
+                    follower.setMaxPower(ROLLBACK_POWER);
+                    follower.followPath(goBack);
+                    pathTimer.resetTimer();
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
+                    follower.followPath(shootThenPark);
+                    setPathState(4);
+                }
+                break;
+            case 4:
+                if (!follower.isBusy()) {
+                    PoseStorage.currentPose = follower.getPose();
+                    dashTele.update();
+                    setPathState(-1);
+                }
+                break;
+        }
+    }
 
-            @Override
-            public boolean isReady() {
-                return true;
-            }
-
-            @Override
-            public int getPathIndex() {
-                return 0;
-            }
-        };
-
-      PathCallback SecondShoot = new PathCallback() {
-          @Override
-          public boolean run() {
-              follower.pausePathFollowing();
-              while (!shooterAutoCore.shoot(3, dashTele)){
-                  dashTele.update();
-              }
-              shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-              shooterAutoCore.stop();
-              follower.setMaxPower(1);
-              shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-              follower.resumePathFollowing();
-              return true;
-          }
-
-          @Override
-          public void initialize() {
-              if (secondTimeCR) {
-                  ShooterAutoCore.failsafeTimer.reset();
-                  shooterAutoCore.setCRPower(1, dashTele);
-                  shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
-                  secondTimeCR = false;
-              }
-          }
-
-          @Override
-          public boolean isReady() {
-              return true;
-          }
-
-          @Override
-          public int getPathIndex() {
-              return 0;
-          }
-      };
-
+  public void buildPaths(){
         firstPath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootFar1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootFar1.getHeading())
@@ -210,73 +206,76 @@ public class BLUEshootingFAR extends OpMode {
                 .addCallback(SecondShoot)
                 .build();
   }
-
-  @Override
-  public void loop() {
-    follower.update(); // Update Pedro Pathing
-    autonomousPathUpdate(); // Update autonomous state machine
-    //shooterAutoCore.power_surge(150);
-    telemetry.addData("Path State: ", pathState);
-    // Log values to Panels and Driver Station
-      dashTele.update();
-    panelsTelemetry.debug("Path State", pathState);
-    panelsTelemetry.debug("X", follower.getPose().getX());
-    panelsTelemetry.debug("Y", follower.getPose().getY());
-    panelsTelemetry.debug("Heading", follower.getPose().getHeading());
-    panelsTelemetry.update(telemetry);
-  }
-
-  @Override
-  public void start() {
-        opmodeTimer.resetTimer();
-      shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-      setPathState(0);
-  }
-
-    @Override
-    public void stop(){
-        PoseStorage.currentPose = follower.getPose();
-        shooterAutoCore.spinUpFlys(0, 0);
-        dashTele.update();
-    }
-
-  public void autonomousPathUpdate() {
-    switch (pathState){
-        case 0:
-            //shooterAutoCore.in();
-            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-            shooterAutoCore.setLauncherPos(ModeCore.BLUE_HOPPER_FAR_LEFT_LAUNCHER);
-            follower.followPath(firstPath);
-            setPathState(1);
-            break;
-        case 1:
-            if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
-                follower.followPath(collect1Path);
-                setPathState(2);
-            }
-            break;
-        case 2:
-            if (!follower.isBusy()) {
-                follower.setMaxPower(ROLLBACK_POWER);
-                follower.followPath(goBack);
-                pathTimer.resetTimer();
-                setPathState(3);
-            }
-            break;
-        case 3:
-            if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                follower.followPath(shootThenPark);
-                setPathState(4);
-            }
-            break;
-        case 4:
-            if (!follower.isBusy()) {
-                PoseStorage.currentPose = follower.getPose();
+    PathCallback FirstShoot = new PathCallback() {
+        @Override
+        public boolean run() {
+            follower.pausePathFollowing();
+            while (!shooterAutoCore.shoot(3, dashTele)){
                 dashTele.update();
-                setPathState(-1);
             }
-            break;
-    }
-  }
+            shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+            shooterAutoCore.in();
+            follower.setMaxPower(PICKUP_POWER);
+            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+            follower.resumePathFollowing();
+            return true;
+        }
+
+        @Override
+        public void initialize() {
+            if (firstTimeCR) {
+                ShooterAutoCore.failsafeTimer.reset();
+                shooterAutoCore.setCRPower(1, dashTele);
+                shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
+                firstTimeCR = false;
+            }
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public int getPathIndex() {
+            return 0;
+        }
+    };
+
+    PathCallback SecondShoot = new PathCallback() {
+        @Override
+        public boolean run() {
+            follower.pausePathFollowing();
+            while (!shooterAutoCore.shoot(3, dashTele)){
+                dashTele.update();
+            }
+            shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+            shooterAutoCore.stop();
+            follower.setMaxPower(1);
+            shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+            follower.resumePathFollowing();
+            return true;
+        }
+
+        @Override
+        public void initialize() {
+            if (secondTimeCR) {
+                ShooterAutoCore.failsafeTimer.reset();
+                shooterAutoCore.setCRPower(1, dashTele);
+                shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_SHOOT);
+                secondTimeCR = false;
+            }
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public int getPathIndex() {
+            return 0;
+        }
+    };
 }
     
