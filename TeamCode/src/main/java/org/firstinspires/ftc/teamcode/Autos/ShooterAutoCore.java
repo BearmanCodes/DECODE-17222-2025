@@ -78,7 +78,7 @@ public class ShooterAutoCore {
 
     public DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.32;
+    public static double laInitPos = 0.32; //0.32
 
 
     public void init(HardwareMap hwMap){

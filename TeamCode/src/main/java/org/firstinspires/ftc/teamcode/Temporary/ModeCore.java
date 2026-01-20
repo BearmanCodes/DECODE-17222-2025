@@ -49,13 +49,13 @@ public class ModeCore {
     public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.32;
 
     public static double BLUE_LEFT_FAR_LAUNCHER = 0.33; //changed name
-    public static double RED_LEFT_FAR_LAUNCHER = 0.47;
+    public static double RED_LEFT_FAR_LAUNCHER = 0.33;
 
     public static double BLUE_RIGHT_FAR_LAUNCHER = 0.47;
-    public static double RED_RIGHT_FAR_LAUNCHER = 0.32;
+    public static double RED_RIGHT_FAR_LAUNCHER = 0.35;
 
-    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.53;
-    public static double RED_LINE_CLOSE_LAUNCHER = 0.52; //0.53
+    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.45;
+    public static double RED_LINE_CLOSE_LAUNCHER = 0.45; //0.53
 
     //END LAUNCHER POS
 
@@ -70,10 +70,10 @@ public class ModeCore {
     public static int RED_RIGHT_FAR_VEL = 1000;
     public static int RED_RIGHT_FAR_VER = 1000;
 
-    public static int BLUE_LINE_CLOSE_VEL = 900;
-    public static int BLUE_LINE_CLOSE_VER = 900;
-    public static int RED_LINE_CLOSE_VEL = 900;
-    public static int RED_LINE_CLOSE_VER = 900;
+    public static int BLUE_LINE_CLOSE_VEL = 850;
+    public static int BLUE_LINE_CLOSE_VER = 1125;
+    public static int RED_LINE_CLOSE_VEL = 850;
+    public static int RED_LINE_CLOSE_VER = 1125;
 
     //END VELS
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;

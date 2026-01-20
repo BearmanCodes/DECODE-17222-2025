@@ -22,11 +22,13 @@ public class HopperTesting extends LinearOpMode {
 
     public static Follower follower;
 
+    public static int STOPPED_POWER = -1;
 
-    public static int L_VEL = 975;
+
+    public static int L_VEL = 850;
     //RED 1000
 
-    public static int R_VEL = 1175;
+    public static int R_VEL = 1125;
     //RED 1225
 
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
@@ -86,7 +88,7 @@ public class HopperTesting extends LinearOpMode {
                 shooterAutoCore.luigiServo.setPosition(KICK_SERVO_POS);
             }
             if (gamepad1.triangleWasPressed()) {
-                shooterAutoCore.setCRPower(0, telemetry);
+                shooterAutoCore.setCRPower(STOPPED_POWER, telemetry);
                 shooterAutoCore.luigiServo.setPosition(0.065);
             }
             dualTele("Follower X: ", follower.getPose().getX());
