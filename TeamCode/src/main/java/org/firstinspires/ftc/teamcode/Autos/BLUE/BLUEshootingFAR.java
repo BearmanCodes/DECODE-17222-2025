@@ -69,17 +69,17 @@ public class BLUEshootingFAR extends OpMode {
     public static int R_VEL = 1200;
 
     public static double SHOOT_FAR_POS_X = 61.5;
-    public static double SHOOT_FAR_POS_Y = 12.0;
+    public static double SHOOT_FAR_POS_Y = 12.0; //12
 
     public static double SHOOT_FAR_POS_HEADING = 111;
 
     public static double SHOOT_FAR_2_POS_X = 61.5;
-    public static double SHOOT_FAR_2_POS_Y = 12.0;
+    public static double SHOOT_FAR_2_POS_Y = 14.0; //12
 
     public static double SHOOT_FAR_2_HEADING = 115;
 
     public static double SHOOT_FAR_3_POS_X = 61.5;
-    public static double SHOOT_FAR_3_POS_Y = 12.0;
+    public static double SHOOT_FAR_3_POS_Y = 14.0; //12
 
     public static double SHOOT_FAR_3_HEADING = 115;
 
@@ -92,15 +92,15 @@ public class BLUEshootingFAR extends OpMode {
 
     public static double COLLECT_BALLS_2_X = 11;
 
-    public static double COLLECT_BALLS_2_Y = 58;
+    public static double COLLECT_BALLS_2_Y = 57.75;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 67.42;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 66.62;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 66.25;
 
-    public static double PICKUP_1_TEMPORAL = 0.1;
+    public static double PICKUP_1_TEMPORAL = 0.175;
 
-    public static double PICKUP_2_TEMPORAL = 0.3;
+    public static double PICKUP_2_TEMPORAL = 0.4;
 
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
@@ -206,7 +206,7 @@ public class BLUEshootingFAR extends OpMode {
                 }
                 break;
             case 5:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
                     follower.followPath(shootThenPark);
                     setPathState(6);
                 }

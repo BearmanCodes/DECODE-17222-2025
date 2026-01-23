@@ -36,7 +36,7 @@ public class ShooterAutoCore {
 
     public static double luigiFlow = 0.065;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 1500;
+    public static int SHOOT_INTERMITENT_TIME_MS = 1250;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 
@@ -211,6 +211,46 @@ public class ShooterAutoCore {
             if (failsafeTimer.time(TimeUnit.MILLISECONDS) > FAILSAFE_WAIT && canAddShot) {
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
                 setCRPower(0, tele);
+                luigiServo.setPosition(luigiFlow);
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
+                failsafeTimer.reset();
+            }
+            tele.update();
+            return false;
+        } else {
+            setCRPower(0, tele);
+            shotsTaken = 0;
+            canAddShot = true;
+            return true;
+        }
+    }
+
+    public boolean close_shoot(int shots, Telemetry tele){
+        if (shotsTaken < shots){
+            if (power_surge(SURGE_MEASURE, tele)){
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(-1, tele);
+                luigiServo.setPosition(luigiFlow);
+                if (canAddShot){
+                    shotsTaken++;
+                    canAddShot = false;
+                }
+                failsafeTimer.reset();
+            }
+            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS) {
+                entry_time = 0;
+                //in();
+                setCRPower(1, tele);
+                luigiServo.setPosition(luigiBlock);
+                canAddShot = true;
+                failsafeTimer.reset();
+            }
+            if (failsafeTimer.time(TimeUnit.MILLISECONDS) > FAILSAFE_WAIT && canAddShot) {
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(-1, tele);
                 luigiServo.setPosition(luigiFlow);
                 if (canAddShot){
                     shotsTaken++;
