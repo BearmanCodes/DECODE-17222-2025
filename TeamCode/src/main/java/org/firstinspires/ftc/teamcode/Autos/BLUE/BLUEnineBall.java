@@ -9,6 +9,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
@@ -22,13 +23,11 @@ import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
 import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.concurrent.TimeUnit;
-
 
 @Config
-@Autonomous(name = "BLUE Shooting FAR", group = "BLUE")
+@Autonomous(name = "BLUE 9 BALL", group = "BLUE")
 @Configurable // Panels
-public class BLUEshootingFAR extends OpMode {
+public class BLUEnineBall extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -262,7 +261,7 @@ public class BLUEshootingFAR extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.shoot(3, dashTele) && !LEAVE_LINE_FALSAFE(shootFar1)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -297,7 +296,7 @@ public class BLUEshootingFAR extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.shoot(3, dashTele)  && !LEAVE_LINE_FALSAFE(shootFar2)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -329,11 +328,27 @@ public class BLUEshootingFAR extends OpMode {
         }
     };
 
+    public boolean LEAVE_LINE_FALSAFE(Pose currentPose){
+        double time_passed_sec = opmodeTimer.getElapsedTimeSeconds();
+        if (time_passed_sec >= 28) {
+            PathChain failsafeChain = follower.pathBuilder()
+                    .addPath(new BezierLine(currentPose, parkingPose))
+                    .setLinearHeadingInterpolation(currentPose.getHeading(), parkingPose.getHeading())
+                    .build();
+            follower.resumePathFollowing();
+            follower.setMaxPower(1);
+            follower.followPath(failsafeChain);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     PathCallback ThirdShoot = new PathCallback() {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.shoot(3, dashTele)  && !LEAVE_LINE_FALSAFE(shootFar3)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);

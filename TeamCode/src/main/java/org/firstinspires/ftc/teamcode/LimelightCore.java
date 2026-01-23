@@ -30,6 +30,8 @@ public class LimelightCore {
     public static LLResult get_result() {
         LLResult llResult = limelight.getLatestResult();
 
+        
+
         if (llResult != null && llResult.isValid()) {
             return get_result();
         }

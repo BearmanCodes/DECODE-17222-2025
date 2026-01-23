@@ -9,6 +9,8 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -36,11 +38,19 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double intakeReducer = 0.75;
 
+    public static double RESET_HEADING_DEG = 0;
+
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.3;
+
+    public static double PEDRO_STANDING_HEADING_CONSTRAINT = Math.toDegrees(0.007);
+
     public static boolean automatedDrive = false;
 
     public static boolean useDefaultPose = false;
 
     public static Pose targetPose;
+
+    public Limelight3A limelight;
 
     public static double FAILSAFE_STICK_TRIGGER = 0.5;
 
@@ -87,15 +97,12 @@ public class AutoTeleOp_BLUE extends OpMode {
         intake.setDirection(inDir);
         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
 
-        follower    = Constants.createFollower(hardwareMap);
+        follower = Constants.createFollower(hardwareMap);
         startingPose = useDefaultPose ? defaultStartingPose : PoseStorage.currentPose;
         follower.setStartingPose(startingPose);
+        follower.pathConstraints.setHeadingConstraint(Math.toRadians(ALLOWED_HEADING_ERROR_DEG));
         TempShooterAutoCore.init(hardwareMap);
         follower.update();
-        pathChain = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET), 0.8))
-                .build();
     }
 
     @Override
@@ -114,60 +121,39 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad2.rightBumperWasPressed()) {
             TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);
             TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+            TempShooterAutoCore.setCRPower(0);
         }
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
         }
-        if (gamepad1.leftBumperWasPressed()) {
-            INTAKE_RUN = !INTAKE_RUN;
-            if (INTAKE_RUN) {
-                inPower = intakeReducer;
-            } else {
-                inPower = 0;
-            }
+        if (gamepad2.shareWasPressed()){
+            resetHeading();
         }
-        if (gamepad1.rightBumperWasPressed()) {
-            INTAKE_RUN = !INTAKE_RUN;
-            if (INTAKE_RUN) {
-                inPower = -intakeReducer;
-            } else {
-                inPower = 0;
-            }
-        }
-        intake.setPower(inPower);
+        intakeControls();
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
-                if (gamepad2.startWasPressed()) {
+                if (gamepad1.startWasPressed()) {
                     if (targetPose != null) {
-                        gamepad1.rumbleBlips(3);
-                        gamepad2.rumbleBlips(3);
-                        follower.followPath(pathChain.get());
+                        gamepad1.rumbleBlips(1);
+                        double desired_heading = targetPose.getHeading();
+                        follower.turnToDegrees(desired_heading);
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
                         break;
                     } else {
-                        gamepad2.rumbleBlips(4);
+                        gamepad1.rumbleBlips(4);
                     }
                 }
                 break;
             case AUTOMATED_DRIVE:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
-                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE()) {
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isTurning()) {
                     follower.startTeleOpDrive(true);
-                    gamepad1.rumbleBlips(3);
-                    gamepad2.rumbleBlips(3);
+                    gamepad1.rumbleBlips(2);
+                    gamepad2.rumbleBlips(2);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
-                }
-                if (gamepad2.startWasPressed()) {
-                    if (targetPose != null) {
-                        gamepad1.rumbleBlips(1);
-                        gamepad2.rumbleBlips(1);
-                        follower.followPath(pathChain.get());
-                    } else {
-                        gamepad2.rumbleBlips(4);
-                    }
                 }
                 break;
         }
@@ -203,5 +189,29 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (twoColor == GAMEPAD_COLORS.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
+    }
+
+    private void resetHeading() {
+        follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(RESET_HEADING_DEG)));
+    }
+
+    private void intakeControls(){
+        if (gamepad1.leftBumperWasPressed()) {
+            INTAKE_RUN = !INTAKE_RUN;
+            if (INTAKE_RUN) {
+                inPower = intakeReducer;
+            } else {
+                inPower = 0;
+            }
+        }
+        if (gamepad1.rightBumperWasPressed()) {
+            INTAKE_RUN = !INTAKE_RUN;
+            if (INTAKE_RUN) {
+                inPower = -intakeReducer;
+            } else {
+                inPower = 0;
+            }
+        }
+        intake.setPower(inPower);
     }
 }
