@@ -10,6 +10,8 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,6 +23,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 @Config
@@ -87,7 +90,6 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean IS_ROBOT_CENTRIC = true;
 
-
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -96,7 +98,8 @@ public class AutoTeleOp_BLUE extends OpMode {
         currAlliance = BLUE_ALLIANCE ? ModeCore.ALLIANCE.BLUE : ModeCore.ALLIANCE.RED;
         intake.setDirection(inDir);
         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
-
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.start();
         follower = Constants.createFollower(hardwareMap);
         startingPose = useDefaultPose ? defaultStartingPose : PoseStorage.currentPose;
         follower.setStartingPose(startingPose);
