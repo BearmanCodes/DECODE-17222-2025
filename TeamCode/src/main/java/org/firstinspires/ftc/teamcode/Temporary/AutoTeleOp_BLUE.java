@@ -41,7 +41,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double intakeReducer = 0.75;
 
-    public static double RESET_HEADING_DEG = 0;
+    public static double RESET_HEADING_DEG = 180;
 
     public static double ALLOWED_HEADING_ERROR_DEG = 0.3;
 
@@ -55,7 +55,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public Limelight3A limelight;
 
-    public static double FAILSAFE_STICK_TRIGGER = 0.5;
+    public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
     enum GAMEPAD_COLORS {
         RED,
@@ -65,7 +65,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double luigiServoIntakeOffset = 0;
 
-    public static double PATH_HEADING_OFFSET = 0;
+    public static double PATH_HEADING_OFFSET = 90;
 
     public static Supplier<PathChain> pathChain;
 
@@ -141,7 +141,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
                         double desired_heading = targetPose.getHeading();
-                        follower.turnToDegrees(desired_heading);
+                        follower.turnTo(desired_heading + Math.toRadians(PATH_HEADING_OFFSET));
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
                         break;
                     } else {
