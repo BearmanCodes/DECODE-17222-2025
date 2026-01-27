@@ -127,6 +127,9 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
         }
+        if (gamepad2.dpadUpWasPressed()){
+            TempShooterAutoCore.stop_shooting();
+        }
         if (gamepad2.shareWasPressed()){
             resetHeading();
         }

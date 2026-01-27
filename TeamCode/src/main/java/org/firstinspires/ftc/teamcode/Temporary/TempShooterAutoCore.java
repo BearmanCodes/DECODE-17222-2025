@@ -66,7 +66,9 @@ public class TempShooterAutoCore {
 
     public static int RUNNING_MODIFIER = 350;
 
-    public boolean hasSurged = false;
+    public static boolean hasSurged = false;
+
+    public static boolean isShooting = false;
 
     public static DcMotorEx intake;
 
@@ -218,25 +220,36 @@ public class TempShooterAutoCore {
             return true;
         }
     }
-
     public static void shoot_RED(Telemetry tele) {
+        //run only on dpad_down
         setCRPower(1);
         luigiServo.setPosition(luigiBlock);
-        if (power_surge(SURGE_MEASURE, tele)) {
-            entry_time = timer.now(TimeUnit.MILLISECONDS);
-            setCRPower(-1);
-            luigiServo.setPosition(luigiFlow);
-            stop();
+        isShooting = true;
+    }
+    public static void RED_SURGE(Telemetry tele){
+        //Run constantly
+        if (isShooting) {
+            if (power_surge(SURGE_MEASURE, tele)) {
+                hasSurged = true;
+                entry_time = timer.now(TimeUnit.MILLISECONDS);
+                setCRPower(-1);
+                luigiServo.setPosition(luigiFlow);
+            }
+            if (hasSurged && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS){
+                hasSurged = false;
+                entry_time = 0;
+                setCRPower(1);
+                luigiServo.setPosition(luigiBlock);
+            }
         }
     }
 
-    public static void RED_SURGE(Telemetry tele){
-        if (power_surge(SURGE_MEASURE, tele)) {
-            entry_time = timer.now(TimeUnit.MILLISECONDS);
-            setCRPower(-1);
-            luigiServo.setPosition(luigiFlow);
-            stop();
-        }
+    public static void stop_shooting(){
+        setCRPower(0);
+        luigiServo.setPosition(luigiFlow);
+        isShooting = false;
+        hasSurged = false;
+        entry_time = 0;
     }
 
     public static void intake_SHOOT(Telemetry tele, double ServoPos) {
