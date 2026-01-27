@@ -25,10 +25,10 @@ public class HopperTesting extends LinearOpMode {
     public static int STOPPED_POWER = -1;
 
 
-    public static int L_VEL = 850;
+    public static int L_VEL = 900;
     //RED 1000
 
-    public static int R_VEL = 1125;
+    public static int R_VEL = 975;
     //RED 1225
 
     public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));

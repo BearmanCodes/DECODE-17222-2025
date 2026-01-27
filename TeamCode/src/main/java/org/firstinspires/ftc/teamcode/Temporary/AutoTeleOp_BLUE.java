@@ -65,7 +65,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double luigiServoIntakeOffset = 0;
 
-    public static double PATH_HEADING_OFFSET = 90;
+    public static double PATH_HEADING_OFFSET = 0;
 
     public static Supplier<PathChain> pathChain;
 
@@ -105,6 +105,10 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower.setStartingPose(startingPose);
         follower.pathConstraints.setHeadingConstraint(Math.toRadians(ALLOWED_HEADING_ERROR_DEG));
         TempShooterAutoCore.init(hardwareMap);
+        pathChain = () -> follower.pathBuilder()
+                .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET), 0.8))
+                .build();
         follower.update();
     }
 
@@ -130,7 +134,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad2.dpadUpWasPressed()){
             TempShooterAutoCore.stop_shooting();
         }
-        if (gamepad2.shareWasPressed()){
+        if (gamepad1.shareWasPressed()){
             resetHeading();
         }
         intakeControls();
@@ -141,8 +145,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 if (gamepad1.startWasPressed()) {
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
-                        double desired_heading = targetPose.getHeading();
-                        follower.turnTo(desired_heading + Math.toRadians(PATH_HEADING_OFFSET));
+                        follower.followPath(pathChain.get());
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
                         break;
                     } else {
@@ -152,7 +155,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 break;
             case AUTOMATED_DRIVE:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
-                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isTurning()) {
+                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isBusy()) {
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
                     gamepad2.rumbleBlips(2);
