@@ -122,9 +122,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
         if (gamepad2.rightBumperWasPressed()) {
-            TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);
-            TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-            TempShooterAutoCore.setCRPower(0);
+            setToLoadingBallsPosition();
         }
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
@@ -173,6 +171,13 @@ public class AutoTeleOp_BLUE extends OpMode {
         boolean two_right_x = Math.abs(gamepad2.right_stick_x) > FAILSAFE_STICK_TRIGGER;
         return one_left_y || one_left_x || one_right_y || one_right_x;
     }
+
+    private void setToLoadingBallsPosition(){
+        TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);
+        TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+        TempShooterAutoCore.setCRPower(0);
+    }
+
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
         if (oneColor == GAMEPAD_COLORS.RED) {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
@@ -202,6 +207,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad1.leftBumperWasPressed()) {
             INTAKE_RUN = !INTAKE_RUN;
             if (INTAKE_RUN) {
+                setToLoadingBallsPosition();
                 inPower = intakeReducer;
             } else {
                 inPower = 0;

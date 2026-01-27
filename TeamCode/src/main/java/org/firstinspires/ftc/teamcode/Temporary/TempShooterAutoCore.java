@@ -34,9 +34,9 @@ public class TempShooterAutoCore {
 
     static long entry_time = 0;
 
-    public static double luigiFlow = 0.15;
+    public static double luigiFlow = 0.065;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 1500;
+    public static int SHOOT_INTERMITENT_TIME_MS = 1250;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 

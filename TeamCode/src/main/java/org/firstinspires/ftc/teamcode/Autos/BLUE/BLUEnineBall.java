@@ -40,7 +40,7 @@ public class BLUEnineBall extends OpMode {
 
     public static int INTAKE_POWER_OFFSET = 100;
 
-    public static double TIMEOUT = 2500;
+    public static double TIMEOUT = 1500;
 
     public static int HEADING_OFFSET = 8;
 
