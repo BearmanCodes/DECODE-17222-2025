@@ -261,7 +261,7 @@ public class BLUEnineBall extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele) && !LEAVE_LINE_FALSAFE(shootFar1)){
+            while (!shooterAutoCore.shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -296,7 +296,7 @@ public class BLUEnineBall extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)  && !LEAVE_LINE_FALSAFE(shootFar2)){
+            while (!shooterAutoCore.shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -328,27 +328,11 @@ public class BLUEnineBall extends OpMode {
         }
     };
 
-    public boolean LEAVE_LINE_FALSAFE(Pose currentPose){
-        double time_passed_sec = opmodeTimer.getElapsedTimeSeconds();
-        if (time_passed_sec >= 28) {
-            PathChain failsafeChain = follower.pathBuilder()
-                    .addPath(new BezierLine(currentPose, parkingPose))
-                    .setLinearHeadingInterpolation(currentPose.getHeading(), parkingPose.getHeading())
-                    .build();
-            follower.resumePathFollowing();
-            follower.setMaxPower(1);
-            follower.followPath(failsafeChain);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     PathCallback ThirdShoot = new PathCallback() {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)  && !LEAVE_LINE_FALSAFE(shootFar3)){
+            while (!shooterAutoCore.shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);

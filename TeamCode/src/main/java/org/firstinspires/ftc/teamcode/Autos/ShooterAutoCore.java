@@ -80,7 +80,6 @@ public class ShooterAutoCore {
 
     public static double laInitPos = 0.32; //0.32
 
-
     public void init(HardwareMap hwMap){
         lServo = hwMap.get(CRServo .class, "crl");
         rServo = hwMap.get(CRServo.class, "crr");
