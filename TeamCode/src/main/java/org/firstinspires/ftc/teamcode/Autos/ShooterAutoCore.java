@@ -36,7 +36,7 @@ public class ShooterAutoCore {
 
     public static double luigiFlow = 0.065;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 500;
+    public static int SHOOT_INTERMITENT_TIME_MS = 1000;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 

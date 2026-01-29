@@ -54,26 +54,26 @@ public class ModeCore {
     public static double BLUE_RIGHT_FAR_LAUNCHER = 0.47;
     public static double RED_RIGHT_FAR_LAUNCHER = 0.35;
 
-    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.45;
-    public static double RED_LINE_CLOSE_LAUNCHER = 0.45; //0.53
+    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.48;
+    public static double RED_LINE_CLOSE_LAUNCHER = 0.52; //0.53
 
     //END LAUNCHER POS
 
     //VELS
     public static int BLUE_LEFT_FAR_VEL = 1000;
-    public static int BLUE_LEFT_FAR_VER = 1000;
+    public static int BLUE_LEFT_FAR_VER = 1200;
     public static int RED_LEFT_FAR_VEL = 1000;
     public static int RED_LEFT_FAR_VER = 1000;
 
     public static int BLUE_RIGHT_FAR_VEL = 1000;
     public static int BLUE_RIGHT_FAR_VER = 1000;
-    public static int RED_RIGHT_FAR_VEL = 1000;
-    public static int RED_RIGHT_FAR_VER = 1000;
+    public static int RED_RIGHT_FAR_VEL = 975;
+    public static int RED_RIGHT_FAR_VER = 1175;
 
     public static int BLUE_LINE_CLOSE_VEL = 850;
-    public static int BLUE_LINE_CLOSE_VER = 1125;
+    public static int BLUE_LINE_CLOSE_VER = 975;
     public static int RED_LINE_CLOSE_VEL = 850;
-    public static int RED_LINE_CLOSE_VER = 1125;
+    public static int RED_LINE_CLOSE_VER = 900;
 
     //END VELS
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;
@@ -129,21 +129,21 @@ public class ModeCore {
                         flySpeed = RED_RIGHT_FAR_VEL;
                         frySpeed = RED_RIGHT_FAR_VER;
                         prepareForShot(platformHeight, flySpeed, frySpeed);
-                        AutoTeleOp_RED_LEGACY.targetPose = PoseCore.RED_RIGHT_FAR_POSE;
+                        AutoTeleOp_RED.targetPose = PoseCore.RED_RIGHT_FAR_POSE;
                         break;
                     case LEFT_FAR:
                         platformHeight = RED_LEFT_FAR_LAUNCHER;
                         flySpeed = RED_LEFT_FAR_VEL;
                         frySpeed = RED_RIGHT_FAR_VER;
                         prepareForShot(platformHeight, flySpeed, frySpeed);
-                        AutoTeleOp_RED_LEGACY.targetPose = PoseCore.RED_LEFT_FAR_POSE;
+                        AutoTeleOp_RED.targetPose = PoseCore.RED_LEFT_FAR_POSE;
                         break;
                     case LINE_CLOSE:
                         platformHeight = RED_LINE_CLOSE_LAUNCHER;
                         flySpeed = RED_LINE_CLOSE_VEL;
                         frySpeed = RED_LINE_CLOSE_VER;
                         prepareForShot(platformHeight, flySpeed, frySpeed);
-                        AutoTeleOp_BLUE.targetPose = PoseCore.RED_LINE_CLOSE_POSE;
+                        AutoTeleOp_RED.targetPose = PoseCore.RED_LINE_CLOSE_POSE;
                         break;
                 }
                 break;
