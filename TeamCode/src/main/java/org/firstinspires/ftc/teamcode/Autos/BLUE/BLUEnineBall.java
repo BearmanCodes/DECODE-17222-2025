@@ -28,7 +28,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Autonomous(name = "BLUE 9 BALL", group = "BLUE")
 @Configurable // Panels
 public class BLUEnineBall extends OpMode {
-
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
@@ -106,12 +105,9 @@ public class BLUEnineBall extends OpMode {
     private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(0));
     private final Pose collectBalls1ControlPoint1 = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
     private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
-
     private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(20, 11.5, Math.toRadians(180));
-
+    private final Pose parkingPose = new Pose(30, 11.5, Math.toRadians(180));
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(0));
-
     private final Pose collectBalls2ControlPoint = new Pose(COLLECT_BALLS_2_CONTROL_X, COLLECT_BALLS_2_CONTROL_Y);
 
     private PathChain firstPath, collect1Path, goBack, shootThenCollect2, goBack2, shootThenPark;

@@ -39,9 +39,17 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static DcMotorEx intake;
 
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.25;
+
+
+    public static double driveReducer = 1;
+
     public static double intakeReducer = 0.75;
 
     public static double RESET_HEADING_DEG = 180;
+
+    public static boolean isReduced = false;
+
 
     public static double ALLOWED_HEADING_ERROR_DEG = 0.3;
 
@@ -130,18 +138,21 @@ public class AutoTeleOp_RED extends OpMode {
         }
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
+            isReduced = true;
         }
         if (gamepad2.dpadUpWasPressed()){
             TempShooterAutoCore.stop_shooting();
+            isReduced = false;
         }
         if (gamepad1.shareWasPressed()){
             resetHeading();
         }
         changeHeading();
         intakeControls();
+        shootingMoveReducer();
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
-                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, IS_ROBOT_CENTRIC);
+                follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPose != null) {
@@ -182,6 +193,13 @@ public class AutoTeleOp_RED extends OpMode {
     private void setToLoadingBallsPosition(){
         TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
         TempShooterAutoCore.setCRPower(-1);
+    }
+
+    private void shootingMoveReducer(){
+        if (gamepad1.leftStickButtonWasPressed()) {
+            isReduced = !isReduced;
+        }
+        driveReducer = isReduced ? DRIVE_SHOOT_REDUCER_COEFFICENT : 1;
     }
 
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
