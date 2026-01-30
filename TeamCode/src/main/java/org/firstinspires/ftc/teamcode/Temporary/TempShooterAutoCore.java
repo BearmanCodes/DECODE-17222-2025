@@ -245,7 +245,7 @@ public class TempShooterAutoCore {
     }
 
     public static void stop_shooting(){
-        setCRPower(0);
+        setCRPower(-1);
         luigiServo.setPosition(luigiFlow);
         isShooting = false;
         hasSurged = false;

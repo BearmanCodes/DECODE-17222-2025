@@ -54,7 +54,7 @@ public class ModeCore {
     public static double BLUE_RIGHT_FAR_LAUNCHER = 0.47;
     public static double RED_RIGHT_FAR_LAUNCHER = 0.35;
 
-    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.48;
+    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.53;
     public static double RED_LINE_CLOSE_LAUNCHER = 0.52; //0.53
 
     //END LAUNCHER POS
@@ -71,8 +71,8 @@ public class ModeCore {
     public static int RED_RIGHT_FAR_VER = 1175;
 
     public static int BLUE_LINE_CLOSE_VEL = 850;
-    public static int BLUE_LINE_CLOSE_VER = 975;
-    public static int RED_LINE_CLOSE_VEL = 850;
+    public static int BLUE_LINE_CLOSE_VER = 875;
+    public static int RED_LINE_CLOSE_VEL = 875;
     public static int RED_LINE_CLOSE_VER = 900;
 
     //END VELS

@@ -125,7 +125,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
-        if (gamepad2.rightBumperWasPressed()) {
+        if (gamepad2.rightStickButtonWasPressed()){
             setToLoadingBallsPosition();
         }
         if (gamepad2.dpadDownWasPressed()) {
@@ -137,12 +137,13 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad1.shareWasPressed()){
             resetHeading();
         }
+        changeHeading();
         intakeControls();
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
-                if (gamepad1.startWasPressed()) {
+                if (gamepad2.startWasPressed()) {
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
                         follower.followPath(pathChain.get());
@@ -179,9 +180,8 @@ public class AutoTeleOp_BLUE extends OpMode {
     }
 
     private void setToLoadingBallsPosition(){
-        TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);
         TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-        TempShooterAutoCore.setCRPower(0);
+        TempShooterAutoCore.setCRPower(-1);
     }
 
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
@@ -207,6 +207,23 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     private void resetHeading() {
         follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(RESET_HEADING_DEG)));
+    }
+
+    private void changeHeading(){
+        if (gamepad2.leftBumperWasPressed()){
+            Pose currentPose = follower.getPose();
+            PoseCore.BLUE_LINE_CLOSE_X = currentPose.getX();
+            PoseCore.BLUE_LINE_CLOSE_Y = currentPose.getY();
+            PoseCore.BLUE_LINE_CLOSE_HEADING = currentPose.getHeading();
+            PoseCore.BLUE_LINE_CLOSE_POSE = new Pose(PoseCore.BLUE_LINE_CLOSE_X, PoseCore.BLUE_LINE_CLOSE_Y, PoseCore.BLUE_LINE_CLOSE_HEADING);
+        }
+        if (gamepad2.rightBumperWasPressed()){
+            Pose currentPose = follower.getPose();
+            PoseCore.BLUE_LEFT_FAR_X = currentPose.getX();
+            PoseCore.BLUE_LEFT_FAR_Y = currentPose.getY();
+            PoseCore.BLUE_LEFT_FAR_HEADING = currentPose.getHeading();
+            PoseCore.BLUE_LEFT_FAR_POSE = new Pose(PoseCore.BLUE_LEFT_FAR_X, PoseCore.BLUE_LEFT_FAR_Y, PoseCore.BLUE_LEFT_FAR_HEADING);
+        }
     }
 
     private void intakeControls(){

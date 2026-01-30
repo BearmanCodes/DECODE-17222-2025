@@ -35,15 +35,15 @@ public class PoseCore {
 
     //LINE_CLOSE
 
-    public static double BLUE_LINE_CLOSE_X = 62.25;
-    public static double BLUE_LINE_CLOSE_Y = 85.65;
-    public static double BLUE_LINE_CLOSE_HEADING = 138.4;
+    public static double BLUE_LINE_CLOSE_X = 63.349;
+    public static double BLUE_LINE_CLOSE_Y = 83.594;
+    public static double BLUE_LINE_CLOSE_HEADING = 135.46;
     public static Pose BLUE_LINE_CLOSE_POSE = new Pose(BLUE_LINE_CLOSE_X, BLUE_LINE_CLOSE_Y, Math.toRadians(BLUE_LINE_CLOSE_HEADING));
 
 
-    public static double RED_LINE_CLOSE_X = 81.75;
-    public static double RED_LINE_CLOSE_Y = 85.65;
-    public static double RED_LINE_CLOSE_HEADING = 46.5;
+    public static double RED_LINE_CLOSE_X = 88;
+    public static double RED_LINE_CLOSE_Y = 87.4;
+    public static double RED_LINE_CLOSE_HEADING = 46.15;
     public static Pose RED_LINE_CLOSE_POSE = new Pose(RED_LINE_CLOSE_X, RED_LINE_CLOSE_Y, Math.toRadians(RED_LINE_CLOSE_HEADING));
 
     //END LINE_CLOSE

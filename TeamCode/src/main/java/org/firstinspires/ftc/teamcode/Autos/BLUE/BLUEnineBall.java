@@ -40,7 +40,7 @@ public class BLUEnineBall extends OpMode {
 
     public static int INTAKE_POWER_OFFSET = 100;
 
-    public static double TIMEOUT = 1500;
+    public static double TIMEOUT = 1100;
 
     public static int HEADING_OFFSET = 8;
 
@@ -99,7 +99,7 @@ public class BLUEnineBall extends OpMode {
 
     public static double PICKUP_1_TEMPORAL = 0.175;
 
-    public static double PICKUP_2_TEMPORAL = 0.4;
+    public static double PICKUP_2_TEMPORAL = 0.35;
 
     private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
@@ -108,7 +108,7 @@ public class BLUEnineBall extends OpMode {
     private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
 
     private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(13.5, 11.5, Math.toRadians(180));
+    private final Pose parkingPose = new Pose(20, 11.5, Math.toRadians(180));
 
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(0));
 
@@ -212,6 +212,7 @@ public class BLUEnineBall extends OpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
+                    shooterAutoCore.stop();
                     PoseStorage.currentPose = follower.getPose();
                     dashTele.update();
                     setPathState(-1);
