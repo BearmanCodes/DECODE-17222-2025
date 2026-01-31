@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -37,7 +38,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static Pose startingPose;
 
-    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.25;
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.23;
 
     public static DcMotorEx intake;
 
@@ -60,6 +61,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static Pose targetPose;
 
     public Limelight3A limelight;
+
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
@@ -131,9 +133,6 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
-        if (gamepad2.rightStickButtonWasPressed()){
-            setToLoadingBallsPosition();
-        }
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
             isReduced = true;

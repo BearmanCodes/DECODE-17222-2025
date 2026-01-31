@@ -91,6 +91,8 @@ public class HopperTesting extends LinearOpMode {
                 shooterAutoCore.setCRPower(STOPPED_POWER, telemetry);
                 shooterAutoCore.luigiServo.setPosition(0.065);
             }
+            shooterAutoCore.fly.setVelocityPIDFCoefficients(ShooterAutoCore.LP, ShooterAutoCore.LI, ShooterAutoCore.LD, ShooterAutoCore.LF);
+            shooterAutoCore.fry.setVelocityPIDFCoefficients(ShooterAutoCore.RP, ShooterAutoCore.RI, ShooterAutoCore.RD, ShooterAutoCore.RF);
             dualTele("Follower X: ", follower.getPose().getX());
             dualTele("Follower Y: ", follower.getPose().getY());
             dualTele("Follower Heading (rad): ", follower.getPose().getHeading());

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos.BLUE;
+package org.firstinspires.ftc.teamcode.Autos.RED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -9,7 +9,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
@@ -25,9 +24,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "BLUE 6 CLOSE", group = "BLUE")
+@Autonomous(name = "RED 6 CLOSE", group = "RED")
 @Configurable // Panels
-public class BLUEshootingPERFECTGOAL extends OpMode {
+public class REDshootingPERFECTGOAL extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
@@ -47,7 +46,7 @@ public class BLUEshootingPERFECTGOAL extends OpMode {
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.5; //0.4
+    public static double PICKUP_POWER = 0.35; //0.4
 
     public static double ROLLBACK_POWER = 1;
 
@@ -68,22 +67,26 @@ public class BLUEshootingPERFECTGOAL extends OpMode {
 
     public static int R_VEL = 875;
 
-    public static double SHOOT_CLOSE_POS_X = 63.5;
-    public static double SHOOT_CLOSE_POS_Y = 83.5;
+    public static double SHOOT_CLOSE_POS_X = 88;
+    public static double SHOOT_CLOSE_POS_Y = 87.5;
 
-    public static double SHOOT_CLOSE_POS_HEADING = 139;
+    public static double SHOOT_CLOSE_POS_HEADING = 46.5;
 
-    public static double SHOOT_CLOSE_2_POS_X = 63.5;
-    public static double SHOOT_CLOSE_2_POS_Y = 83.5;
+    public static double SHOOT_CLOSE_2_POS_X = 88;
+    public static double SHOOT_CLOSE_2_POS_Y = 87.5;
 
-    public static double SHOOT_CLOSE_2_HEADING = 139;
+    public static double SHOOT_CLOSE_2_HEADING = 46.5;
 
-    public static double COLLECT_BALLS_X = 25;
-    public static double COLLECT_BALLS_Y = 84.5;
+    public static double COLLECT_BALLS_X = 125;
+    public static double COLLECT_BALLS_Y = 83.75;
 
-    public static double COLLECT_BALLS_2_X = 19;
+    public static double COLLECT_BALLS_CONTROL_X = 102;
 
-    public static double COLLECT_BALLS_2_Y = 84.5;
+    public static double COLLECT_BALLS_CONTROL_Y = 81.5;
+
+    public static double COLLECT_BALLS_2_X = 115;
+
+    public static double COLLECT_BALLS_2_Y = 83.75;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 71.75;
 
@@ -93,16 +96,15 @@ public class BLUEshootingPERFECTGOAL extends OpMode {
 
     public static double PICKUP_2_TEMPORAL = 0.4333;
 
-    private final Pose startPose = new Pose(15.5, 111, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(128.5, 111, Math.toRadians(90)); // Start Pose of our robot.
     private final Pose shootClose1 = new Pose(SHOOT_CLOSE_POS_X, SHOOT_CLOSE_POS_Y, Math.toRadians(SHOOT_CLOSE_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(0));
+    private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(180));
+    private final Pose collectBalls1ControlPoint = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
     private final Pose shootClose2 = new Pose(SHOOT_CLOSE_2_POS_X, SHOOT_CLOSE_2_POS_Y, Math.toRadians(SHOOT_CLOSE_2_HEADING));
 
     private final Pose parkingPose = new Pose(130.5, 11.5, Math.toRadians(180));
 
-    private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(0));
-
-    private final Pose collectBalls2ControlPoint = new Pose(COLLECT_BALLS_2_CONTROL_X, COLLECT_BALLS_2_CONTROL_Y);
+    private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(180));
 
     private PathChain firstPath, collect1Path, goBack, shootThenCollect2, goBack2, shootThenPark;
 
@@ -207,7 +209,7 @@ public class BLUEshootingPERFECTGOAL extends OpMode {
                 .build();
 
         collect1Path = follower.pathBuilder()
-                .addPath(new BezierLine(shootClose1, collectBalls1))
+                .addPath(new BezierCurve(shootClose1, collectBalls1ControlPoint, collectBalls1))
                 .setConstantHeadingInterpolation(collectBalls1.getHeading())
                 .addCallback(FirstShoot)
                 .addParametricCallback(PICKUP_1_TEMPORAL, () -> follower.setMaxPower(PICKUP_POWER))

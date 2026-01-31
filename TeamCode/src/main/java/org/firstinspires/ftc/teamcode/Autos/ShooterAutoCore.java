@@ -54,13 +54,13 @@ public class ShooterAutoCore {
 
     public static double LF = 12.5;
 
-    public static double RP = 161;
+    public static double RP = 195;
 
-    public static double RI = 0.5;
+    public static double RI = 0.4;
 
-    public static double RD = 0.5;
+    public static double RD = 0.75;
 
-    public static double RF = 12.5;
+    public static double RF = 9.5;
 
     public static int SURGE_MEASURE = 150;
 
@@ -100,14 +100,14 @@ public class ShooterAutoCore {
         laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laR.setPwmEnable();
-        laR.setPosition(laInitPos);
+        //laR.setPosition(laInitPos);
 
         laL = hwMap.get(ServoImplEx.class, "lal");
 
         laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laL.setPwmEnable();
-        laL.setPosition(laInitPos);
+        //laL.setPosition(laInitPos);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -260,7 +260,8 @@ public class ShooterAutoCore {
             tele.update();
             return false;
         } else {
-            setCRPower(0, tele);
+            setCRPower(-1, tele);
+            luigiServo.setPosition(luigiFlow);
             shotsTaken = 0;
             canAddShot = true;
             return true;

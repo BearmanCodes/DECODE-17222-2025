@@ -36,7 +36,7 @@ public class TempShooterAutoCore {
 
     public static double luigiFlow = 0.065;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 1000;
+    public static int SHOOT_INTERMITENT_TIME_MS = 500;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 
@@ -50,13 +50,13 @@ public class TempShooterAutoCore {
 
     public static double LF = 12.5;
 
-    public static double RP = 161;
+    public static double RP = 195;
 
-    public static double RI = 0.5;
+    public static double RI = 0.4;
 
-    public static double RD = 0.5;
+    public static double RD = 0.75;
 
-    public static double RF = 12.5;
+    public static double RF = 9.5;
 
     static ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 

@@ -39,7 +39,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static DcMotorEx intake;
 
-    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.25;
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.23;
 
 
     public static double driveReducer = 1;
@@ -133,9 +133,6 @@ public class AutoTeleOp_RED extends OpMode {
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
-        if (gamepad2.rightStickButtonWasPressed()){
-            setToLoadingBallsPosition();
-        }
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
             isReduced = true;
