@@ -39,7 +39,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static DcMotorEx intake;
 
-    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.23;
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.425;
 
 
     public static double driveReducer = 1;
@@ -51,7 +51,9 @@ public class AutoTeleOp_RED extends OpMode {
     public static boolean isReduced = false;
 
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.3;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.15;
+
+    public static double AUTO_REDUCER = 0.65;
 
     public static double PEDRO_STANDING_HEADING_CONSTRAINT = Math.toDegrees(0.007);
 
@@ -115,7 +117,7 @@ public class AutoTeleOp_RED extends OpMode {
         TempShooterAutoCore.init(hardwareMap);
         pathChain = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET), 0.8))
+                .setHeadingInterpolation(HeadingInterpolator.constant(targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET)))
                 .build();
         follower.update();
     }
@@ -154,7 +156,7 @@ public class AutoTeleOp_RED extends OpMode {
                 if (gamepad2.startWasPressed()) {
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
-                        follower.followPath(pathChain.get());
+                        follower.followPath(pathChain.get(), AUTO_REDUCER, true);
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
                         break;
                     } else {
@@ -165,6 +167,7 @@ public class AutoTeleOp_RED extends OpMode {
             case AUTOMATED_DRIVE:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                 if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isBusy()) {
+                    follower.setMaxPower(1);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
                     gamepad2.rumbleBlips(2);

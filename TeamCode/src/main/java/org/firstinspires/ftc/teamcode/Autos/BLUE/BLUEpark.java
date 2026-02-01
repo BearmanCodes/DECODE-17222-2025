@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos.RED;
+package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -25,9 +25,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 9 FAR", group = "RED")
+@Autonomous(name = "BLUE PARK FAR", group = "RED")
 @Configurable // Panels
-public class REDshootingPERFECTFAR extends OpMode {
+public class BLUEpark extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -63,14 +63,14 @@ public class REDshootingPERFECTFAR extends OpMode {
     Timer opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 975;
+    public static int L_VEL = 1000;
 
-    public static int R_VEL = 1175;
+    public static int R_VEL = 1200;
 
-    public static double SHOOT_FAR_POS_X = 84.5;
+    public static double SHOOT_FAR_POS_X = 61.5;
     public static double SHOOT_FAR_POS_Y = 12.0;
 
-    public static double SHOOT_FAR_POS_HEADING = 69;
+    public static double SHOOT_FAR_POS_HEADING = 111;
 
     public static double SHOOT_FAR_2_POS_X = 86.5;
     public static double SHOOT_FAR_2_POS_Y = 15.0;
@@ -101,14 +101,14 @@ public class REDshootingPERFECTFAR extends OpMode {
 
     public static double PICKUP_2_TEMPORAL = 0.4333;
 
-    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(180));
     private final Pose collectBalls1ControlPoint1 = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
     private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
 
     private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(115, 11.5, Math.toRadians(180));
+    private final Pose parkingPose = new Pose(30, 11.5, Math.toRadians(180));
 
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(180));
 
@@ -179,43 +179,17 @@ public class REDshootingPERFECTFAR extends OpMode {
             case 0:
                 //shooterAutoCore.in();
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-                shooterAutoCore.setLauncherPos(ModeCore.RED_RIGHT_FAR_LAUNCHER);
+                shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
                 follower.followPath(firstPath);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
-                    follower.followPath(collect1Path);
+                    follower.followPath(shootThenPark);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack);
-                    pathTimer.resetTimer();
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenCollect2);
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack2);
-                    pathTimer.resetTimer();
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenPark);
-                    setPathState(6);
-                }
-                break;
-            case 6:
                 if (!follower.isBusy()) {
                     shooterAutoCore.stop();
                     PoseStorage.currentPose = follower.getPose();
@@ -258,9 +232,9 @@ public class REDshootingPERFECTFAR extends OpMode {
                 .build();
 
         shootThenPark = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar3, parkingPose))
-                .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
-                .addCallback(SecondShoot)
+                .addPath(new BezierLine(shootFar1, parkingPose))
+                .setLinearHeadingInterpolation(shootFar1.getHeading(), parkingPose.getHeading())
+                .addCallback(FirstShoot)
                 .build();
     }
     PathCallback FirstShoot = new PathCallback() {

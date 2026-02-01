@@ -90,11 +90,11 @@ public class BLUEnineBall extends OpMode {
 
     public static double COLLECT_BALLS_2_X = 11;
 
-    public static double COLLECT_BALLS_2_Y = 57.75;
+    public static double COLLECT_BALLS_2_Y = 57.25;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 67.42;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 66.25;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 65.5;
 
     public static double PICKUP_1_TEMPORAL = 0.175;
 

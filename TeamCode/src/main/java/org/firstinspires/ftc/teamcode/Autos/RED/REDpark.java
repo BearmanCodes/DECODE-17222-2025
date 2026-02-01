@@ -25,9 +25,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 9 FAR", group = "RED")
+@Autonomous(name = "RED PARK FAR", group = "RED")
 @Configurable // Panels
-public class REDshootingPERFECTFAR extends OpMode {
+public class REDpark extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -185,37 +185,11 @@ public class REDshootingPERFECTFAR extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
-                    follower.followPath(collect1Path);
+                    follower.followPath(shootThenPark);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack);
-                    pathTimer.resetTimer();
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenCollect2);
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack2);
-                    pathTimer.resetTimer();
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenPark);
-                    setPathState(6);
-                }
-                break;
-            case 6:
                 if (!follower.isBusy()) {
                     shooterAutoCore.stop();
                     PoseStorage.currentPose = follower.getPose();
@@ -258,9 +232,9 @@ public class REDshootingPERFECTFAR extends OpMode {
                 .build();
 
         shootThenPark = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar3, parkingPose))
-                .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
-                .addCallback(SecondShoot)
+                .addPath(new BezierLine(shootFar1, parkingPose))
+                .setLinearHeadingInterpolation(shootFar1.getHeading(), parkingPose.getHeading())
+                .addCallback(FirstShoot)
                 .build();
     }
     PathCallback FirstShoot = new PathCallback() {

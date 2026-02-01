@@ -24,7 +24,7 @@ public class ShooterAutoCore {
 
     public static double KICK_ITERATOR = 0.325;
 
-    public static long FAILSAFE_WAIT = 3500;
+    public static long FAILSAFE_WAIT = 1750;
 
     public long failsafeTime;
 

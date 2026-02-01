@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos.RED;
+package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -25,9 +25,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 9 FAR", group = "RED")
+@Autonomous(name = "BLUE PARK 6 FAR", group = "BLUE")
 @Configurable // Panels
-public class REDshootingPERFECTFAR extends OpMode {
+public class BLUEsixpark extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -63,52 +63,52 @@ public class REDshootingPERFECTFAR extends OpMode {
     Timer opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 975;
+    public static int L_VEL = 1000;
 
-    public static int R_VEL = 1175;
+    public static int R_VEL = 1200;
 
-    public static double SHOOT_FAR_POS_X = 84.5;
-    public static double SHOOT_FAR_POS_Y = 12.0;
+    public static double SHOOT_FAR_POS_X = 61.5;
+    public static double SHOOT_FAR_POS_Y = 12.0; //12
 
-    public static double SHOOT_FAR_POS_HEADING = 69;
+    public static double SHOOT_FAR_POS_HEADING = 111;
 
-    public static double SHOOT_FAR_2_POS_X = 86.5;
-    public static double SHOOT_FAR_2_POS_Y = 15.0;
+    public static double SHOOT_FAR_2_POS_X = 61.5;
+    public static double SHOOT_FAR_2_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_2_HEADING = 67;
+    public static double SHOOT_FAR_2_HEADING = 115;
 
-    public static double SHOOT_FAR_3_POS_X = 86.5;
-    public static double SHOOT_FAR_3_POS_Y = 15.0;
+    public static double SHOOT_FAR_3_POS_X = 61.5;
+    public static double SHOOT_FAR_3_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_3_HEADING = 67;
+    public static double SHOOT_FAR_3_HEADING = 115;
 
-    public static double COLLECT_BALLS_X = 132.75;
-    public static double COLLECT_BALLS_Y = 40;
+    public static double COLLECT_BALLS_X = 11;
+    public static double COLLECT_BALLS_Y = 35;
 
-    public static double COLLECT_BALLS_CONTROL_X = 73.059026559147;
+    public static double COLLECT_BALLS_CONTROL_X = 67.42;
 
-    public static double COLLECT_BALLS_CONTROL_Y = 44;
+    public static double COLLECT_BALLS_CONTROL_Y = 39.12;
 
-    public static double COLLECT_BALLS_2_X = 132.5;
+    public static double COLLECT_BALLS_2_X = 11;
 
-    public static double COLLECT_BALLS_2_Y = 63;
+    public static double COLLECT_BALLS_2_Y = 57.25;
 
-    public static double COLLECT_BALLS_2_CONTROL_X = 71.75;
+    public static double COLLECT_BALLS_2_CONTROL_X = 67.42;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 67;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 65.5;
 
-    public static double PICKUP_1_TEMPORAL = 0.25;
+    public static double PICKUP_1_TEMPORAL = 0.175;
 
-    public static double PICKUP_2_TEMPORAL = 0.4333;
+    public static double PICKUP_2_TEMPORAL = 0.35;
 
-    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(180));
+    private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(0));
     private final Pose collectBalls1ControlPoint1 = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
     private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
 
     private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(115, 11.5, Math.toRadians(180));
+    private final Pose parkingPose = new Pose(30, 11.5, Math.toRadians(180));
 
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(180));
 
@@ -179,7 +179,7 @@ public class REDshootingPERFECTFAR extends OpMode {
             case 0:
                 //shooterAutoCore.in();
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-                shooterAutoCore.setLauncherPos(ModeCore.RED_RIGHT_FAR_LAUNCHER);
+                shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
                 follower.followPath(firstPath);
                 setPathState(1);
                 break;
@@ -198,24 +198,11 @@ public class REDshootingPERFECTFAR extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenCollect2);
+                    follower.followPath(shootThenPark);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack2);
-                    pathTimer.resetTimer();
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenPark);
-                    setPathState(6);
-                }
-                break;
-            case 6:
                 if (!follower.isBusy()) {
                     shooterAutoCore.stop();
                     PoseStorage.currentPose = follower.getPose();
@@ -258,8 +245,8 @@ public class REDshootingPERFECTFAR extends OpMode {
                 .build();
 
         shootThenPark = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar3, parkingPose))
-                .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
+                .addPath(new BezierLine(shootFar2, parkingPose))
+                .setLinearHeadingInterpolation(shootFar2.getHeading(), parkingPose.getHeading())
                 .addCallback(SecondShoot)
                 .build();
     }
