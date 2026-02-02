@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.Temporary;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
@@ -100,6 +101,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean IS_ROBOT_CENTRIC = true;
 
+    private static PathChain targetPath;
+
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -143,21 +146,29 @@ public class AutoTeleOp_BLUE extends OpMode {
             TempShooterAutoCore.stop_shooting();
             isReduced = false;
         }
-        if (gamepad1.shareWasPressed()){
-            resetHeading();
-        }
         changeHeading();
         intakeControls();
         shootingMoveReducer();
+        updatePathToFollow();
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
+                    if (targetPath != null) {
+                        gamepad1.rumbleBlips(1);
+                        follower.followPath(targetPath, AUTO_REDUCER, true);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
+                        break;
+                    } else {
+                        gamepad1.rumbleBlips(4);
+                    }
+                }
+                if (gamepad2.shareWasPressed()){
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
-                        follower.followPath(pathChain.get(), AUTO_REDUCER, true);
-                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
+                        follower.holdPoint(targetPose);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
                         break;
                     } else {
                         gamepad1.rumbleBlips(4);
@@ -166,7 +177,19 @@ public class AutoTeleOp_BLUE extends OpMode {
                 break;
             case AUTOMATED_DRIVE:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
-                if (gamepad1.circleWasPressed() || gamepad2.shareWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isBusy()) {
+                if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isBusy()) {
+                    follower.setMaxPower(1);
+                    follower.startTeleOpDrive(true);
+                    gamepad1.rumbleBlips(2);
+                    gamepad2.rumbleBlips(2);
+                    ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
+                    break;
+                }
+                break;
+            case HOLD:
+                setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
+                follower.holdPoint(targetPose);
+                if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
@@ -214,6 +237,13 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (twoColor == GAMEPAD_COLORS.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
+    }
+
+    private void updatePathToFollow(){
+        targetPath = follower.pathBuilder()
+                .addPath(new BezierCurve(follower::getPose, targetPose))
+                .setConstantHeadingInterpolation(targetPose.getHeading())
+                .build();
     }
 
     private void resetHeading() {

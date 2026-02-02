@@ -22,7 +22,8 @@ public class ModeCore {
     public static enum DRIVE_MODE {
         MANUAL_DRIVE,
         AUTOMATED_DRIVE,
-        SHOOT_MODE
+        SHOOT_MODE,
+        HOLD
     }
     //END ENUMS
 
