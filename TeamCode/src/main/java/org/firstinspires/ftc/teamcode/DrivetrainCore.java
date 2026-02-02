@@ -126,7 +126,6 @@ public class DrivetrainCore{
         frontleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
     }
 
     //below are functions of convenience that apply to all the motors in just one line of code
