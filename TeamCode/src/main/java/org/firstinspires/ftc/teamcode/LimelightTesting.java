@@ -26,12 +26,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 public class LimelightTesting extends OpMode {
     private Follower follower;
+    public static double INTIAL_HEADING = -90;
+
     private Limelight3A limelight;
-    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); //BLUE
+    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(INTIAL_HEADING)); //BLUE
     //new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); //RED
     public static Pose startingPose;
 
-    public static double INITIAL_HEADING_OFFSET = 0;
+
+    public static double INITIAL_HEADING_OFFSET = -90;
 
     public static double SECOND_HEADING_OFFSET = 0;
 
@@ -58,6 +61,7 @@ public class LimelightTesting extends OpMode {
     public void loop() {
         follower.update();
         telemetry.update();
+        follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
 
         Pose pedroPose = follower.getPose();
 
@@ -69,6 +73,9 @@ public class LimelightTesting extends OpMode {
             Pose2D llPose = new Pose2D(DistanceUnit.METER, threeDimensionalPose.getPosition().x, threeDimensionalPose.getPosition().y, AngleUnit.DEGREES, threeDimensionalPose.getOrientation().getYaw() + SECOND_HEADING_OFFSET);
             Pose llToFTCPose = PoseConverter.pose2DToPose(llPose, InvertedFTCCoordinates.INSTANCE);
             Pose fieldPose = llToFTCPose.getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+            telemetry.addData("Pose3D X: ", threeDimensionalPose.getPosition().x);
+            telemetry.addData("Pose3D Y: ", threeDimensionalPose.getPosition().y);
+            telemetry.addData("Pose3D HEADING: ", threeDimensionalPose.getOrientation().getYaw(AngleUnit.DEGREES));
             telemetry.addData("LL X: ", llPose.getX(DistanceUnit.METER));
             telemetry.addData("LL Y: ", llPose.getY(DistanceUnit.METER));
             telemetry.addData("LL HEADING: ", llPose.getHeading(AngleUnit.DEGREES));
