@@ -149,7 +149,18 @@ public class AutoTeleOp_BLUE extends OpMode {
         changeHeading();
         intakeControls();
         shootingMoveReducer();
-        updatePathToFollow();
+        if (targetPose != null) {
+            updatePathToFollow();
+        }
+        if (gamepad2.shareWasPressed()){
+            if (targetPose != null) {
+                gamepad1.rumbleBlips(1);
+                follower.holdPoint(targetPose);
+                ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
+            } else {
+                gamepad1.rumbleBlips(4);
+            }
+        }
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
@@ -159,16 +170,6 @@ public class AutoTeleOp_BLUE extends OpMode {
                         gamepad1.rumbleBlips(1);
                         follower.followPath(targetPath, AUTO_REDUCER, true);
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
-                        break;
-                    } else {
-                        gamepad1.rumbleBlips(4);
-                    }
-                }
-                if (gamepad2.shareWasPressed()){
-                    if (targetPose != null) {
-                        gamepad1.rumbleBlips(1);
-                        follower.holdPoint(targetPose);
-                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
                         break;
                     } else {
                         gamepad1.rumbleBlips(4);
