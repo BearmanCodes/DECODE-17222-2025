@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Temporary;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -20,9 +21,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.PIDCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
@@ -90,7 +93,11 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double lastSign;
 
+    VoltageSensor voltageSensor;
+
     public static boolean inFWD = false;
+
+    PIDCore pidCore = new PIDCore();
 
     public static double intakeGamepad;
 
@@ -109,6 +116,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     @Override
     public void init() {
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
@@ -140,6 +149,8 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower.update();
         dashTele.update();
         telemetry.update();
+        TempShooterAutoCore.fly.setPower(pidCore.PID_calc(TempShooterAutoCore.fly, TempShooterAutoCore.L_VEL, voltageSensor, telemetry));
+        TempShooterAutoCore.fry.setPower(pidCore.PID_calc(TempShooterAutoCore.fry, TempShooterAutoCore.R_VEL, voltageSensor, telemetry));
         ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
         if (gamepad2.dpadDownWasPressed()) {
