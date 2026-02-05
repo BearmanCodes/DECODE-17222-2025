@@ -68,6 +68,10 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
+    public static double X_TOLERANCE = .35;
+    public static double Y_TOLERANCE = .35;
+    public static double HEADING_TOLERANCE_DEG = 3;
+
     enum GAMEPAD_COLORS {
         RED,
         GREEN,
@@ -152,7 +156,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (targetPose != null) {
             updatePathToFollow();
         }
-        if (gamepad2.shareWasPressed()){
+        if (gamepad2.triangleWasPressed()){
             if (targetPose != null) {
                 gamepad1.rumbleBlips(1);
                 follower.holdPoint(targetPose);
@@ -190,11 +194,18 @@ public class AutoTeleOp_BLUE extends OpMode {
             case HOLD:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
                 follower.holdPoint(targetPose);
+                boolean notMoved = follower.atPose(targetPose, X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
+                if (notMoved) {
+                    TempShooterAutoCore.shoot_RED(telemetry);
+                } else {
+                    TempShooterAutoCore.stop_shooting();
+                }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
                     gamepad2.rumbleBlips(2);
+                    TempShooterAutoCore.stop_shooting();
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
