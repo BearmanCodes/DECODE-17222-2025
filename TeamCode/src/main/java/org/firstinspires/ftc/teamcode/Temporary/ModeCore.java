@@ -151,7 +151,7 @@ public class ModeCore {
         }
     }
     public static void prepareForShot(double platformHeight, int flySpeed, int frySpeed) {
-        TempShooterAutoCore.setLauncherPos(platformHeight);
+        //TempShooterAutoCore.setLauncherPos(platformHeight);
         TempShooterAutoCore.spinUpFlys(flySpeed, frySpeed);
         canMakeShot = true;
     }
