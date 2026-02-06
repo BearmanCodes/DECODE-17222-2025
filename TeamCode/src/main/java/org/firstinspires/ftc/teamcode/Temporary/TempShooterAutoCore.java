@@ -102,14 +102,14 @@ public class TempShooterAutoCore {
         laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laR.setPwmEnable();
-        laR.setPosition(laInitPos);
+        //laR.setPosition(laInitPos);
 
         laL = hwMap.get(ServoImplEx.class, "lal");
 
         laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laL.setPwmEnable();
-        laL.setPosition(laInitPos);
+        //laL.setPosition(laInitPos);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);

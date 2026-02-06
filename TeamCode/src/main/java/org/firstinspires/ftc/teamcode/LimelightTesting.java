@@ -29,17 +29,57 @@ public class LimelightTesting extends OpMode {
     public static double INTIAL_HEADING_LL_OFFSET = -270;
 
     private Limelight3A limelight;
-    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180 + INTIAL_HEADING_LL_OFFSET)); //BLUE
+    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180)); //BLUE
     //new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); //RED
     public static Pose startingPose;
 
 
     public static double MT2_HEADING_OFFSET = -90;
 
-    public static boolean useDefaultPose = false;
+    public static boolean useDefaultPose = true;
+
+    public double clamp_heading_deg(double heading_deg){
+        if (heading_deg < 0){
+            return heading_deg + 360;
+        }
+        if (heading_deg >= 360) {
+            return heading_deg - 360;
+        }
+        return heading_deg;
+    }
+
+    public double clamp_heading_rad(double heading_rad){
+        if (heading_rad < Math.toRadians(0)){
+            return heading_rad + Math.toRadians(360);
+        }
+        if (heading_rad >= Math.toRadians(360)) {
+            return heading_rad - Math.toRadians(360);
+        }
+        return heading_rad;
+    }
+
+    public Pose2D ll_to_FTC(double ll_x, double ll_y, double ll_heading_deg){
+        double ftc_x = ll_x;
+        double ftc_y = ll_y;
+        double ftc_heading_deg = ll_heading_deg;
+        Pose2D ftcPose = new Pose2D(DistanceUnit.INCH, ftc_x, ftc_y, AngleUnit.DEGREES, ftc_heading_deg);
+        return ftcPose;
+    }
+    public double pedro_rad_to_MT2_heading_deg(double pedro_rad_heading){
+        double pedro_deg_heading = Math.toDegrees(pedro_rad_heading);
+        return clamp_heading_deg(pedro_deg_heading + 90);
+    }
+    public Pose FTC_to_Pedro(double FTC_x, double FTC_y, double pedro_rad_heading){
+        double pedro_x = FTC_y + 72;
+        double pedro_y = -FTC_x + 72;
+        double pedro_heading_rad = pedro_rad_heading;
+        Pose pedroPose = new Pose(pedro_x, pedro_y, pedro_heading_rad);
+        return pedroPose;
+    }
 
     @Override
     public void init() {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
         follower = Constants.createFollower(hardwareMap);
@@ -64,22 +104,23 @@ public class LimelightTesting extends OpMode {
         Pose pedroPose = follower.getPose();
 
         LLResult llResult = limelight.getLatestResult();
-        limelight.updateRobotOrientation(Math.toDegrees(pedroPose.getHeading()) + MT2_HEADING_OFFSET); //Heading currently in degrees, convert to radians if necessary
-
+        limelight.updateRobotOrientation(pedro_rad_to_MT2_heading_deg(pedroPose.getHeading())); //Heading currently in degrees, convert to radians if necessary
+        telemetry.addData("Follower X: ", pedroPose.getX());
+        telemetry.addData("Follower Y: ", pedroPose.getY());
+        telemetry.addData("Follower Heading (rad.): ", pedroPose.getHeading());
+        telemetry.addData("Pedro to MT2: ", pedro_rad_to_MT2_heading_deg(pedroPose.getHeading()));
         if (llResult != null && llResult.isValid()) {
             Pose3D threeDimensionalPose = llResult.getBotpose_MT2();
             Pose2D llPose = new Pose2D(DistanceUnit.METER, threeDimensionalPose.getPosition().x, threeDimensionalPose.getPosition().y, AngleUnit.DEGREES, threeDimensionalPose.getOrientation().getYaw());
-            Pose llToFTCPose = PoseConverter.pose2DToPose(llPose, InvertedFTCCoordinates.INSTANCE);
-            Pose fieldPose = llToFTCPose.getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-            telemetry.addData("Pose3D X: ", threeDimensionalPose.getPosition().x);
-            telemetry.addData("Pose3D Y: ", threeDimensionalPose.getPosition().y);
-            telemetry.addData("Pose3D HEADING: ", threeDimensionalPose.getOrientation().getYaw(AngleUnit.DEGREES));
-            telemetry.addData("LL X: ", llPose.getX(DistanceUnit.METER));
-            telemetry.addData("LL Y: ", llPose.getY(DistanceUnit.METER));
-            telemetry.addData("LL HEADING: ", llPose.getHeading(AngleUnit.DEGREES));
-            telemetry.addData("LLFTC X: ", llToFTCPose.getX());
-            telemetry.addData("LLFTC Y: ", llToFTCPose.getY());
-            telemetry.addData("LLFTC HEADING: ", llToFTCPose.getHeading());
+            //Pose2D FTCPose = ll_to_FTC(llPose.getX(DistanceUnit.INCH), llPose.getY(DistanceUnit.INCH), clamp_heading_deg(llPose.getHeading(AngleUnit.DEGREES)));
+            Pose fieldPose = FTC_to_Pedro(llPose.getX(DistanceUnit.INCH), llPose.getY(DistanceUnit.INCH), pedroPose.getHeading());
+            follower.setPose(new Pose(fieldPose.getX(), fieldPose.getY(), pedroPose.getHeading()));
+            telemetry.addData("Mt2 X: ", llPose.getX(DistanceUnit.INCH));
+            telemetry.addData("Mt2 Y: ", llPose.getY(DistanceUnit.INCH));
+            telemetry.addData("Mt2 Heading (deg.): ", llPose.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("Field X: ", fieldPose.getX());
+            telemetry.addData("Field Y: ", fieldPose.getY());
+            telemetry.addData("Field Heading (deg.): ", Math.toDegrees(follower.getHeading()));
             //to convert to ftc, convert data from meters to inches
             
             //for rotation to appear correct on the limelight, the intial position of 180 had to become -90. Meaning it went from <- to ↓. So when the robot was <- the imu was reading a value of -90 deg. 
@@ -106,39 +147,7 @@ public class LimelightTesting extends OpMode {
                 else if deg >= 360:
                     deg -= 360;
             */
-            /*
-            public double clamp_heading_deg(double heading_deg){
-                if (heading_deg < 0){
-                    return heading_deg + 360;
-                } 
-                if (heading_deg >= 360) {
-                    return heading_deg - 360;
-                }
-                return heading_deg;
-            }
-            public Pose2D ll_to_FTC(double ll_x, double ll_y, double ll_heading_deg){
-                double ftc_x = ll_x * 39.37;
-                double ftc_y = ll_y * 39.37;
-                double ftc_heading_deg = clamp_heading_deg(ll_heading_deg);
-                Pose2D ftcPose = new Pose2D(ftc_x, ftc_y, ftc_heading_deg);
-                return ftcPose;
-            }
-            public double pedro_rad_to_MT2_heading_deg(double pedro_rad_heading){
-                double pedro_deg_heading = Math.toDegrees(pedro_rad_heading);
-                return clamp_heading_deg(pedro_deg_heading + 90);
-            }
-            public Pose FTC_to_Pedro(double FTC_x, double FTC_y, double FTC_heading_deg){
-                double pedro_x = FTC_y + 72;
-                double pedro_y = -FTC_x + 72;
-                double pedro_heading_deg = clamp_heading_deg(FTC_heading_deg - 90);
-                Pose pedroPose = new Pose(pedro_x, pedro_y, Math.toRadians(pedro_heading_deg));
-                return pedroPose;
-            }
-            */
-            telemetry.addData("FIELD X: ", fieldPose.getX());
-            telemetry.addData("FIELD Y: ", fieldPose.getY());
-            telemetry.addData("FIELD HEADING: ", fieldPose.getHeading());
-            telemetry.update();
         }
+        telemetry.update();
     }
 }
