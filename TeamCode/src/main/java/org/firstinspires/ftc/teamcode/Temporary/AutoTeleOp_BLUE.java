@@ -58,6 +58,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double ALLOWED_HEADING_ERROR_DEG = 0.15;
 
+    boolean wasMoved = false;
+
     public static double PEDRO_STANDING_HEADING_CONSTRAINT = Math.toDegrees(0.007);
 
     public static boolean automatedDrive = false;
@@ -71,8 +73,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
-    public static double X_TOLERANCE = .35;
-    public static double Y_TOLERANCE = .35;
+    public static double X_TOLERANCE = .65;
+    public static double Y_TOLERANCE = .65;
     public static double HEADING_TOLERANCE_DEG = 3;
 
     enum GAMEPAD_COLORS {
@@ -205,11 +207,19 @@ public class AutoTeleOp_BLUE extends OpMode {
             case HOLD:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
                 follower.holdPoint(targetPose);
+                boolean startShoot = !TempShooterAutoCore.isShooting;
                 boolean notMoved = follower.atPose(targetPose, X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
-                if (notMoved) {
+                if (startShoot) {
                     TempShooterAutoCore.shoot_RED(telemetry);
-                } else {
+                    startShoot = false;
+                }
+                if (!notMoved){
                     TempShooterAutoCore.stop_shooting();
+                    wasMoved = true;
+                }
+                if (notMoved && wasMoved) {
+                    startShoot = true;
+                    wasMoved = false;
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);

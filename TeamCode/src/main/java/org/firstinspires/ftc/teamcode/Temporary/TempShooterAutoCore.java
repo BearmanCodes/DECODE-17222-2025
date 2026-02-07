@@ -66,7 +66,7 @@ public class TempShooterAutoCore {
 
     public static int shotsTaken = 0;
 
-    public static int SURGE_MEASURE = 500;
+    public static int SURGE_MEASURE = 200;
 
     public static int RUNNING_MODIFIER = 350;
 
