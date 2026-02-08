@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Temporary;
+package org.firstinspires.ftc.teamcode.Op;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -81,22 +81,22 @@ public class ModeCore {
 
     public static DRIVE_MODE currentDriveMode = DRIVE_MODE.MANUAL_DRIVE;
 
-    public static void autoShootHandler(Gamepad gamepad2, ALLIANCE currentAlliance) {
+    public static void autoShootHandler(Gamepad gamepad2, ALLIANCE currentAlliance, OpShooterCore shooterCore) {
         if (gamepad2.squareWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
-            determineShotVariables(currentAlliance, desiredLocation);
+            determineShotVariables(currentAlliance, desiredLocation, shooterCore);
         }
         if (gamepad2.dpadLeftWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LEFT_FAR;
-            determineShotVariables(currentAlliance, desiredLocation);
+            determineShotVariables(currentAlliance, desiredLocation, shooterCore);
         }
         if (gamepad2.dpadRightWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.RIGHT_FAR;
-            determineShotVariables(currentAlliance, desiredLocation);
+            determineShotVariables(currentAlliance, desiredLocation, shooterCore);
         }
     }
 
-    public static void determineShotVariables(ALLIANCE alliance, ROBOTS_SHOOTING_LOCATION location) {
+    public static void determineShotVariables(ALLIANCE alliance, ROBOTS_SHOOTING_LOCATION location, OpShooterCore shooterCore) {
         switch (alliance) {
             case BLUE:
                 switch (location) {
@@ -104,21 +104,21 @@ public class ModeCore {
                         platformHeight = BLUE_LEFT_FAR_LAUNCHER;
                         flySpeed = BLUE_LEFT_FAR_VEL;
                         frySpeed = BLUE_LEFT_FAR_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_BLUE.targetPose = PoseCore.BLUE_LEFT_FAR_POSE;
                         break;
                     case RIGHT_FAR:
                         platformHeight = BLUE_RIGHT_FAR_LAUNCHER;
                         flySpeed = BLUE_RIGHT_FAR_VEL;
                         frySpeed = BLUE_RIGHT_FAR_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_BLUE.targetPose = PoseCore.BLUE_RIGHT_FAR_POSE;
                         break;
                     case LINE_CLOSE:
                         platformHeight = BLUE_LINE_CLOSE_LAUNCHER;
                         flySpeed = BLUE_LINE_CLOSE_VEL;
                         frySpeed = BLUE_LINE_CLOSE_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_BLUE.targetPose = PoseCore.BLUE_LINE_CLOSE_POSE;
                         break;
                 }
@@ -129,30 +129,30 @@ public class ModeCore {
                         platformHeight = RED_RIGHT_FAR_LAUNCHER;
                         flySpeed = RED_RIGHT_FAR_VEL;
                         frySpeed = RED_RIGHT_FAR_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_RED.targetPose = PoseCore.RED_RIGHT_FAR_POSE;
                         break;
                     case LEFT_FAR:
                         platformHeight = RED_LEFT_FAR_LAUNCHER;
                         flySpeed = RED_LEFT_FAR_VEL;
                         frySpeed = RED_RIGHT_FAR_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_RED.targetPose = PoseCore.RED_LEFT_FAR_POSE;
                         break;
                     case LINE_CLOSE:
                         platformHeight = RED_LINE_CLOSE_LAUNCHER;
                         flySpeed = RED_LINE_CLOSE_VEL;
                         frySpeed = RED_LINE_CLOSE_VER;
-                        prepareForShot(platformHeight, flySpeed, frySpeed);
+                        prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_RED.targetPose = PoseCore.RED_LINE_CLOSE_POSE;
                         break;
                 }
                 break;
         }
     }
-    public static void prepareForShot(double platformHeight, int flySpeed, int frySpeed) {
+    public static void prepareForShot(double platformHeight, int flySpeed, int frySpeed, OpShooterCore shooterCore) {
         //TempShooterAutoCore.setLauncherPos(platformHeight);
-        TempShooterAutoCore.spinUpFlys(flySpeed, frySpeed);
+        shooterCore.setFlySpeeds(flySpeed, frySpeed);
         canMakeShot = true;
     }
 }

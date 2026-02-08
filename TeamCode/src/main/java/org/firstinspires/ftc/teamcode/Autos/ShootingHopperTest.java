@@ -13,9 +13,6 @@ import java.util.concurrent.TimeUnit;
 @Config
 @Autonomous
 public class ShootingHopperTest extends LinearOpMode {
-
-
-
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static int L_VEL = 1100;

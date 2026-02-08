@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Temporary;
+package org.firstinspires.ftc.teamcode.Op;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -11,9 +11,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.PathConstraints;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -22,13 +19,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.PIDCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 @Config
@@ -89,18 +84,11 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static Supplier<PathChain> pathChain;
 
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
-
-    private Telemetry dashTele = dashboard.getTelemetry();
-
     public static double lastSign;
-
-    VoltageSensor voltageSensor;
 
     public static boolean inFWD = false;
 
-    PIDCore pidCore = new PIDCore();
-
+    OpShooterCore shooterCore = new OpShooterCore(telemetry);
     public static double intakeGamepad;
 
     public static boolean BLUE_ALLIANCE = true;
@@ -114,11 +102,16 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean IS_ROBOT_CENTRIC = true;
 
+    boolean firstEntry = true;
+    boolean currentlyStill = false;
+    boolean previouslyStill = false;
+    boolean currentlyMoved = false;
+    boolean previouslyMoved = false;
+
     private static PathChain targetPath;
 
     @Override
     public void init() {
-        voltageSensor = hardwareMap.voltageSensor.iterator().next();
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -131,8 +124,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         startingPose = useDefaultPose ? defaultStartingPose : PoseStorage.currentPose;
         follower.setStartingPose(startingPose);
-        follower.pathConstraints.setHeadingConstraint(Math.toRadians(ALLOWED_HEADING_ERROR_DEG));
-        TempShooterAutoCore.init(hardwareMap);
+        shooterCore.init(hardwareMap);
         pathChain = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
                 .setHeadingInterpolation(HeadingInterpolator.constant(targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET)))
@@ -147,39 +139,21 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addData("Automated Drive: ", automatedDrive);
+        telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
         follower.update();
-        dashTele.update();
         telemetry.update();
-        TempShooterAutoCore.fly.setPower(pidCore.PID_calc(TempShooterAutoCore.fly, TempShooterAutoCore.L_VEL, voltageSensor, telemetry));
-        TempShooterAutoCore.fry.setPower(pidCore.PID_calc(TempShooterAutoCore.fry, TempShooterAutoCore.R_VEL, voltageSensor, telemetry));
-        ModeCore.autoShootHandler(gamepad2, currAlliance);
-        TempShooterAutoCore.RED_SURGE(telemetry);
-        if (gamepad2.dpadDownWasPressed()) {
-            TempShooterAutoCore.shoot_RED(telemetry);
-            isReduced = true;
-        }
-        if (gamepad2.dpadUpWasPressed()){
-            TempShooterAutoCore.stop_shooting();
-            isReduced = false;
-        }
-        changeHeading();
+        ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
+        shooterCore.FlysPIDControl();
+        shooterCore.shooting_loop();
+        handleShootingInputs();
+        storePositions();
         intakeControls();
-        shootingMoveReducer();
         if (targetPose != null) {
             updatePathToFollow();
         }
-        if (gamepad2.triangleWasPressed()){
-            if (targetPose != null) {
-                gamepad1.rumbleBlips(1);
-                follower.holdPoint(targetPose);
-                ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
-            } else {
-                gamepad1.rumbleBlips(4);
-            }
-        }
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
+                shootingMoveReducer();
                 follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
@@ -192,45 +166,87 @@ public class AutoTeleOp_BLUE extends OpMode {
                         gamepad1.rumbleBlips(4);
                     }
                 }
+                if (gamepad2.triangleWasPressed()){
+                    if (targetPose != null) {
+                        gamepad1.rumbleBlips(1);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
+                        break;
+                    } else {
+                        gamepad1.rumbleBlips(4);
+                    }
+                }
                 break;
             case AUTOMATED_DRIVE:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE() || !follower.isBusy()) {
                     follower.setMaxPower(1);
+                    isReduced = false;
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
                     gamepad2.rumbleBlips(2);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
+                }
+                if (gamepad2.triangleWasPressed()){
+                    if (targetPose != null) {
+                        gamepad1.rumbleBlips(1);
+                        follower.holdPoint(targetPose);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
+                        break;
+                    } else {
+                        gamepad1.rumbleBlips(4);
+                    }
                 }
                 break;
             case HOLD:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
                 follower.holdPoint(targetPose);
-                boolean startShoot = !TempShooterAutoCore.isShooting;
-                boolean notMoved = follower.atPose(targetPose, X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
-                if (startShoot) {
-                    TempShooterAutoCore.shoot_RED(telemetry);
-                    startShoot = false;
+                if (firstEntry) {
+                    shooterCore.start_shoot_once();
+                    firstEntry = false;
                 }
-                if (!notMoved){
-                    TempShooterAutoCore.stop_shooting();
-                    wasMoved = true;
+                boolean still = follower.atPose(targetPose, X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
+                updateMovedState(still);
+                if (currentlyMoved && !previouslyMoved){
+                    shooterCore.stop_shoot_once();
                 }
-                if (notMoved && wasMoved) {
-                    startShoot = true;
-                    wasMoved = false;
+                if (currentlyStill && !previouslyStill && !firstEntry) {
+                    shooterCore.start_shoot_once();
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);
+                    isReduced = false;
                     follower.startTeleOpDrive(true);
                     gamepad1.rumbleBlips(2);
                     gamepad2.rumbleBlips(2);
-                    TempShooterAutoCore.stop_shooting();
+                    shooterCore.stop_shoot_once();
+                    firstEntry = true;
+                    currentlyStill = false;
+                    currentlyMoved = false;
+                    previouslyStill = false;
+                    previouslyMoved = false;
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
                 break;
+        }
+    }
+
+    public void updateMovedState(boolean still){
+        previouslyStill = currentlyStill;
+        currentlyStill = still;
+        previouslyMoved = currentlyMoved;
+        currentlyMoved = !still;
+    }
+
+    public void handleShootingInputs(){
+        if (gamepad2.dpadDownWasPressed()) {
+            shooterCore.start_shoot_once();
+            isReduced = true;
+        }
+        if (gamepad2.dpadUpWasPressed()){
+            shooterCore.stop_shoot_once();
+            isReduced = false;
         }
     }
 
@@ -244,11 +260,6 @@ public class AutoTeleOp_BLUE extends OpMode {
         boolean two_right_y = Math.abs(gamepad2.right_stick_y) > FAILSAFE_STICK_TRIGGER;
         boolean two_right_x = Math.abs(gamepad2.right_stick_x) > FAILSAFE_STICK_TRIGGER;
         return one_left_y || one_left_x || one_right_y || one_right_x;
-    }
-
-    private void setToLoadingBallsPosition(){
-        TempShooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-        TempShooterAutoCore.setCRPower(-1);
     }
 
     private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
@@ -283,7 +294,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(RESET_HEADING_DEG)));
     }
 
-    private void changeHeading(){
+    private void storePositions(){
         if (gamepad2.leftBumperWasPressed()){
             Pose currentPose = follower.getPose();
             PoseCore.BLUE_LINE_CLOSE_X = currentPose.getX();
@@ -311,7 +322,6 @@ public class AutoTeleOp_BLUE extends OpMode {
         if (gamepad1.leftBumperWasPressed()) {
             INTAKE_RUN = !INTAKE_RUN;
             if (INTAKE_RUN) {
-                setToLoadingBallsPosition();
                 inPower = intakeReducer;
             } else {
                 inPower = 0;

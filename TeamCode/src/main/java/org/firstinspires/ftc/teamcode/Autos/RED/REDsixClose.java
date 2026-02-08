@@ -18,15 +18,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
-import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.ModeCore;
+import org.firstinspires.ftc.teamcode.Op.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 6 CLOSE", group = "RED")
+@Autonomous(name = "RED 6 CLOSE", group = "RED_CLOSE")
 @Configurable // Panels
-public class REDshootingPERFECTGOAL extends OpMode {
+public class REDsixClose extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);

@@ -19,15 +19,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
-import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.ModeCore;
+import org.firstinspires.ftc.teamcode.Op.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 9 FAR", group = "RED")
+@Autonomous(name = "RED 6 FAR", group = "RED_FAR")
 @Configurable // Panels
-public class REDshootingPERFECTFAR extends OpMode {
+public class REDsixFar extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -198,24 +198,11 @@ public class REDshootingPERFECTFAR extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenCollect2);
+                    follower.followPath(shootThenPark);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack2);
-                    pathTimer.resetTimer();
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
-                    follower.followPath(shootThenPark);
-                    setPathState(6);
-                }
-                break;
-            case 6:
                 if (!follower.isBusy()) {
                     shooterAutoCore.stop();
                     PoseStorage.currentPose = follower.getPose();
@@ -258,8 +245,8 @@ public class REDshootingPERFECTFAR extends OpMode {
                 .build();
 
         shootThenPark = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar3, parkingPose))
-                .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
+                .addPath(new BezierLine(shootFar2, parkingPose))
+                .setLinearHeadingInterpolation(shootFar2.getHeading(), parkingPose.getHeading())
                 .addCallback(SecondShoot)
                 .build();
     }

@@ -19,15 +19,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
-import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.ModeCore;
+import org.firstinspires.ftc.teamcode.Op.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED PARK FAR", group = "RED")
+@Autonomous(name = "RED 3 FAR", group = "RED_FAR")
 @Configurable // Panels
-public class REDpark extends OpMode {
+public class REDthreeFar extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 

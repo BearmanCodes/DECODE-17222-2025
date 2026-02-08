@@ -35,9 +35,18 @@ public class PIDCore {
 
     public static boolean doThing = true;
 
+    public VoltageSensor voltageSensor;
+
+    public Telemetry telemetry;
+
     double motorPower;
 
-    public double PID_calc(DcMotorEx fly, double desired_rpm, VoltageSensor voltageSensor, Telemetry telemetry){
+    public PIDCore(VoltageSensor voltageSensor, Telemetry telemetry) {
+        this.voltageSensor = voltageSensor;
+        this.telemetry = telemetry;
+    }
+
+    public double PID_calc(DcMotorEx fly, double desired_rpm){
         double current_time = timer.time();
         double DESIRED_POWER = desired_rpm / MAX_RPM;
         double curr_voltage = voltageSensor.getVoltage();

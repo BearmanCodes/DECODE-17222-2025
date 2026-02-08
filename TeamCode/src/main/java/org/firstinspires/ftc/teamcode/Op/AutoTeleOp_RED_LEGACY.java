@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Temporary;
+package org.firstinspires.ftc.teamcode.Op;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -98,7 +98,7 @@ public class AutoTeleOp_RED_LEGACY extends OpMode {
         dashTele.addData("Current Mode: ", ModeCore.currentDriveMode);
         dashTele.update();
         telemetry.update();
-        ModeCore.autoShootHandler(gamepad2, currAlliance);
+        //ModeCore.autoShootHandler(gamepad2, currAlliance);
         if (gamepad2.rightBumperWasPressed()) {
             //ModeCore.deliveryCurrentMethod = ModeCore.BALL_DELIVERY_METHOD.HOPPER;
             TempShooterAutoCore.setLauncherPos(ModeCore.HOPPER_LOAD_PLATFORM_HEIGHT);

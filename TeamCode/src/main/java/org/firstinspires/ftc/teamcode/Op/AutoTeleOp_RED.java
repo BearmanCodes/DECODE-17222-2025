@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Temporary;
+package org.firstinspires.ftc.teamcode.Op;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -9,9 +9,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.PathConstraints;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -23,7 +20,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 @Config
@@ -133,7 +129,7 @@ public class AutoTeleOp_RED extends OpMode {
         follower.update();
         dashTele.update();
         telemetry.update();
-        ModeCore.autoShootHandler(gamepad2, currAlliance);
+       // ModeCore.autoShootHandler(gamepad2, currAlliance);
         TempShooterAutoCore.RED_SURGE(telemetry);
         if (gamepad2.dpadDownWasPressed()) {
             TempShooterAutoCore.shoot_RED(telemetry);
