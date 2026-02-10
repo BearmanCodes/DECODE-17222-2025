@@ -231,7 +231,6 @@ public class AutoTeleOp_BLUE extends OpMode {
                 break;
         }
     }
-
     public void updateMovedState(boolean still){
         previouslyStill = currentlyStill;
         currentlyStill = still;

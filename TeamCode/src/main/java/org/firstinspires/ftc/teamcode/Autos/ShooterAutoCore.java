@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class ShooterAutoCore {
-    public ServoImplEx laR, laL;
+    public Servo laR, laL;
 
     public Servo luigiServo;
 
@@ -97,17 +97,17 @@ public class ShooterAutoCore {
 
         laR = hwMap.get(ServoImplEx.class, "lar");
 
-        laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+        //laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
-        laR.setPwmEnable();
-        //laR.setPosition(laInitPos);
+        //laR.setPwmEnable();
+        laR.setPosition(laInitPos);
 
         laL = hwMap.get(ServoImplEx.class, "lal");
 
-        laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
+       // laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
-        laL.setPwmEnable();
-        //laL.setPosition(laInitPos);
+        //laL.setPwmEnable();
+        laL.setPosition(laInitPos);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
