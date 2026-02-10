@@ -38,26 +38,6 @@ public class LimelightTesting extends OpMode {
 
     public static boolean useDefaultPose = true;
 
-    public double clamp_heading_deg(double heading_deg){
-        if (heading_deg < 0){
-            return heading_deg + 360;
-        }
-        if (heading_deg >= 360) {
-            return heading_deg - 360;
-        }
-        return heading_deg;
-    }
-
-    public double clamp_heading_rad(double heading_rad){
-        if (heading_rad < Math.toRadians(0)){
-            return heading_rad + Math.toRadians(360);
-        }
-        if (heading_rad >= Math.toRadians(360)) {
-            return heading_rad - Math.toRadians(360);
-        }
-        return heading_rad;
-    }
-
     public Pose2D ll_to_FTC(double ll_x, double ll_y, double ll_heading_deg){
         double ftc_x = ll_x;
         double ftc_y = ll_y;
@@ -66,8 +46,8 @@ public class LimelightTesting extends OpMode {
         return ftcPose;
     }
     public double pedro_rad_to_MT2_heading_deg(double pedro_rad_heading){
-        double pedro_deg_heading = Math.toDegrees(pedro_rad_heading);
-        return clamp_heading_deg(pedro_deg_heading + 90);
+        double pedro_deg_heading = AngleUnit.normalizeDegrees(Math.toDegrees(pedro_rad_heading));
+        return pedro_deg_heading + 90;
     }
     public Pose FTC_to_Pedro(double FTC_x, double FTC_y, double pedro_rad_heading){
         double pedro_x = FTC_y + 72;
@@ -100,27 +80,30 @@ public class LimelightTesting extends OpMode {
         follower.update();
         telemetry.update();
         follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-
         Pose pedroPose = follower.getPose();
-
+        double pedro_heading_rad = pedroPose.getHeading();
+        telemetry.addData("Pedro POSE START LOOP", pedroPose.getAsVector());
+        telemetry.addData("Pedro POSE START LOOP heading", pedro_heading_rad);
         LLResult llResult = limelight.getLatestResult();
-        limelight.updateRobotOrientation(pedro_rad_to_MT2_heading_deg(pedroPose.getHeading())); //Heading currently in degrees, convert to radians if necessary
+        limelight.updateRobotOrientation(pedro_rad_to_MT2_heading_deg(pedro_heading_rad)); //Heading currently in degrees, convert to radians if necessary
         telemetry.addData("Follower X: ", pedroPose.getX());
         telemetry.addData("Follower Y: ", pedroPose.getY());
-        telemetry.addData("Follower Heading (rad.): ", pedroPose.getHeading());
-        telemetry.addData("Pedro to MT2: ", pedro_rad_to_MT2_heading_deg(pedroPose.getHeading()));
+        telemetry.addData("Follower Heading (rad.): ", pedro_heading_rad);
+        telemetry.addData("Pedro to MT2: ", pedro_rad_to_MT2_heading_deg(pedro_heading_rad));
         if (llResult != null && llResult.isValid()) {
             Pose3D threeDimensionalPose = llResult.getBotpose_MT2();
             Pose2D llPose = new Pose2D(DistanceUnit.METER, threeDimensionalPose.getPosition().x, threeDimensionalPose.getPosition().y, AngleUnit.DEGREES, threeDimensionalPose.getOrientation().getYaw());
-            //Pose2D FTCPose = ll_to_FTC(llPose.getX(DistanceUnit.INCH), llPose.getY(DistanceUnit.INCH), clamp_heading_deg(llPose.getHeading(AngleUnit.DEGREES)));
-            Pose fieldPose = FTC_to_Pedro(llPose.getX(DistanceUnit.INCH), llPose.getY(DistanceUnit.INCH), pedroPose.getHeading());
-            follower.setPose(new Pose(fieldPose.getX(), fieldPose.getY(), pedroPose.getHeading()));
+            Pose fieldPose = FTC_to_Pedro(llPose.getX(DistanceUnit.INCH), llPose.getY(DistanceUnit.INCH), pedro_heading_rad);
+            limelight.updateRobotOrientation(pedro_rad_to_MT2_heading_deg(pedro_heading_rad));
+            follower.setPose(new Pose(fieldPose.getX(), fieldPose.getY(), pedro_heading_rad));
             telemetry.addData("Mt2 X: ", llPose.getX(DistanceUnit.INCH));
             telemetry.addData("Mt2 Y: ", llPose.getY(DistanceUnit.INCH));
             telemetry.addData("Mt2 Heading (deg.): ", llPose.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Field X: ", fieldPose.getX());
             telemetry.addData("Field Y: ", fieldPose.getY());
             telemetry.addData("Field Heading (deg.): ", Math.toDegrees(follower.getHeading()));
+            telemetry.addData("Pedro POSE END LOOP", fieldPose.getAsVector());
+            telemetry.addData("Pedro POSE END LOOP heading", AngleUnit.normalizeRadians(fieldPose.getHeading()));
             //to convert to ftc, convert data from meters to inches
             
             //for rotation to appear correct on the limelight, the intial position of 180 had to become -90. Meaning it went from <- to ↓. So when the robot was <- the imu was reading a value of -90 deg. 
