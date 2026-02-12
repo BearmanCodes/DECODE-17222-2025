@@ -29,9 +29,9 @@ public class ShootingOPTest extends LinearOpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
-    public static int L_VEL = 2145;
+    public static int L_VEL = 1000;
 
-    public static int R_VEL = 2575;
+    public static int R_VEL = 1200;
 
     OpShooterCore shooterAutoCore;
 
@@ -65,6 +65,10 @@ public class ShootingOPTest extends LinearOpMode {
             if (gamepad2.dpadUpWasPressed()){
                 shooterAutoCore.stop_shoot_once();
             }
+            telemetry.addData("Vel: ", shooterAutoCore.fly.getVelocity());
+            telemetry.addData("Ver: ", shooterAutoCore.fry.getVelocity());
+            telemetry.addData("Desired Vel: ", shooterAutoCore.load_fly_expected_vel());
+            telemetry.addData("Desired Ver: ", shooterAutoCore.load_fry_expected_vel());
             telemetry.addData("Follower X: ", follower.getPose().getX());
             telemetry.addData("Follower Y: ", follower.getPose().getY());
             telemetry.addData("Follower Heading: ", follower.getPose().getHeading());
