@@ -55,7 +55,7 @@ public class ShootingOPTest extends LinearOpMode {
 
         while (!isStopRequested()){
             follower.update();
-            shooterAutoCore.FlysPIDControl();
+            //shooterAutoCore.FlysPIDControl();
             shooterAutoCore.setFlySpeeds(L_VEL, R_VEL);
             shooterAutoCore.shooting_loop();
             shooterAutoCore.setLauncherPos(OpShooterCore.laInitPos);

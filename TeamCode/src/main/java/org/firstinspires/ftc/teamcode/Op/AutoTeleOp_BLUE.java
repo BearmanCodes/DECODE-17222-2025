@@ -143,7 +143,6 @@ public class AutoTeleOp_BLUE extends OpMode {
         follower.update();
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
-        shooterCore.FlysPIDControl();
         shooterCore.shooting_loop();
         handleShootingInputs();
         storePositions();

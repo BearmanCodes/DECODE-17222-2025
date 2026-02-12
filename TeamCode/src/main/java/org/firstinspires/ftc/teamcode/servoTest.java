@@ -26,7 +26,7 @@ public class servoTest extends LinearOpMode {
 
     ServoImplEx la;
 
-    private static final DecimalFormat dformat = new DecimalFormat("0.00");
+    private static final DecimalFormat dformat = new DecimalFormat("0.000");
 
     public static Servo.Direction dirL;
 
@@ -61,37 +61,37 @@ public class servoTest extends LinearOpMode {
                 throw new RuntimeException(e);
             }
             if (currentGamepad.y && !previousGamepad.y){
-                laPos += 0.01;
+                laPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.x && !previousGamepad.x){
-                laPos -= 0.01;
+                laPos -= 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.dpad_up && !previousGamepad.dpad_up){
-                servo2iamgoingtonewjerseyPos += 0.01;
+                servo2iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.dpad_down && !previousGamepad.dpad_down){
-                servo2iamgoingtonewjerseyPos -= 0.01;
+                servo2iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
 
             if (currentGamepad.a && !previousGamepad.a){
-                servo3iamgoingtonewjerseyPos += 0.01;
+                servo3iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.b && !previousGamepad.b) {
-                servo3iamgoingtonewjerseyPos -= 0.01;
+                servo3iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
 
             if (currentGamepad.right_bumper && !previousGamepad.right_bumper){
-                servo4iamgoingtonewjerseyPos += 0.01;
+                servo4iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.left_bumper && !previousGamepad.left_bumper) {
-                servo4iamgoingtonewjerseyPos -= 0.01;
+                servo4iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.start && !previousGamepad.start){

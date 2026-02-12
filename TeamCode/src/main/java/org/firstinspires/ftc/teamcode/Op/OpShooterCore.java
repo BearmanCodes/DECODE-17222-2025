@@ -22,6 +22,22 @@ public class OpShooterCore {
     public CRServo lServo, rServo;
 
     public DcMotorEx fly, fry;
+
+    public static double LP = 161;
+
+    public static double LI = 0.5;
+
+    public static double LD = 0.5;
+
+    public static double LF = 12.5;
+
+    public static double RP = 195;
+
+    public static double RI = 0.4;
+
+    public static double RD = 0.75;
+
+    public static double RF = 9.5;
     public double L_RPM = 0;
     public double R_RPM = 0;
     public double flyExpectedVel, fryExpectedVel;
@@ -33,7 +49,7 @@ public class OpShooterCore {
 
     public static Servo laL, laR;
     public static double laInitPos = 0.025;
-    public PIDCore pidCore;
+    //public PIDCore pidCore;
     public VoltageSensor voltageSensor;
     public Telemetry telemetry;
 
@@ -59,12 +75,14 @@ public class OpShooterCore {
 
         fry = hwMap.get(DcMotorEx.class, "fry");
         fly = hwMap.get(DcMotorEx.class, "fly");
+        fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
+        fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
-        fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        voltageSensor = hwMap.voltageSensor.iterator().next();
-        pidCore = new PIDCore(voltageSensor, telemetry);
+        //voltageSensor = hwMap.voltageSensor.iterator().next();
+        //pidCore = new PIDCore(voltageSensor, telemetry);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 
@@ -80,16 +98,16 @@ public class OpShooterCore {
 
         //laL.setPosition(laInitPos);
     }
-    public void FlysPIDControl(){
-        fly.setPower(pidCore.PID_calc(fly, L_RPM));
-        fry.setPower(pidCore.PID_calc(fry, R_RPM));
-    }
+    //public void FlysPIDControl(){
+     //   fly.setPower(pidCore.PID_calc(fly, L_RPM));
+      //  fry.setPower(pidCore.PID_calc(fry, R_RPM));
+    //}
 
     public void setFlySpeeds(double lRPM, double rRPM){
-        L_RPM = lRPM;
-        flyExpectedVel = (lRPM / 60) * 28;
-        R_RPM = rRPM;
-        fryExpectedVel = (rRPM / 60) * 28;
+        fly.setVelocity(lRPM);
+        flyExpectedVel = lRPM;
+        fry.setVelocity(rRPM);
+        fryExpectedVel = rRPM;
     }
     public double load_fly_expected_vel(){
         return flyExpectedVel;
