@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
@@ -14,6 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 //0.06 close
 //0.47/8 rest down
 //
+
+@Config
 @TeleOp(name = "ServoTest")
 public class servoTest extends LinearOpMode {
     Servo servo1iamgoingtonewjersey, servo2iamgoingtonewjersey, servo3iamgoingtonewjersey, servo4iamgoingtonewjersey;
@@ -24,6 +27,14 @@ public class servoTest extends LinearOpMode {
     ServoImplEx la;
 
     private static final DecimalFormat dformat = new DecimalFormat("0.00");
+
+    public static Servo.Direction dirL;
+
+    public static Servo.Direction dirR;
+
+    public static boolean isFwdL = false;
+
+    public static boolean isFwdR = true;
     double servo1iamgoingtonewjerseyPos, servo2iamgoingtonewjerseyPos, servo3iamgoingtonewjerseyPos, servo4iamgoingtonewjerseyPos, laPos;
     @Override
 
@@ -32,6 +43,10 @@ public class servoTest extends LinearOpMode {
         servo2iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt2iamgoingtokillmyself".toLowerCase());
         servo3iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt3iamgoingtokillmyself".toLowerCase());
         servo4iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt4iamgoingtokillmyself".toLowerCase());
+        dirL = isFwdL ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
+        dirR = isFwdR ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
+        servo2iamgoingtonewjersey.setDirection(dirL);
+        servo3iamgoingtonewjersey.setDirection(dirR);
         la = hardwareMap.get(ServoImplEx.class, "la");
 
         la.setPwmRange(new PwmControl.PwmRange(1000, 2000));

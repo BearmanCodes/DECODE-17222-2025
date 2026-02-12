@@ -31,8 +31,8 @@ public class OpShooterCore {
 
     public Servo luigiServo;
 
-    public ServoImplEx laL, laR;
-    public double laInitPos = 0.32;
+    public static Servo laL, laR;
+    public static double laInitPos = 0.025;
     public PIDCore pidCore;
     public VoltageSensor voltageSensor;
     public Telemetry telemetry;
@@ -54,6 +54,8 @@ public class OpShooterCore {
         rServo = hwMap.get(CRServo.class, "crr");
         lServo = hwMap.get(CRServo.class, "crl");
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        rServo.setPower(-1);
+        lServo.setPower(-1);
 
         fry = hwMap.get(DcMotorEx.class, "fry");
         fly = hwMap.get(DcMotorEx.class, "fly");
@@ -66,13 +68,16 @@ public class OpShooterCore {
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 
-        laR = hwMap.get(ServoImplEx.class, "lar");
-        laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
-        laR.setPwmEnable();
-        //laR.setPosition(laInitPos);
-        laL = hwMap.get(ServoImplEx.class, "lal");
-        laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
-        laL.setPwmEnable();
+        laL = hwMap.get(Servo.class ,"lal");
+
+        laL.setDirection(Servo.Direction.REVERSE);
+
+        laR = hwMap.get(Servo.class, "lar");
+
+
+        laL.setPosition(laInitPos);
+        laR.setPosition(laInitPos);
+
         //laL.setPosition(laInitPos);
     }
     public void FlysPIDControl(){
@@ -130,6 +135,12 @@ public class OpShooterCore {
         hasSurged = false;
         entry_time = 0;
     }
+
+    public static void setLauncherPos(double position){
+        laL.setPosition(position);
+        laR.setPosition(position);
+    }
+
     public void shooting_loop() {
         if (isShooting) {
             if (power_surge()) {

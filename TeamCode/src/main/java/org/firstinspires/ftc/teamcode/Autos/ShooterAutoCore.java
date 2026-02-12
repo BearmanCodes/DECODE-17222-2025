@@ -78,7 +78,7 @@ public class ShooterAutoCore {
 
     public DcMotorEx fly, fry;
 
-    public static double laInitPos = 0.32; //0.32
+    public static double laInitPos = 0; //0.32
 
     public void init(HardwareMap hwMap){
         lServo = hwMap.get(CRServo .class, "crl");
@@ -107,6 +107,7 @@ public class ShooterAutoCore {
        // laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         //laL.setPwmEnable();
+        laL.setDirection(Servo.Direction.REVERSE);
         laL.setPosition(laInitPos);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
