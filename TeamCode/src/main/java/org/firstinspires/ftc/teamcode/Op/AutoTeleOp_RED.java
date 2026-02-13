@@ -98,7 +98,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double INTAKE_THRESHOLD = 0.15;
 
-    public static boolean IS_ROBOT_CENTRIC = true;
+    public static boolean IS_ROBOT_CENTRIC = false;
 
     boolean firstEntry = true;
     boolean currentlyStill = false;
@@ -152,7 +152,7 @@ public class AutoTeleOp_RED extends OpMode {
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 shootingMoveReducer();
-                follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
+                follower.setTeleOpDrive(gamepad1.left_stick_y * driveReducer, gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPath != null) {
