@@ -95,12 +95,11 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean INTAKE_RUN = false;
 
-
     public static ModeCore.ALLIANCE currAlliance;
 
     public static double INTAKE_THRESHOLD = 0.15;
 
-    public static boolean IS_ROBOT_CENTRIC = true;
+    public static boolean IS_ROBOT_CENTRIC = false;
 
     boolean firstEntry = true;
     boolean currentlyStill = false;
@@ -135,12 +134,20 @@ public class AutoTeleOp_BLUE extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive(true);
+        shooterCore.setCRPower(-1);
     }
 
     @Override
     public void loop() {
         telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
         follower.update();
+        telemetry.addData("Vel: ", shooterCore.fly.getVelocity());
+        telemetry.addData("Ver: ", shooterCore.fry.getVelocity());
+        telemetry.addData("Desired Vel: ", shooterCore.load_fly_expected_vel());
+        telemetry.addData("Desired Ver: ", shooterCore.load_fry_expected_vel());
+        telemetry.addData("Follower X: ", follower.getPose().getX());
+        telemetry.addData("Follower Y: ", follower.getPose().getY());
+        telemetry.addData("Follower Heading: ", follower.getPose().getHeading());
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
@@ -153,7 +160,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 shootingMoveReducer();
-                follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
+                follower.setTeleOpDrive(gamepad1.left_stick_y * driveReducer, gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPath != null) {

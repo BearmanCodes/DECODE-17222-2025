@@ -41,9 +41,8 @@ public class OpShooterCore {
     public double L_RPM = 0;
     public double R_RPM = 0;
     public double flyExpectedVel, fryExpectedVel;
-    public double SURGE_MEASURE = 250;
+    public double SURGE_MEASURE = 150;
     public double RUNNING_SPEEDS = 350;
-
 
     public Servo luigiServo;
 
@@ -70,8 +69,6 @@ public class OpShooterCore {
         rServo = hwMap.get(CRServo.class, "crr");
         lServo = hwMap.get(CRServo.class, "crl");
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
-        rServo.setPower(-1);
-        lServo.setPower(-1);
 
         fry = hwMap.get(DcMotorEx.class, "fry");
         fly = hwMap.get(DcMotorEx.class, "fly");
@@ -160,6 +157,7 @@ public class OpShooterCore {
     }
 
     public void shooting_loop() {
+        telemetry.addData("isShooting: ", isShooting);
         if (isShooting) {
             if (power_surge()) {
                 hasSurged = true;
