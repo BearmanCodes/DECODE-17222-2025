@@ -108,7 +108,7 @@ public class REDthreeFar extends OpMode {
     private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
 
     private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(115, 11.5, Math.toRadians(180));
+    private final Pose parkingPose = new Pose(115, 11.5, Math.toRadians(0));
 
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(180));
 
@@ -152,6 +152,7 @@ public class REDthreeFar extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        shooterAutoCore.setCRPower(-1, telemetry);
         setPathState(0);
     }
 

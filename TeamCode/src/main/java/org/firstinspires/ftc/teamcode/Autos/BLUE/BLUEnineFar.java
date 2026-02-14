@@ -146,6 +146,7 @@ public class BLUEnineFar extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        shooterAutoCore.setCRPower(-1, telemetry);
         setPathState(0);
     }
 
@@ -169,7 +170,7 @@ public class BLUEnineFar extends OpMode {
             case 0:
                 //shooterAutoCore.in();
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-                shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
+                //shooterAutoCore.setLauncherPos(ModeCore.BLUE_LEFT_FAR_LAUNCHER);
                 follower.followPath(firstPath);
                 setPathState(1);
                 break;

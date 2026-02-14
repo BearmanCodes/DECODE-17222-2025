@@ -63,9 +63,9 @@ public class REDnineFar extends OpMode {
     Timer opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 900;
+    public static int L_VEL = 950;
 
-    public static int R_VEL = 1100;
+    public static int R_VEL = 1150;
 
     public static double SHOOT_FAR_POS_X = 84.5;
     public static double SHOOT_FAR_POS_Y = 12.0;
@@ -152,6 +152,7 @@ public class REDnineFar extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        shooterAutoCore.setCRPower(-1, telemetry);
         setPathState(0);
     }
 

@@ -68,9 +68,9 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
-    public static double X_TOLERANCE = .65;
-    public static double Y_TOLERANCE = .65;
-    public static double HEADING_TOLERANCE_DEG = 3;
+    public static double X_TOLERANCE = .85;
+    public static double Y_TOLERANCE = .85;
+    public static double HEADING_TOLERANCE_DEG = 5;
 
     enum GAMEPAD_COLORS {
         RED,

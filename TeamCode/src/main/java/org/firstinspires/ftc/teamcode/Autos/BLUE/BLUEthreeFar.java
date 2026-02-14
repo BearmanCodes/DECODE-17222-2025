@@ -152,6 +152,7 @@ public class BLUEthreeFar extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        shooterAutoCore.setCRPower(-1, telemetry);
         setPathState(0);
     }
 

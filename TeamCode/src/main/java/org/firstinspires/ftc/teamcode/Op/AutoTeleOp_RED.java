@@ -67,9 +67,9 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
-    public static double X_TOLERANCE = .65;
-    public static double Y_TOLERANCE = .65;
-    public static double HEADING_TOLERANCE_DEG = 3;
+    public static double X_TOLERANCE = .85;
+    public static double Y_TOLERANCE = .85;
+    public static double HEADING_TOLERANCE_DEG = 5;
 
     enum GAMEPAD_COLORS {
         RED,
@@ -152,7 +152,7 @@ public class AutoTeleOp_RED extends OpMode {
         switch (ModeCore.currentDriveMode) {
             case MANUAL_DRIVE:
                 shootingMoveReducer();
-                follower.setTeleOpDrive(gamepad1.left_stick_y * driveReducer, gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
+                follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
                 setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPath != null) {
