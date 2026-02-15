@@ -33,7 +33,8 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double inPower = 0;
 
-    public static Pose defaultStartingPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0));
+    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
+
     public static Pose startingPose;
 
     public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.425;
@@ -61,6 +62,8 @@ public class AutoTeleOp_RED extends OpMode {
     public static boolean useDefaultPose = false;
 
     public static Pose targetPose;
+
+    public static Pose holdingPose;
 
     public Limelight3A limelight;
 
@@ -98,7 +101,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double INTAKE_THRESHOLD = 0.15;
 
-    public static boolean IS_ROBOT_CENTRIC = false;
+    public static boolean IS_ROBOT_CENTRIC = true;
 
     boolean firstEntry = true;
     boolean currentlyStill = false;
@@ -136,10 +139,22 @@ public class AutoTeleOp_RED extends OpMode {
         shooterCore.setCRPower(-1);
     }
 
+    public void updatePose(){
+        follower.update();
+        PoseStorage.currentPose = follower.getPose();
+    }
+
     @Override
     public void loop() {
         telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
-        follower.update();
+        updatePose();
+        telemetry.addData("Vel: ", shooterCore.fly.getVelocity());
+        telemetry.addData("Ver: ", shooterCore.fry.getVelocity());
+        telemetry.addData("Desired Vel: ", shooterCore.load_fly_expected_vel());
+        telemetry.addData("Desired Ver: ", shooterCore.load_fry_expected_vel());
+        telemetry.addData("Follower X: ", follower.getPose().getX());
+        telemetry.addData("Follower Y: ", follower.getPose().getY());
+        telemetry.addData("Follower Heading: ", follower.getPose().getHeading());
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
@@ -161,16 +176,27 @@ public class AutoTeleOp_RED extends OpMode {
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.AUTOMATED_DRIVE;
                         break;
                     } else {
-                        gamepad1.rumbleBlips(4);
+                        gamepad2.rumbleBlips(4);
+                    }
+                }
+                if (gamepad2.circleWasPressed()){
+                    if (targetPose != null) {
+                        gamepad1.rumbleBlips(1);
+                        setPoseToHold(follower.getPose());
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
+                        break;
+                    } else {
+                        gamepad2.rumbleBlips(4);
                     }
                 }
                 if (gamepad2.triangleWasPressed()){
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
+                        setPoseToHold(targetPose);
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
                         break;
                     } else {
-                        gamepad1.rumbleBlips(4);
+                        gamepad2.rumbleBlips(4);
                     }
                 }
                 break;
@@ -185,40 +211,47 @@ public class AutoTeleOp_RED extends OpMode {
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
-                if (gamepad2.triangleWasPressed()){
+                if (gamepad2.circleWasPressed()){
                     if (targetPose != null) {
                         gamepad1.rumbleBlips(1);
-                        follower.holdPoint(targetPose);
+                        setPoseToHold(follower.getPose());
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
                         break;
                     } else {
-                        gamepad1.rumbleBlips(4);
+                        gamepad2.rumbleBlips(4);
+                    }
+                }
+                if (gamepad2.triangleWasPressed()){
+                    if (targetPose != null) {
+                        gamepad1.rumbleBlips(1);
+                        setPoseToHold(targetPose);
+                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.HOLD;
+                        break;
+                    } else {
+                        gamepad2.rumbleBlips(4);
                     }
                 }
                 break;
             case HOLD:
                 setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
-                follower.holdPoint(targetPose);
-                if (firstEntry) {
-                    shooterCore.start_shoot_once();
-                    firstEntry = false;
-                }
-                boolean still = follower.atPose(targetPose, X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
+                follower.holdPoint(getPoseToHold());
+                boolean still = follower.atPose(getPoseToHold(), X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
                 updateMovedState(still);
                 if (currentlyMoved && !previouslyMoved){
                     shooterCore.stop_shoot_once();
+                    gamepad2.rumbleBlips(1);
                 }
-                if (currentlyStill && !previouslyStill && !firstEntry) {
-                    shooterCore.start_shoot_once();
+                if (currentlyStill && !previouslyStill) {
+                    gamepad2.rumbleBlips(2);
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
-                    follower.setMaxPower(1);
-                    isReduced = false;
+                    if (!shooterCore.isShooting){
+                        follower.setMaxPower(1);
+                        isReduced = false;
+                    }
                     follower.startTeleOpDrive(true);
-                    gamepad1.rumbleBlips(2);
-                    gamepad2.rumbleBlips(2);
+                    gamepad2.rumbleBlips(3);
                     shooterCore.stop_shoot_once();
-                    firstEntry = true;
                     currentlyStill = false;
                     currentlyMoved = false;
                     previouslyStill = false;
@@ -298,6 +331,7 @@ public class AutoTeleOp_RED extends OpMode {
             PoseCore.RED_LINE_CLOSE_Y = currentPose.getY();
             PoseCore.RED_LINE_CLOSE_HEADING = currentPose.getHeading();
             PoseCore.RED_LINE_CLOSE_POSE = new Pose(PoseCore.RED_LINE_CLOSE_X, PoseCore.RED_LINE_CLOSE_Y, PoseCore.RED_LINE_CLOSE_HEADING);
+            targetPose = PoseCore.RED_LINE_CLOSE_POSE;
         }
         if (gamepad2.rightBumperWasPressed()){
             Pose currentPose = follower.getPose();
@@ -305,6 +339,7 @@ public class AutoTeleOp_RED extends OpMode {
             PoseCore.RED_RIGHT_FAR_Y = currentPose.getY();
             PoseCore.RED_RIGHT_FAR_HEADING = currentPose.getHeading();
             PoseCore.RED_RIGHT_FAR_POSE = new Pose(PoseCore.RED_RIGHT_FAR_X, PoseCore.RED_RIGHT_FAR_Y, PoseCore.RED_RIGHT_FAR_HEADING);
+            targetPose = PoseCore.RED_RIGHT_FAR_POSE;
         }
     }
 
@@ -313,6 +348,14 @@ public class AutoTeleOp_RED extends OpMode {
             isReduced = !isReduced;
         }
         driveReducer = isReduced ? DRIVE_SHOOT_REDUCER_COEFFICENT : 1;
+    }
+
+    private void setPoseToHold(Pose poseToHold) {
+        holdingPose = poseToHold;
+    }
+
+    private Pose getPoseToHold(){
+        return holdingPose;
     }
 
     private void intakeControls(){
