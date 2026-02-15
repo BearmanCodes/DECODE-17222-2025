@@ -33,7 +33,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double inPower = 0;
 
-    public static Pose defaultStartingPose = new Pose(55.92558139534884, 8.037209302325575, Math.toRadians(180));
+    public static Pose defaultStartingPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0));
 
     public static Pose startingPose;
 
