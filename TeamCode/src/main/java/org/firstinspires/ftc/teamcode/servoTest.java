@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
@@ -14,6 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 //0.06 close
 //0.47/8 rest down
 //
+
+@Config
 @TeleOp(name = "ServoTest")
 public class servoTest extends LinearOpMode {
     Servo servo1iamgoingtonewjersey, servo2iamgoingtonewjersey, servo3iamgoingtonewjersey, servo4iamgoingtonewjersey;
@@ -23,7 +26,15 @@ public class servoTest extends LinearOpMode {
 
     ServoImplEx la;
 
-    private static final DecimalFormat dformat = new DecimalFormat("0.00");
+    private static final DecimalFormat dformat = new DecimalFormat("0.000");
+
+    public static Servo.Direction dirL;
+
+    public static Servo.Direction dirR;
+
+    public static boolean isFwdL = false;
+
+    public static boolean isFwdR = true;
     double servo1iamgoingtonewjerseyPos, servo2iamgoingtonewjerseyPos, servo3iamgoingtonewjerseyPos, servo4iamgoingtonewjerseyPos, laPos;
     @Override
 
@@ -32,6 +43,10 @@ public class servoTest extends LinearOpMode {
         servo2iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt2iamgoingtokillmyself".toLowerCase());
         servo3iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt3iamgoingtokillmyself".toLowerCase());
         servo4iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt4iamgoingtokillmyself".toLowerCase());
+        dirL = isFwdL ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
+        dirR = isFwdR ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
+        servo2iamgoingtonewjersey.setDirection(dirL);
+        servo3iamgoingtonewjersey.setDirection(dirR);
         la = hardwareMap.get(ServoImplEx.class, "la");
 
         la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
@@ -46,37 +61,37 @@ public class servoTest extends LinearOpMode {
                 throw new RuntimeException(e);
             }
             if (currentGamepad.y && !previousGamepad.y){
-                laPos += 0.01;
+                laPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.x && !previousGamepad.x){
-                laPos -= 0.01;
+                laPos -= 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.dpad_up && !previousGamepad.dpad_up){
-                servo2iamgoingtonewjerseyPos += 0.01;
+                servo2iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.dpad_down && !previousGamepad.dpad_down){
-                servo2iamgoingtonewjerseyPos -= 0.01;
+                servo2iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
 
             if (currentGamepad.a && !previousGamepad.a){
-                servo3iamgoingtonewjerseyPos += 0.01;
+                servo3iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.b && !previousGamepad.b) {
-                servo3iamgoingtonewjerseyPos -= 0.01;
+                servo3iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
 
             if (currentGamepad.right_bumper && !previousGamepad.right_bumper){
-                servo4iamgoingtonewjerseyPos += 0.01;
+                servo4iamgoingtonewjerseyPos += 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.left_bumper && !previousGamepad.left_bumper) {
-                servo4iamgoingtonewjerseyPos -= 0.01;
+                servo4iamgoingtonewjerseyPos -= 0.001;
                 telemetryUpdate();
             }
             if (currentGamepad.start && !previousGamepad.start){

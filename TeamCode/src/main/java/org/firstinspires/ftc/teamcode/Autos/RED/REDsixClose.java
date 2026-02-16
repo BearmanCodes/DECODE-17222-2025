@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Autos.RED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -19,16 +18,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
-import org.firstinspires.ftc.teamcode.Temporary.ModeCore;
-import org.firstinspires.ftc.teamcode.Temporary.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.ModeCore;
+import org.firstinspires.ftc.teamcode.Op.PoseStorage;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED PARK FAR", group = "RED")
+@Autonomous(name = "RED 6 CLOSE", group = "RED_CLOSE")
 @Configurable // Panels
-public class REDpark extends OpMode {
-
+public class REDsixClose extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
@@ -40,13 +38,15 @@ public class REDpark extends OpMode {
 
     public static int INTAKE_POWER_OFFSET = 100;
 
-    public static double TIMEOUT = 2500;
+    public static double TIMEOUT = 1500;
+
+    public static double INTAKE_TIMEOUT = 9000;
 
     public static int HEADING_OFFSET = 8;
 
     public static boolean HOLD_END = true;
 
-    public static double PICKUP_POWER = 0.5; //0.4
+    public static double PICKUP_POWER = 0.35; //0.4
 
     public static double ROLLBACK_POWER = 1;
 
@@ -63,56 +63,48 @@ public class REDpark extends OpMode {
     Timer opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
 
-    public static int L_VEL = 975;
+    public static int L_VEL = 800;
 
-    public static int R_VEL = 1175;
+    public static int R_VEL = 875;
 
-    public static double SHOOT_FAR_POS_X = 84.5;
-    public static double SHOOT_FAR_POS_Y = 12.0;
+    public static double SHOOT_CLOSE_POS_X = 88;
+    public static double SHOOT_CLOSE_POS_Y = 87.5;
 
-    public static double SHOOT_FAR_POS_HEADING = 69;
+    public static double SHOOT_CLOSE_POS_HEADING = 46.5;
 
-    public static double SHOOT_FAR_2_POS_X = 86.5;
-    public static double SHOOT_FAR_2_POS_Y = 15.0;
+    public static double SHOOT_CLOSE_2_POS_X = 88;
+    public static double SHOOT_CLOSE_2_POS_Y = 87.5;
 
-    public static double SHOOT_FAR_2_HEADING = 67;
+    public static double SHOOT_CLOSE_2_HEADING = 46.5;
 
-    public static double SHOOT_FAR_3_POS_X = 86.5;
-    public static double SHOOT_FAR_3_POS_Y = 15.0;
+    public static double COLLECT_BALLS_X = 125;
+    public static double COLLECT_BALLS_Y = 83.75;
 
-    public static double SHOOT_FAR_3_HEADING = 67;
+    public static double COLLECT_BALLS_CONTROL_X = 102;
 
-    public static double COLLECT_BALLS_X = 132.75;
-    public static double COLLECT_BALLS_Y = 40;
+    public static double COLLECT_BALLS_CONTROL_Y = 81.5;
 
-    public static double COLLECT_BALLS_CONTROL_X = 73.059026559147;
+    public static double COLLECT_BALLS_2_X = 115;
 
-    public static double COLLECT_BALLS_CONTROL_Y = 44;
-
-    public static double COLLECT_BALLS_2_X = 132.5;
-
-    public static double COLLECT_BALLS_2_Y = 63;
+    public static double COLLECT_BALLS_2_Y = 83.75;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 71.75;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 67;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 67.25;
 
-    public static double PICKUP_1_TEMPORAL = 0.25;
+    public static double PICKUP_1_TEMPORAL = 0.01;
 
     public static double PICKUP_2_TEMPORAL = 0.4333;
 
-    private final Pose startPose = new Pose(88.0744186, 8.037209302325575, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(SHOOT_FAR_POS_X, SHOOT_FAR_POS_Y, Math.toRadians(SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose startPose = new Pose(128.5, 111, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose shootClose1 = new Pose(SHOOT_CLOSE_POS_X, SHOOT_CLOSE_POS_Y, Math.toRadians(SHOOT_CLOSE_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose collectBalls1 = new Pose(COLLECT_BALLS_X, COLLECT_BALLS_Y, Math.toRadians(180));
-    private final Pose collectBalls1ControlPoint1 = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
-    private final Pose shootFar2 = new Pose(SHOOT_FAR_2_POS_X, SHOOT_FAR_2_POS_Y, Math.toRadians(SHOOT_FAR_2_HEADING));
+    private final Pose collectBalls1ControlPoint = new Pose(COLLECT_BALLS_CONTROL_X, COLLECT_BALLS_CONTROL_Y);
+    private final Pose shootClose2 = new Pose(SHOOT_CLOSE_2_POS_X, SHOOT_CLOSE_2_POS_Y, Math.toRadians(SHOOT_CLOSE_2_HEADING));
 
-    private final Pose shootFar3 = new Pose(SHOOT_FAR_3_POS_X, SHOOT_FAR_3_POS_Y, Math.toRadians(SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(115, 11.5, Math.toRadians(180));
+    private final Pose parkingPose = new Pose(130.5, 11.5, Math.toRadians(180));
 
     private final Pose collectBalls2 = new Pose(COLLECT_BALLS_2_X, COLLECT_BALLS_2_Y, Math.toRadians(180));
-
-    private final Pose collectBalls2ControlPoint = new Pose(COLLECT_BALLS_2_CONTROL_X, COLLECT_BALLS_2_CONTROL_Y);
 
     private PathChain firstPath, collect1Path, goBack, shootThenCollect2, goBack2, shootThenPark;
 
@@ -127,7 +119,6 @@ public class REDpark extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -161,12 +152,8 @@ public class REDpark extends OpMode {
         autonomousPathUpdate(); // Update autonomous state machine
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);
-        telemetry.addData("FLY_EXPECTED_VEL: ", shooterAutoCore.load_fly_expected());
-        telemetry.addData("FRY_EXPECTED_VEL: ", shooterAutoCore.load_fry_expected());
-        telemetry.addData("FLY_REAL_VEL: ", shooterAutoCore.fly.getVelocity());
-        telemetry.addData("FRY_REAL_VEL: ", shooterAutoCore.fry.getVelocity());
         // Log values to Panels and Driver Station
-        telemetry.update();
+        dashTele.update();
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -179,69 +166,72 @@ public class REDpark extends OpMode {
             case 0:
                 //shooterAutoCore.in();
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
-                shooterAutoCore.setLauncherPos(ModeCore.RED_RIGHT_FAR_LAUNCHER);
+                shooterAutoCore.setLauncherPos(ModeCore.BLUE_LINE_CLOSE_LAUNCHER);
                 follower.followPath(firstPath);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT){
-                    follower.followPath(shootThenPark);
+                    follower.followPath(collect1Path);
+                    pathTimer.resetTimer();
                     setPathState(2);
                 }
                 break;
             case 2:
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > INTAKE_TIMEOUT) {
+                    follower.followPath(goBack);
+                    pathTimer.resetTimer();
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > TIMEOUT) {
+                    follower.followPath(shootThenCollect2);
+                    setPathState(4);
+                }
+                break;
+            case 4:
                 if (!follower.isBusy()) {
                     shooterAutoCore.stop();
+                    shooterAutoCore.setCRPower(0, telemetry);
                     PoseStorage.currentPose = follower.getPose();
                     dashTele.update();
                     setPathState(-1);
                 }
+                break;
         }
     }
 
     public void buildPaths(){
         firstPath = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootFar1))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootFar1.getHeading())
+                .addPath(new BezierLine(startPose, shootClose1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootClose1.getHeading())
                 .build();
 
         collect1Path = follower.pathBuilder()
-                .addPath(new BezierCurve(shootFar1, collectBalls1ControlPoint1, collectBalls1))
+                .addPath(new BezierCurve(shootClose1, collectBalls1ControlPoint, collectBalls1))
                 .setConstantHeadingInterpolation(collectBalls1.getHeading())
                 .addCallback(FirstShoot)
                 .addParametricCallback(PICKUP_1_TEMPORAL, () -> follower.setMaxPower(PICKUP_POWER))
                 .build();
 
         goBack = follower.pathBuilder()
-                .addPath(new BezierLine(collectBalls1, shootFar2))
-                .setLinearHeadingInterpolation(collectBalls1.getHeading(), shootFar2.getHeading())
+                .addPath(new BezierLine(collectBalls1, shootClose2))
+                .setLinearHeadingInterpolation(collectBalls1.getHeading(), shootClose2.getHeading())
                 .addParametricCallback(0.001, () -> follower.setMaxPower(1))
                 .build();
 
         shootThenCollect2 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootFar2, collectBalls2ControlPoint, collectBalls2))
+                .addPath(new BezierLine(shootClose2, collectBalls2))
                 .setConstantHeadingInterpolation(collectBalls2.getHeading())
                 .addCallback(SecondShoot)
-                .addParametricCallback(PICKUP_2_TEMPORAL, () -> follower.setMaxPower(PICKUP_POWER))
-                .build();
-
-        goBack2 = follower.pathBuilder()
-                .addPath(new BezierLine(collectBalls2, shootFar3))
-                .setLinearHeadingInterpolation(collectBalls2.getHeading(), shootFar3.getHeading())
-                .addParametricCallback(0.001, () -> follower.setMaxPower(1))
-                .build();
-
-        shootThenPark = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar1, parkingPose))
-                .setLinearHeadingInterpolation(shootFar1.getHeading(), parkingPose.getHeading())
-                .addCallback(FirstShoot)
                 .build();
     }
     PathCallback FirstShoot = new PathCallback() {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.close_shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -276,7 +266,7 @@ public class REDpark extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.close_shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -312,7 +302,7 @@ public class REDpark extends OpMode {
         @Override
         public boolean run() {
             follower.pausePathFollowing();
-            while (!shooterAutoCore.shoot(3, dashTele)){
+            while (!shooterAutoCore.close_shoot(3, dashTele)){
                 dashTele.update();
             }
             shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);

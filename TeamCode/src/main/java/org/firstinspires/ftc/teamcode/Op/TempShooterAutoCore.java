@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Temporary;
+package org.firstinspires.ftc.teamcode.Op;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -19,6 +19,10 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class TempShooterAutoCore {
     public static ServoImplEx laR, laL;
+
+    public static double L_VEL = 0;
+
+    public static double R_VEL = 0;
 
     public static Servo luigiServo;
 
@@ -62,7 +66,7 @@ public class TempShooterAutoCore {
 
     public static int shotsTaken = 0;
 
-    public static int SURGE_MEASURE = 150;
+    public static int SURGE_MEASURE = 200;
 
     public static int RUNNING_MODIFIER = 350;
 
@@ -87,10 +91,11 @@ public class TempShooterAutoCore {
         fly = hwMap.get(DcMotorEx .class, "fly");
         fry = hwMap.get(DcMotorEx.class, "fry");
 
-        fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
-        fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
-        fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
+        //fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
+        //fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -102,14 +107,14 @@ public class TempShooterAutoCore {
         laR.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laR.setPwmEnable();
-        laR.setPosition(laInitPos);
+        //laR.setPosition(laInitPos);
 
         laL = hwMap.get(ServoImplEx.class, "lal");
 
         laL.setPwmRange(new PwmControl.PwmRange(1000, 2000));
         //fully retract 0, fully extend 1
         laL.setPwmEnable();
-        laL.setPosition(laInitPos);
+        //laL.setPosition(laInitPos);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -179,11 +184,11 @@ public class TempShooterAutoCore {
         rServo.setPower(power);
     }
 
-    public static void spinUpFlys(double lVel, double rVel){
-        fly.setVelocity(lVel);
-        flyExpected = lVel;
-        fry.setVelocity(rVel);
-        fryExpected = rVel;
+    public static void spinUpFlys(double lRPM, double rRPM){
+        L_VEL = lRPM;
+        flyExpected = (lRPM / 60) * 28;
+        R_VEL = rRPM;
+        fryExpected = (rRPM / 60) * 28;
     }
 
     public static void setLauncherPos(double pos){

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autos.BLUE;
+package org.firstinspires.ftc.teamcode.Autos.RED;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -23,9 +23,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "BLUE 9 BALL", group = "BLUE_FAR")
+@Autonomous(name = "RED 9 BALL", group = "RED_FAR")
 @Configurable // Panels
-public class BLUEnineBall extends OpMode {
+public class REDnineBall extends OpMode {
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     enum PATH_STATES {
@@ -44,23 +44,23 @@ public class BLUEnineBall extends OpMode {
 
     public boolean isFirstSoShoot = true;
 
-  private TelemetryManager panelsTelemetry; // Panels Telemetry instance
+    private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
-  public Follower follower; // Pedro Pathing follower instance
+    public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;
-   private PATH_STATES pathState; // Current autonomous path state (state machine)
+    private PATH_STATES pathState; // Current autonomous path state (state machine)
 
-    private final Pose startPose = new Pose(BLUE_AUTO_CONSTANTS.STARTING_X, BLUE_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PICKUP_HEADING));
-    private final Pose collectBalls1ControlPoint1 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_Y);
-    private final Pose shootFar2 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_HEADING));
-    private final Pose shootFar3 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_HEADING));
-    private final Pose parkingPose = new Pose(BLUE_AUTO_CONSTANTS.PARKING_X, BLUE_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PARKING_HEADING));
-    private final Pose collectBalls2 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PICKUP_HEADING));
-    private final Pose collectBalls2ControlPoint = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_Y);
+    private final Pose startPose = new Pose(RED_AUTO_CONSTANTS.STARTING_X, RED_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(RED_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
+    private final Pose shootFar1 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose collectBalls1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_Y, Math.toRadians(RED_AUTO_CONSTANTS.PICKUP_HEADING));
+    private final Pose collectBalls1ControlPoint1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_Y);
+    private final Pose shootFar2 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_2_HEADING));
+    private final Pose shootFar3 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_3_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_3_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_3_HEADING));
+    private final Pose parkingPose = new Pose(RED_AUTO_CONSTANTS.PARKING_X, RED_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(RED_AUTO_CONSTANTS.PARKING_HEADING));
+    private final Pose collectBalls2 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_2_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_2_Y, Math.toRadians(RED_AUTO_CONSTANTS.PICKUP_HEADING));
+    private final Pose collectBalls2ControlPoint = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_Y);
 
     private PathChain startToFirePath, collect1Path, collect1ToFirePath, collect2Path, collect2ToFirePath, parkPath;
 
@@ -70,26 +70,26 @@ public class BLUEnineBall extends OpMode {
     }
 
     @Override
-  public void init() {
-    pathTimer = new Timer();
-    opmodeTimer = new Timer();
-    pathTimer.resetTimer();
-    opmodeTimer.resetTimer();
-    panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-    telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    public void init() {
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        pathTimer.resetTimer();
+        opmodeTimer.resetTimer();
+        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-    shooterAutoCore.init(hardwareMap);
-    shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-    shooterAutoCore.setCRPower(0, telemetry);
+        shooterAutoCore.init(hardwareMap);
+        shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
+        shooterAutoCore.setCRPower(0, telemetry);
 
-    follower = Constants.createFollower(hardwareMap);
-    follower.setStartingPose(startPose);
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
 
-    buildPaths();
+        buildPaths();
 
-    panelsTelemetry.debug("Status", "Initialized");
-    panelsTelemetry.update(telemetry);
-  }
+        panelsTelemetry.debug("Status", "Initialized");
+        panelsTelemetry.update(telemetry);
+    }
 
     @Override
     public void stop(){
@@ -101,7 +101,7 @@ public class BLUEnineBall extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         pathTimer.resetTimer();
-        shooterAutoCore.spinUpFlys(BLUE_AUTO_CONSTANTS.L_VEL, BLUE_AUTO_CONSTANTS.R_VEL);
+        shooterAutoCore.spinUpFlys(RED_AUTO_CONSTANTS.L_VEL, RED_AUTO_CONSTANTS.R_VEL);
         shooterAutoCore.setCRPower(-1, telemetry);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
@@ -133,7 +133,7 @@ public class BLUEnineBall extends OpMode {
                 setPathState(PATH_STATES.FIRE_AFTER_START);
                 break;
             case FIRE_AFTER_START:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > BLUE_AUTO_CONSTANTS.TIMEOUT){
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.TIMEOUT){
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -162,7 +162,7 @@ public class BLUEnineBall extends OpMode {
                 }
                 break;
             case FIRE_AFTER_BALLS_1:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > BLUE_AUTO_CONSTANTS.TIMEOUT) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.TIMEOUT) {
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -190,7 +190,7 @@ public class BLUEnineBall extends OpMode {
                 }
                 break;
             case FIRE_AFTER_BALLS_2:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > BLUE_AUTO_CONSTANTS.TIMEOUT) {
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.TIMEOUT) {
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -224,7 +224,7 @@ public class BLUEnineBall extends OpMode {
         }
     }
 
-  public void buildPaths(){
+    public void buildPaths(){
         startToFirePath = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootFar1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootFar1.getHeading())
@@ -233,7 +233,7 @@ public class BLUEnineBall extends OpMode {
         collect1Path = follower.pathBuilder()
                 .addPath(new BezierCurve(shootFar1, collectBalls1ControlPoint1, collectBalls1))
                 .setConstantHeadingInterpolation(collectBalls1.getHeading())
-                .addParametricCallback(BLUE_AUTO_CONSTANTS.PICKUP_1_TEMPORAL, () -> follower.setMaxPower(BLUE_AUTO_CONSTANTS.PICKUP_POWER))
+                .addParametricCallback(RED_AUTO_CONSTANTS.PICKUP_1_TEMPORAL, () -> follower.setMaxPower(RED_AUTO_CONSTANTS.PICKUP_POWER))
                 .build();
 
         collect1ToFirePath = follower.pathBuilder()
@@ -245,7 +245,7 @@ public class BLUEnineBall extends OpMode {
         collect2Path = follower.pathBuilder()
                 .addPath(new BezierCurve(shootFar2, collectBalls2ControlPoint, collectBalls2))
                 .setConstantHeadingInterpolation(collectBalls2.getHeading())
-                .addParametricCallback(BLUE_AUTO_CONSTANTS.PICKUP_2_TEMPORAL, () -> follower.setMaxPower(BLUE_AUTO_CONSTANTS.PICKUP_POWER))
+                .addParametricCallback(RED_AUTO_CONSTANTS.PICKUP_2_TEMPORAL, () -> follower.setMaxPower(RED_AUTO_CONSTANTS.PICKUP_POWER))
                 .build();
 
         collect2ToFirePath = follower.pathBuilder()
@@ -258,6 +258,6 @@ public class BLUEnineBall extends OpMode {
                 .addPath(new BezierLine(shootFar3, parkingPose))
                 .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
                 .build();
-  }
+    }
 }
     
