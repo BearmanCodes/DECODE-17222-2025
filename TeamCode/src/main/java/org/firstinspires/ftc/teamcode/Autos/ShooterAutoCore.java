@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Op.ModeCore;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,11 +31,11 @@ public class ShooterAutoCore {
 
     public boolean canAddShot = true;
 
-    public static double luigiBlock = 0.35;
+    public static double luigiBlock = ModeCore.LUIGI_HOPPER_SHOOT;
 
     long entry_time = 0;
 
-    public static double luigiFlow = 0.065;
+    public static double luigiFlow = ModeCore.LUIGI_HOPPER_LOAD;
 
     public static int SHOOT_INTERMITENT_TIME_MS = 1000;
 
@@ -109,6 +110,8 @@ public class ShooterAutoCore {
         //laL.setPwmEnable();
         laL.setDirection(Servo.Direction.REVERSE);
         laL.setPosition(laInitPos);
+
+        luigiServo.setPosition(luigiFlow);
 
         intake = hwMap.get(DcMotorEx.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -192,7 +195,7 @@ public class ShooterAutoCore {
         if (shotsTaken < shots){
             if (power_surge(SURGE_MEASURE, tele)){
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(0, tele);
+                setCRPower(-1, tele);
                 luigiServo.setPosition(luigiFlow);
                 if (canAddShot){
                     shotsTaken++;
@@ -210,7 +213,7 @@ public class ShooterAutoCore {
             }
             if (failsafeTimer.time(TimeUnit.MILLISECONDS) > FAILSAFE_WAIT && canAddShot) {
                 entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(0, tele);
+                setCRPower(-1, tele);
                 luigiServo.setPosition(luigiFlow);
                 if (canAddShot){
                     shotsTaken++;
@@ -222,6 +225,7 @@ public class ShooterAutoCore {
             return false;
         } else {
             setCRPower(0, tele);
+            luigiServo.setPosition(luigiFlow);
             shotsTaken = 0;
             canAddShot = true;
             return true;
@@ -263,33 +267,6 @@ public class ShooterAutoCore {
         } else {
             setCRPower(-1, tele);
             luigiServo.setPosition(luigiFlow);
-            shotsTaken = 0;
-            canAddShot = true;
-            return true;
-        }
-    }
-
-    public boolean intakeShoot(int shots, Telemetry tele){
-        if (shotsTaken < shots){
-            if (power_surge(SURGE_MEASURE, tele)){
-                entry_time = timer.now(TimeUnit.MILLISECONDS);
-                setCRPower(0, tele);
-                if (canAddShot){
-                    shotsTaken++;
-                    canAddShot = false;
-                }
-                failsafeTimer.reset();
-            }
-            if (entry_time > 0 && timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTAKE_TIME_MS){
-                entry_time = 0;
-                setCRPower(1, tele);
-                canAddShot = true;
-                failsafeTimer.reset();
-            }
-            tele.update();
-            return false;
-        } else {
-            setCRPower(0, tele);
             shotsTaken = 0;
             canAddShot = true;
             return true;
