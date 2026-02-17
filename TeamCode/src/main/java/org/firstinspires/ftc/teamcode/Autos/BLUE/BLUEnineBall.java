@@ -77,6 +77,7 @@ public class BLUEnineBall extends OpMode {
     opmodeTimer.resetTimer();
     panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
     telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    shooterAutoCore = new ShooterAutoCore(telemetry);
 
     shooterAutoCore.init(hardwareMap);
     shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -103,6 +104,7 @@ public class BLUEnineBall extends OpMode {
         pathTimer.resetTimer();
         shooterAutoCore.spinUpFlys(BLUE_AUTO_CONSTANTS.L_VEL, BLUE_AUTO_CONSTANTS.R_VEL);
         shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
