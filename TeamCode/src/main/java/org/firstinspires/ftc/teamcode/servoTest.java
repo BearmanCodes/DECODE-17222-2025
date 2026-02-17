@@ -3,6 +3,9 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import java.text.DecimalFormat;
 
@@ -21,6 +24,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class servoTest extends LinearOpMode {
     Servo servo1iamgoingtonewjersey, servo2iamgoingtonewjersey, servo3iamgoingtonewjersey, servo4iamgoingtonewjersey;
           //1        2        4       3
+
+    CRServo crServo;
     Gamepad currentGamepad =  new Gamepad();
     Gamepad previousGamepad = new Gamepad();
 
@@ -32,21 +37,30 @@ public class servoTest extends LinearOpMode {
 
     public static Servo.Direction dirR;
 
+    public static DcMotorSimple.Direction dirCR;
+
     public static boolean isFwdL = false;
 
     public static boolean isFwdR = true;
+
+    public static boolean isFwdCR = true;
     double servo1iamgoingtonewjerseyPos, servo2iamgoingtonewjerseyPos, servo3iamgoingtonewjerseyPos, servo4iamgoingtonewjerseyPos, laPos;
     @Override
 
     public void runOpMode() throws InterruptedException {
         servo1iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt1iamgoingtokillmyself".toLowerCase());
+
         servo2iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt2iamgoingtokillmyself".toLowerCase());
         servo3iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt3iamgoingtokillmyself".toLowerCase());
         servo4iamgoingtonewjersey = hardwareMap.get(Servo.class, "servecunt4iamgoingtokillmyself".toLowerCase());
+        crServo = hardwareMap.get(CRServo.class, "cr");
         dirL = isFwdL ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
         dirR = isFwdR ? Servo.Direction.FORWARD : Servo.Direction.REVERSE;
+        dirCR = isFwdCR ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
         servo2iamgoingtonewjersey.setDirection(dirL);
         servo3iamgoingtonewjersey.setDirection(dirR);
+        crServo.setDirection(dirCR);
+
         la = hardwareMap.get(ServoImplEx.class, "la");
 
         la.setPwmRange(new PwmControl.PwmRange(1000, 2000));
@@ -55,6 +69,7 @@ public class servoTest extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()){
+            crServo.setPower(1);
             try {
                 edgeDetector();
             } catch (RobotCoreException e) {

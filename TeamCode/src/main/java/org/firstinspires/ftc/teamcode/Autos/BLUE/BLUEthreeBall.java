@@ -41,7 +41,7 @@ public class BLUEthreeBall extends OpMode {
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
-    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    public ShooterAutoCore shooterAutoCore;
     public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;
@@ -65,6 +65,7 @@ public class BLUEthreeBall extends OpMode {
         opmodeTimer.resetTimer();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        shooterAutoCore = new ShooterAutoCore(telemetry);
 
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
@@ -91,6 +92,7 @@ public class BLUEthreeBall extends OpMode {
         pathTimer.resetTimer();
         shooterAutoCore.spinUpFlys(BLUE_AUTO_CONSTANTS.L_VEL, BLUE_AUTO_CONSTANTS.R_VEL);
         shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
@@ -102,6 +104,7 @@ public class BLUEthreeBall extends OpMode {
     @Override
     public void loop() {
         updatePose();
+        shooterAutoCore.FlysPIDControl();
         autonomousPathUpdate(); // Update autonomous state machine
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);

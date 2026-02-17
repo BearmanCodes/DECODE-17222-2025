@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,10 +11,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Op.ModeCore;
+import org.firstinspires.ftc.teamcode.PIDCore;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +27,9 @@ public class ShooterAutoCore {
     public Servo luigiServo;
 
     public static double KICK_ITERATOR = 0.325;
+
+    public double L_RPM = 0;
+    public double R_RPM = 0;
 
     public static long FAILSAFE_WAIT = 1750;
 
@@ -37,11 +43,11 @@ public class ShooterAutoCore {
 
     public static double luigiFlow = ModeCore.LUIGI_HOPPER_LOAD;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 1000;
+    public static int SHOOT_INTERMITENT_TIME_MS = 300;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 
-    public CRServo lServo, rServo;
+    public CRServo lServo, rServo, boot;
 
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -67,6 +73,10 @@ public class ShooterAutoCore {
 
     public static int RUNNING_MODIFIER = 350;
 
+    PIDCore pidCore;
+
+    VoltageSensor voltageSensor;
+
     public static ElapsedTime failsafeTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public boolean hasSurged = false;
@@ -79,6 +89,12 @@ public class ShooterAutoCore {
 
     public DcMotorEx fly, fry;
 
+    Telemetry telemetry;
+
+    public ShooterAutoCore(Telemetry telemetry){
+        this.telemetry = telemetry;
+    }
+
     public static double laInitPos = 0; //0.32
 
     public void init(HardwareMap hwMap){
@@ -86,13 +102,20 @@ public class ShooterAutoCore {
         rServo = hwMap.get(CRServo.class, "crr");
         fly = hwMap.get(DcMotorEx .class, "fly");
         fry = hwMap.get(DcMotorEx.class, "fry");
+        boot = hwMap.get(CRServo.class, "boot");
 
-        fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
-        fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
+        voltageSensor = hwMap.voltageSensor.iterator().next();
+        pidCore = new PIDCore(voltageSensor, telemetry);
+
+        fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
+        //fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        boot.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        boot.setPower(0);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 
@@ -155,6 +178,11 @@ public class ShooterAutoCore {
         tele.addData("Launcher Pos: ", laInitPos);
     }
 
+    public void FlysPIDControl(){
+        fly.setPower(pidCore.PID_calc(fly, L_RPM));
+        fry.setPower(pidCore.PID_calc(fry, R_RPM));
+     }
+
     public boolean power_surge(double surge_measure, Telemetry tele){
         boolean leftMotorSurge = (load_fly_expected() - fly.getVelocity()) >= surge_measure;
         boolean rightMotorSurge = (load_fry_expected() - fry.getVelocity()) >= surge_measure;
@@ -179,11 +207,20 @@ public class ShooterAutoCore {
         rServo.setPower(power);
     }
 
+    /*
     public void spinUpFlys(double lVel, double rVel){
         fly.setVelocity(lVel);
         flyExpected = lVel;
         fry.setVelocity(rVel);
         fryExpected = rVel;
+    }
+    */
+
+    public void spinUpFlys(double lRPM, double rRPM){
+        L_RPM = lRPM;
+        flyExpected = (lRPM / 60) * 28;
+        R_RPM = rRPM;
+        fryExpected = (rRPM / 60) * 28;
     }
 
     public void setLauncherPos(double pos){

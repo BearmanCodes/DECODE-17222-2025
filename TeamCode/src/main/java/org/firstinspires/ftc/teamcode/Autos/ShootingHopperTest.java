@@ -21,7 +21,7 @@ public class ShootingHopperTest extends LinearOpMode {
 
     Telemetry dashTele = dashboard.getTelemetry();
 
-    ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
 
     public static ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 

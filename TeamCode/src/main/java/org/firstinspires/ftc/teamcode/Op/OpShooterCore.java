@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Op;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class OpShooterCore {
-    public CRServo lServo, rServo;
+    public CRServo lServo, rServo, boot;
 
     public DcMotorEx fly, fry;
 
@@ -46,9 +47,11 @@ public class OpShooterCore {
 
     public Servo luigiServo;
 
+    public ColorSensor colorSensor;
+
     public static Servo laL, laR;
     public static double laInitPos = 0.025;
-    //public PIDCore pidCore;
+    public PIDCore pidCore;
     public VoltageSensor voltageSensor;
     public Telemetry telemetry;
 
@@ -56,9 +59,11 @@ public class OpShooterCore {
     public boolean hasSurged = false;
     public long entry_time = 0;
     ElapsedTime shot_timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-    public double SHOOT_INTERMITENT_TIME_MS = 600;
+    public static double SHOOT_INTERMITENT_TIME_MS = 275;
     public double luigiKick = ModeCore.LUIGI_HOPPER_SHOOT;
     public double luigiLoad = ModeCore.LUIGI_HOPPER_LOAD;
+
+    //PIDCore pidCore;
 
     public OpShooterCore(Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -68,20 +73,25 @@ public class OpShooterCore {
 
         rServo = hwMap.get(CRServo.class, "crr");
         lServo = hwMap.get(CRServo.class, "crl");
+        boot = hwMap.get(CRServo.class, "boot");
         lServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        boot.setDirection(DcMotorSimple.Direction.REVERSE);
+        boot.setPower(0);
 
         fry = hwMap.get(DcMotorEx.class, "fry");
         fly = hwMap.get(DcMotorEx.class, "fly");
-        fly.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fry.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
-        fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
+        fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //fly.setVelocityPIDFCoefficients(LP, LI, LD, LF);
+        //fry.setVelocityPIDFCoefficients(RP, RI, RD, RF);
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //voltageSensor = hwMap.voltageSensor.iterator().next();
-        //pidCore = new PIDCore(voltageSensor, telemetry);
+        voltageSensor = hwMap.voltageSensor.iterator().next();
+        pidCore = new PIDCore(voltageSensor, telemetry);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
+
+        colorSensor = hwMap.get(ColorSensor.class, "color");
 
         laL = hwMap.get(Servo.class ,"lal");
 
@@ -95,23 +105,53 @@ public class OpShooterCore {
 
         //laL.setPosition(laInitPos);
     }
-    //public void FlysPIDControl(){
-     //   fly.setPower(pidCore.PID_calc(fly, L_RPM));
-      //  fry.setPower(pidCore.PID_calc(fry, R_RPM));
-    //}
+    public void FlysPIDControl(){
+        fly.setPower(pidCore.PID_calc(fly, L_RPM));
+        fry.setPower(pidCore.PID_calc(fry, R_RPM));
+    }
 
+    public void updateColors(){
+        telemetry.addData("Red: ", colorSensor.red());
+        telemetry.addData("Green: ", colorSensor.green());
+        telemetry.addData("Blue: ", colorSensor.blue());
+    }
+
+    /*
     public void setFlySpeeds(double lRPM, double rRPM){
         fly.setVelocity(lRPM);
         flyExpectedVel = lRPM;
         fry.setVelocity(rRPM);
         fryExpectedVel = rRPM;
     }
+    */
+
+
+    public void setFlySpeeds(double lRPM, double rRPM){
+        L_RPM = lRPM;
+        flyExpectedVel = (lRPM / 60) * 28;
+        R_RPM = rRPM;
+        fryExpectedVel = (rRPM / 60) * 28;
+    }
+
     public double load_fly_expected_vel(){
         return flyExpectedVel;
     }
     public double load_fry_expected_vel(){
         return fryExpectedVel;
     }
+
+    public void boot_fwd(){
+        boot.setPower(1);
+    }
+
+    public void boot_rev(){
+        boot.setPower(-1);
+    }
+
+    public void boot_stop(){
+        boot.setPower(0);
+    }
+
     public boolean power_surge(){
         boolean leftMotorSurge = (load_fly_expected_vel() - fly.getVelocity()) >= SURGE_MEASURE;
         boolean rightMotorSurge = (load_fry_expected_vel() - fry.getVelocity()) >= SURGE_MEASURE;

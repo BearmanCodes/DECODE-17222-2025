@@ -46,7 +46,7 @@ public class REDnineBall extends OpMode {
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
-    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
     public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;

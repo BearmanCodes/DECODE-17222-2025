@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
-    static double ROBO_MASS = 16.3/*KILOGRAMS*/;
+    static double ROBO_MASS = 15.4/*KILOGRAMS*/;
     static double MAX_POWER = 1;
 
     static DcMotorSimple.Direction FL_DIR = DcMotorSimple.Direction.REVERSE;

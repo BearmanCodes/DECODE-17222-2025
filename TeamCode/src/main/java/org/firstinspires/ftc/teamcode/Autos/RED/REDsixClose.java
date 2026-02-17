@@ -57,7 +57,7 @@ public class REDsixClose extends OpMode {
     public boolean thirdTimeCR = true;
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
-    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
     public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;

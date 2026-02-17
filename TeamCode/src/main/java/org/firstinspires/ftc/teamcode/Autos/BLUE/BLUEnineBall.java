@@ -46,7 +46,7 @@ public class BLUEnineBall extends OpMode {
 
   private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
-    public ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    public ShooterAutoCore shooterAutoCore;
   public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;
@@ -114,6 +114,7 @@ public class BLUEnineBall extends OpMode {
     @Override
     public void loop() {
         updatePose();
+        shooterAutoCore.FlysPIDControl();
         autonomousPathUpdate(); // Update autonomous state machine
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);
@@ -218,6 +219,7 @@ public class BLUEnineBall extends OpMode {
                     PoseStorage.currentPose = follower.getPose();
                     shooterAutoCore.spinUpFlys(0, 0);
                     telemetry.update();
+                    shooterAutoCore.boot.setPower(0);
                     setPathState(PATH_STATES.FINISHED);
                 }
                 break;

@@ -36,7 +36,7 @@ public class HopperTesting extends LinearOpMode {
 
     public static boolean useDefaultPose = true;
 
-    ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
 
     public static ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 

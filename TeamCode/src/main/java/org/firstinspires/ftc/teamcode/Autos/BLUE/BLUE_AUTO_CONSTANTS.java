@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 public class BLUE_AUTO_CONSTANTS {
-    public static double TIMEOUT = 2500;
+    public static double TIMEOUT = 750;
     public static double PICKUP_POWER = 0.5; //0.4
 
-    public static int L_VEL = 1000;
+    public static int L_VEL = 2125; //2125
 
-    public static int R_VEL = 1200;
+    public static int R_VEL = 2525; //2525
 
     public static double STARTING_X = 55.92558139534884;
 

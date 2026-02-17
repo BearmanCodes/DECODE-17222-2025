@@ -20,7 +20,7 @@ public class CleaningMode extends LinearOpMode {
     public static int R_VEL = 150;
     //RED 1225
 
-    ShooterAutoCore shooterAutoCore = new ShooterAutoCore();
+    ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
 
     public static ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 

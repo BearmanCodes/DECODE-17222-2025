@@ -97,6 +97,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean INTAKE_RUN = false;
 
+    public static boolean BOOT_RUN = false;
+
     public static ModeCore.ALLIANCE currAlliance;
 
     public static double INTAKE_THRESHOLD = 0.15;
@@ -147,7 +149,9 @@ public class AutoTeleOp_BLUE extends OpMode {
     @Override
     public void loop() {
         telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
+        shooterCore.FlysPIDControl();
         updatePose();
+        shooterCore.updateColors();
         telemetry.addData("Vel: ", shooterCore.fly.getVelocity());
         telemetry.addData("Ver: ", shooterCore.fry.getVelocity());
         telemetry.addData("Desired Vel: ", shooterCore.load_fly_expected_vel());
@@ -363,6 +367,8 @@ public class AutoTeleOp_BLUE extends OpMode {
             INTAKE_RUN = !INTAKE_RUN;
             if (INTAKE_RUN) {
                 inPower = intakeReducer;
+                BOOT_RUN = true;
+                shooterCore.boot_fwd();
             } else {
                 inPower = 0;
             }
@@ -371,8 +377,18 @@ public class AutoTeleOp_BLUE extends OpMode {
             INTAKE_RUN = !INTAKE_RUN;
             if (INTAKE_RUN) {
                 inPower = -intakeReducer;
+                BOOT_RUN = true;
+                shooterCore.boot_rev();
             } else {
                 inPower = 0;
+            }
+        }
+        if (gamepad1.crossWasPressed()) {
+            BOOT_RUN = !BOOT_RUN;
+            if (BOOT_RUN) {
+                shooterCore.boot_fwd();
+            } else {
+                shooterCore.boot_stop();
             }
         }
         intake.setPower(inPower);
