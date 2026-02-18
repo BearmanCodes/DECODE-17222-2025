@@ -43,7 +43,7 @@ public class servoTest extends LinearOpMode {
 
     public static boolean isFwdR = true;
 
-    public static boolean isFwdCR = true;
+    public static boolean isFwdCR = false;
     double servo1iamgoingtonewjerseyPos, servo2iamgoingtonewjerseyPos, servo3iamgoingtonewjerseyPos, servo4iamgoingtonewjerseyPos, laPos;
     @Override
 

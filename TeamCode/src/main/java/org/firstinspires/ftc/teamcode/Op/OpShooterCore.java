@@ -24,7 +24,19 @@ public class OpShooterCore {
 
     public DcMotorEx fly, fry;
 
+    double green_count = 0;
+
+    double purple_count = 0;
+
+    boolean currentlyGreen = false;
+    boolean previouslyGreen = false;
+    boolean currentlyPurple = false;
+    boolean previouslyPurple = false;
+
     public static double LP = 161;
+    public static double colorTolerances = 450;
+
+    public static double specificTolerances = 500;
 
     public static double LI = 0.5;
 
@@ -43,14 +55,14 @@ public class OpShooterCore {
     public double R_RPM = 0;
     public double flyExpectedVel, fryExpectedVel;
     public double SURGE_MEASURE = 150;
-    public double RUNNING_SPEEDS = 350;
+    public static double RUNNING_SPEEDS = 350;
 
     public Servo luigiServo;
 
     public ColorSensor colorSensor;
 
     public static Servo laL, laR;
-    public static double laInitPos = 0.025;
+    public static double laInitPos = 0;
     public PIDCore pidCore;
     public VoltageSensor voltageSensor;
     public Telemetry telemetry;
@@ -88,6 +100,7 @@ public class OpShooterCore {
 
         voltageSensor = hwMap.voltageSensor.iterator().next();
         pidCore = new PIDCore(voltageSensor, telemetry);
+        PIDCore.kV = 1.00768;
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 
@@ -111,9 +124,33 @@ public class OpShooterCore {
     }
 
     public void updateColors(){
-        telemetry.addData("Red: ", colorSensor.red());
-        telemetry.addData("Green: ", colorSensor.green());
-        telemetry.addData("Blue: ", colorSensor.blue());
+        double red = colorSensor.red();
+        double blue = colorSensor.blue();
+        double green = colorSensor.green();
+        boolean isRed = red >= specificTolerances;
+        boolean isGreen = green >= specificTolerances;
+        boolean isBlue = blue >= specificTolerances;
+        boolean greenBall = isGreen && green > red && green > blue;
+        boolean purpleBall = (isRed && isBlue) && green < red && green < blue;
+        updateColorState(greenBall, purpleBall);
+        if (currentlyGreen && !previouslyGreen){
+            green_count += 1;
+        }
+        if (currentlyPurple && !previouslyPurple) {
+            purple_count += 1;
+        }
+        telemetry.addData("Red: ", red);
+        telemetry.addData("Green: ", green);
+        telemetry.addData("Blue: ", blue);
+        telemetry.addData("Green Balls: ", green_count);
+        telemetry.addData("Purple Balls: ", purple_count);
+    }
+
+    public void updateColorState(boolean green, boolean purple){
+        previouslyGreen = currentlyGreen;
+        currentlyGreen = green;
+        previouslyPurple = currentlyPurple;
+        currentlyPurple = purple;
     }
 
     /*
@@ -197,7 +234,6 @@ public class OpShooterCore {
     }
 
     public void shooting_loop() {
-        telemetry.addData("isShooting: ", isShooting);
         if (isShooting) {
             if (power_surge()) {
                 hasSurged = true;

@@ -37,9 +37,9 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static Pose startingPose;
 
-    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.425;
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.25;
 
-    public static double AUTO_REDUCER = 0.65;
+    public static double AUTO_REDUCER = 0.45; //0.65
 
     public static DcMotorEx intake;
 
@@ -70,8 +70,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
-    public static double X_TOLERANCE = .85;
-    public static double Y_TOLERANCE = .85;
+    public static double X_TOLERANCE = 1;
+    public static double Y_TOLERANCE = 1;
     public static double HEADING_TOLERANCE_DEG = 5;
 
     enum GAMEPAD_COLORS {
@@ -92,6 +92,9 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     OpShooterCore shooterCore = new OpShooterCore(telemetry);
     public static double intakeGamepad;
+
+    double previousLPM = 0;
+    double previousRPM = 0;
 
     public static boolean BLUE_ALLIANCE = true;
 
@@ -151,7 +154,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
         shooterCore.FlysPIDControl();
         updatePose();
-        shooterCore.updateColors();
+        //shooterCore.updateColors();
         telemetry.addData("Vel: ", shooterCore.fly.getVelocity());
         telemetry.addData("Ver: ", shooterCore.fry.getVelocity());
         telemetry.addData("Desired Vel: ", shooterCore.load_fly_expected_vel());
@@ -163,6 +166,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
         handleShootingInputs();
+        flywheelToggle();
         storePositions();
         intakeControls();
         if (targetPose != null) {
@@ -243,7 +247,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 updateMovedState(still);
                 if (currentlyMoved && !previouslyMoved){
                     shooterCore.stop_shoot_once();
-                    gamepad2.rumbleBlips(1);
+                    gamepad2.rumbleBlips( 1);
                 }
                 if (currentlyStill && !previouslyStill) {
                     gamepad2.rumbleBlips(2);
@@ -271,10 +275,16 @@ public class AutoTeleOp_BLUE extends OpMode {
         currentlyStill = still;
         previouslyMoved = currentlyMoved;
         currentlyMoved = !still;
+        telemetry.addData("previouslyStill: ", previouslyStill);
+        telemetry.addData("currentlyStill: ", currentlyStill);
+        telemetry.addData("previouslyMoved: ", previouslyMoved);
+        telemetry.addData("currentlyMoved: ", currentlyMoved);
+
     }
 
     public void handleShootingInputs(){
-        if (gamepad2.dpadDownWasPressed()) {
+        boolean flysAreRunning = shooterCore.fly.getVelocity() >= OpShooterCore.RUNNING_SPEEDS && shooterCore.fry.getVelocity() >= OpShooterCore.RUNNING_SPEEDS;
+        if (gamepad2.dpadDownWasPressed() && flysAreRunning) {
             shooterCore.start_shoot_once();
             isReduced = true;
         }
@@ -345,6 +355,21 @@ public class AutoTeleOp_BLUE extends OpMode {
             PoseCore.BLUE_LEFT_FAR_POSE = new Pose(PoseCore.BLUE_LEFT_FAR_X, PoseCore.BLUE_LEFT_FAR_Y, PoseCore.BLUE_LEFT_FAR_HEADING);
             targetPose = PoseCore.BLUE_LEFT_FAR_POSE;
         }
+    }
+
+    private void flywheelToggle(){
+        if (gamepad2.rightStickButtonWasPressed()){
+            previousLPM = shooterCore.L_RPM;
+            previousRPM = shooterCore.R_RPM;
+            shooterCore.setFlySpeeds(0, 0);
+        }
+        if (gamepad2.leftStickButtonWasPressed() && previousLPM != 0 && previousRPM  != 0){
+            shooterCore.setFlySpeeds(previousLPM, previousRPM);
+        }
+    }
+
+    private void colorSensing(){
+
     }
 
     private void shootingMoveReducer(){

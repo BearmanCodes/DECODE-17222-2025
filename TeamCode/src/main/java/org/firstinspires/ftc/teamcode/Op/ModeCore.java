@@ -39,7 +39,7 @@ public class ModeCore {
 
 
     //LUIGI POS
-    public static double LUIGI_HOPPER_LOAD = 0.065;
+    public static double LUIGI_HOPPER_LOAD = 0;
 
     public static double LUIGI_HOPPER_SHOOT = 0.35;
 
@@ -49,14 +49,14 @@ public class ModeCore {
     //LAUNCHER POS
     public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.32;
 
-    public static double BLUE_LEFT_FAR_LAUNCHER = 0.025; //changed name
-    public static double RED_LEFT_FAR_LAUNCHER = 0.33;
+    public static double BLUE_LEFT_FAR_LAUNCHER = 0; //changed name
+    public static double RED_LEFT_FAR_LAUNCHER = 0;
 
-    public static double BLUE_RIGHT_FAR_LAUNCHER = 0.47;
-    public static double RED_RIGHT_FAR_LAUNCHER = 0.35;
+    public static double BLUE_RIGHT_FAR_LAUNCHER = 0;
+    public static double RED_RIGHT_FAR_LAUNCHER = 0;
 
-    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.53;
-    public static double RED_LINE_CLOSE_LAUNCHER = 0.525; //0.53
+    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.058; //0.08 is max height
+    public static double RED_LINE_CLOSE_LAUNCHER = 0.058; //0.53
 
     //END LAUNCHER POS
 
@@ -71,8 +71,8 @@ public class ModeCore {
     public static int RED_RIGHT_FAR_VEL = 975;
     public static int RED_RIGHT_FAR_VER = 1175;
 
-    public static int BLUE_LINE_CLOSE_VEL = 850;
-    public static int BLUE_LINE_CLOSE_VER = 875;
+    public static int BLUE_LINE_CLOSE_VEL = 1820;
+    public static int BLUE_LINE_CLOSE_VER = 1875;
     public static int RED_LINE_CLOSE_VEL = 850;
     public static int RED_LINE_CLOSE_VER = 875;
 
@@ -85,14 +85,17 @@ public class ModeCore {
         if (gamepad2.squareWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 650;
         }
         if (gamepad2.dpadLeftWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LEFT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 275;
         }
         if (gamepad2.dpadRightWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.RIGHT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 275;
         }
     }
 

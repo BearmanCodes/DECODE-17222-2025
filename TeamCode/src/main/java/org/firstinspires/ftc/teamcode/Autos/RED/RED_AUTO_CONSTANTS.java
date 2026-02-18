@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.Autos.RED;
 
 public class RED_AUTO_CONSTANTS {
-    public static double TIMEOUT = 2500;
+    public static double TIMEOUT = 750;
     public static double PICKUP_POWER = 0.5; //0.4
 
-    public static int L_VEL = 950;
+    public static int L_VEL = 2125;
 
-    public static int R_VEL = 1150;
+    public static int R_VEL = 2525;
 
     public static double STARTING_X = 88.0744186;
 
