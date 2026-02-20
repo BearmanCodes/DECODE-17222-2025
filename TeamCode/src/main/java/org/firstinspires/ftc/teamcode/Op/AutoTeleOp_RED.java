@@ -36,8 +36,9 @@ public class AutoTeleOp_RED extends OpMode {
     public static double STARTING_X = 88.0744186;
 
     public static double STARTING_Y = 8.037209302325575;
-
     public static double STARTING_HEADING = 0;
+
+    public static double LIMELIGHT_TARGET = -0.5;
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
 
     public static Pose startingPose;
@@ -56,7 +57,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double RESET_HEADING_DEG = 180;
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.5;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.475;
 
     boolean wasMoved = false;
 
@@ -171,7 +172,6 @@ public class AutoTeleOp_RED extends OpMode {
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
         handleShootingInputs();
-        flywheelToggle();
         storePositions();
         intakeControls();
         if (targetPose != null) {
@@ -270,7 +270,9 @@ public class AutoTeleOp_RED extends OpMode {
                     // - = ccw + = cw
                     //cw is + - + -
                     //ccw is - + - +
-                    double deg_error = llResult.getTx();
+                    double tx = llResult.getTx();
+                    double target = LIMELIGHT_TARGET;
+                    double deg_error = tx - target;
                     boolean isLeft = deg_error < 0;
                     if (Math.abs(deg_error) > ALLOWED_HEADING_ERROR_DEG){
                         double[] powers;
@@ -389,44 +391,6 @@ public class AutoTeleOp_RED extends OpMode {
                 .build();
     }
 
-    private void resetHeading() {
-        follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(RESET_HEADING_DEG)));
-    }
-
-    private void storePositions(){
-        if (gamepad2.leftBumperWasPressed()){
-            Pose currentPose = follower.getPose();
-            PoseCore.RED_LINE_CLOSE_X = currentPose.getX();
-            PoseCore.RED_LINE_CLOSE_Y = currentPose.getY();
-            PoseCore.RED_LINE_CLOSE_HEADING = currentPose.getHeading();
-            PoseCore.RED_LINE_CLOSE_POSE = new Pose(PoseCore.RED_LINE_CLOSE_X, PoseCore.RED_LINE_CLOSE_Y, PoseCore.RED_LINE_CLOSE_HEADING);
-            targetPose = PoseCore.RED_LINE_CLOSE_POSE;
-        }
-        if (gamepad2.rightBumperWasPressed()){
-            Pose currentPose = follower.getPose();
-            PoseCore.RED_RIGHT_FAR_X = currentPose.getX();
-            PoseCore.RED_RIGHT_FAR_Y = currentPose.getY();
-            PoseCore.RED_RIGHT_FAR_HEADING = currentPose.getHeading();
-            PoseCore.RED_RIGHT_FAR_POSE = new Pose(PoseCore.RED_RIGHT_FAR_X, PoseCore.RED_RIGHT_FAR_Y, PoseCore.RED_RIGHT_FAR_HEADING);
-            targetPose = PoseCore.RED_RIGHT_FAR_POSE;
-        }
-    }
-
-    private void flywheelToggle(){
-        if (gamepad2.rightStickButtonWasPressed()){
-            previousLPM = shooterCore.L_RPM;
-            previousRPM = shooterCore.R_RPM;
-            shooterCore.setFlySpeeds(0, 0);
-        }
-        if (gamepad2.leftStickButtonWasPressed() && previousLPM != 0 && previousRPM  != 0){
-            shooterCore.setFlySpeeds(previousLPM, previousRPM);
-        }
-    }
-
-    private void colorSensing(){
-
-    }
-
     private void shootingMoveReducer(){
         if (gamepad1.leftStickButtonWasPressed()) {
             isReduced = !isReduced;
@@ -472,5 +436,24 @@ public class AutoTeleOp_RED extends OpMode {
             }
         }
         intake.setPower(inPower);
+    }
+
+    private void storePositions(){
+        if (gamepad2.leftBumperWasPressed()){
+            Pose currentPose = follower.getPose();
+            PoseCore.RED_LINE_CLOSE_X = currentPose.getX();
+            PoseCore.RED_LINE_CLOSE_Y = currentPose.getY();
+            PoseCore.RED_LINE_CLOSE_HEADING = currentPose.getHeading();
+            PoseCore.RED_LINE_CLOSE_POSE = new Pose(PoseCore.RED_LINE_CLOSE_X, PoseCore.RED_LINE_CLOSE_Y, PoseCore.RED_LINE_CLOSE_HEADING);
+            targetPose = PoseCore.RED_LINE_CLOSE_POSE;
+        }
+        if (gamepad2.rightBumperWasPressed()){
+            Pose currentPose = follower.getPose();
+            PoseCore.RED_RIGHT_FAR_X = currentPose.getX();
+            PoseCore.RED_RIGHT_FAR_Y = currentPose.getY();
+            PoseCore.RED_RIGHT_FAR_HEADING = currentPose.getHeading();
+            PoseCore.RED_RIGHT_FAR_POSE = new Pose(PoseCore.RED_RIGHT_FAR_X, PoseCore.RED_RIGHT_FAR_Y, PoseCore.RED_RIGHT_FAR_HEADING);
+            targetPose = PoseCore.RED_RIGHT_FAR_POSE;
+        }
     }
 }

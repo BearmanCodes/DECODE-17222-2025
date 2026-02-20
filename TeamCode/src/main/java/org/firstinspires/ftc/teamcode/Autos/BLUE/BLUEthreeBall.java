@@ -49,7 +49,7 @@ public class BLUEthreeBall extends OpMode {
 
     private final Pose startPose = new Pose(BLUE_AUTO_CONSTANTS.STARTING_X, BLUE_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose parkingPose = new Pose(BLUE_AUTO_CONSTANTS.PARKING_X, BLUE_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PARKING_HEADING));
+    private final Pose parkingPose = new Pose(BLUE_AUTO_CONSTANTS.CLOSE_PARK_X, BLUE_AUTO_CONSTANTS.CLOSE_PARK_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.CLOSE_PARK_HEADING));
     private PathChain startToFirePath, parkPath;
 
     private void setPathState(PATH_STATES pState) {

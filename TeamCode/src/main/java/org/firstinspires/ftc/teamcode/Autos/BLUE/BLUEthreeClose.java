@@ -1,13 +1,11 @@
-package org.firstinspires.ftc.teamcode.Autos.RED;
+package org.firstinspires.ftc.teamcode.Autos.BLUE;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -16,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
 import org.firstinspires.ftc.teamcode.Op.ModeCore;
 import org.firstinspires.ftc.teamcode.Op.PoseStorage;
@@ -23,21 +22,22 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "RED 3 BALL", group = "RED_FAR")
+@Autonomous(name = "BLUE 6 CLOSE", group = "BLUE_CLOSE")
 @Configurable // Panels
-public class REDthreeBall extends OpMode {
+public class BLUEthreeClose extends OpMode {
+    FtcDashboard dashboard = FtcDashboard.getInstance();
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    Telemetry dashTele = dashboard.getTelemetry();
 
     enum PATH_STATES {
         DRIVE_TO_FIRE_FROM_START,
         FIRE_AFTER_START,
         DRIVE_TO_PARK_FROM_FIRE,
         END,
-        FINISHED
+        FINISHED,
     }
 
     public boolean isFirstSoShoot = true;
-
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore = new ShooterAutoCore(telemetry);
@@ -46,14 +46,17 @@ public class REDthreeBall extends OpMode {
     Timer opmodeTimer;
     private PATH_STATES pathState; // Current autonomous path state (state machine)
 
-    private final Pose startPose = new Pose(RED_AUTO_CONSTANTS.STARTING_X, RED_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(RED_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
-    private final Pose shootFar1 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose collectBalls1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_Y, Math.toRadians(RED_AUTO_CONSTANTS.PICKUP_HEADING));
-    private final Pose collectBalls1ControlPoint1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_Y);
-    private final Pose shootFar2 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_2_HEADING));
-    private final Pose parkingPose = new Pose(RED_AUTO_CONSTANTS.PARKING_X, RED_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(RED_AUTO_CONSTANTS.PARKING_HEADING));
+    public static int L_VEL = BLUE_AUTO_CONSTANTS.CLOSE_L_VEL;
 
-    private PathChain startToFirePath, collect1Path, collect1ToFirePath, parkPath;
+    public static int R_VEL = BLUE_AUTO_CONSTANTS.CLOSE_R_VEL;
+
+    private final Pose startPose = new Pose(BLUE_AUTO_CONSTANTS.CLOSE_STARTING_X, BLUE_AUTO_CONSTANTS.CLOSE_STARTING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.CLOSE_STARTING_HEADING)); // Start Pose of our robot.
+    private final Pose shootClose1 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_CLOSE_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_CLOSE_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_CLOSE_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose parkingPose = new Pose(BLUE_AUTO_CONSTANTS.CLOSE_PARK_X, BLUE_AUTO_CONSTANTS.CLOSE_PARK_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.CLOSE_PARK_HEADING));
+
+    //private final Pose collectBalls2ControlPoint = new Pose(BLUE_AUTO_CONSTANTS.CLOSE_COLLECT_BALLS_2_CONTROL_X, BLUE_AUTO_CONSTANTS.CLOSE_COLLECT_BALLS_2_CONTROL_Y);
+
+    private PathChain startToFirePath, parkFromFirePath;
 
     private void setPathState(PATH_STATES pState) {
         pathState = pState;
@@ -64,14 +67,11 @@ public class REDthreeBall extends OpMode {
     public void init() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        pathTimer.resetTimer();
         opmodeTimer.resetTimer();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
-        shooterAutoCore.setCRPower(0, telemetry);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -86,15 +86,15 @@ public class REDthreeBall extends OpMode {
     public void stop(){
         PoseStorage.currentPose = follower.getPose();
         shooterAutoCore.spinUpFlys(0, 0);
+        dashTele.update();
     }
 
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-        pathTimer.resetTimer();
-        shooterAutoCore.spinUpFlys(RED_AUTO_CONSTANTS.L_VEL, RED_AUTO_CONSTANTS.R_VEL);
-        shooterAutoCore.FlysPIDControl();
-        shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
+        shooterAutoCore.setLauncherPos(ModeCore.BLUE_LINE_CLOSE_LAUNCHER);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
@@ -111,7 +111,7 @@ public class REDthreeBall extends OpMode {
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);
         // Log values to Panels and Driver Station
-        telemetry.update();
+        dashTele.update();
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -126,7 +126,7 @@ public class REDthreeBall extends OpMode {
                 setPathState(PATH_STATES.FIRE_AFTER_START);
                 break;
             case FIRE_AFTER_START:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.TIMEOUT){
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > BLUE_AUTO_CONSTANTS.CLOSE_TIMEOUT){
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -142,8 +142,8 @@ public class REDthreeBall extends OpMode {
                 }
                 break;
             case DRIVE_TO_PARK_FROM_FIRE:
-                if (!follower.isBusy()) {
-                    follower.followPath(parkPath);
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > BLUE_AUTO_CONSTANTS.INTAKE_TIMEOUT) {
+                    follower.followPath(parkFromFirePath);
                     setPathState(PATH_STATES.END);
                 }
                 break;
@@ -156,20 +156,18 @@ public class REDthreeBall extends OpMode {
                     telemetry.update();
                     setPathState(PATH_STATES.FINISHED);
                 }
-                break;
         }
     }
 
     public void buildPaths(){
         startToFirePath = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootFar1))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootFar1.getHeading())
+                .addPath(new BezierLine(startPose, shootClose1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootClose1.getHeading())
                 .build();
 
-
-        parkPath = follower.pathBuilder()
-                .addPath(new BezierLine(shootFar1, parkingPose))
-                .setLinearHeadingInterpolation(shootFar1.getHeading(), parkingPose.getHeading())
+        parkFromFirePath = follower.pathBuilder()
+                .addPath(new BezierLine(shootClose1, parkingPose))
+                .setConstantHeadingInterpolation(parkingPose.getHeading())
                 .build();
     }
 }

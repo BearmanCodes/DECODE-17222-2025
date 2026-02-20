@@ -97,6 +97,7 @@ public class REDsixBall extends OpMode {
         pathTimer.resetTimer();
         shooterAutoCore.spinUpFlys(RED_AUTO_CONSTANTS.L_VEL, RED_AUTO_CONSTANTS.R_VEL);
         shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
@@ -109,7 +110,7 @@ public class REDsixBall extends OpMode {
     public void loop() {
         updatePose();
         autonomousPathUpdate(); // Update autonomous state machine
-        //shooterAutoCore.power_surge(150);
+        shooterAutoCore.FlysPIDControl();
         telemetry.addData("Path State: ", pathState);
         // Log values to Panels and Driver Station
         telemetry.update();

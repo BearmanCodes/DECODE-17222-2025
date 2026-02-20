@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class PIDCore {
-    ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    public ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public DcMotorEx fly;
     public VoltageSensor voltageSensor;
@@ -20,9 +20,9 @@ public class PIDCore {
 
     public final double RHINO_RADIUS = 36.0; //mm
 
-    double previous_error = 0.0;
+    public double previous_error = 0.0;
 
-    double previous_time = 0.0;
+    public double previous_time = 0.0;
 
     public static double DESIRED_RPM = 1875;
 

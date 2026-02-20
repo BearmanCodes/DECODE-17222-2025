@@ -71,7 +71,12 @@ public class OpShooterCore {
     public boolean hasSurged = false;
     public long entry_time = 0;
     ElapsedTime shot_timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-    public static double SHOOT_INTERMITENT_TIME_MS = 650;
+
+    public static double SHOOT_INTERMITENT_TIME_MS = 350;
+
+    public static double FAR_SHOOT_INTERMITENT_TIME_MS = 350;
+
+    public static double LINE_CLOSE_SHOOT_INTERMITENT_TIME_MS = 650;
     public double luigiKick = ModeCore.LUIGI_HOPPER_SHOOT;
     public double luigiLoad = ModeCore.LUIGI_HOPPER_LOAD;
 
@@ -100,7 +105,6 @@ public class OpShooterCore {
 
         voltageSensor = hwMap.voltageSensor.iterator().next();
         pidCore = new PIDCore(voltageSensor, telemetry);
-        PIDCore.kV = 1.00768;
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 

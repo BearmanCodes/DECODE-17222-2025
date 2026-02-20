@@ -48,7 +48,7 @@ public class ModeCore {
 
 
     //LAUNCHER POS
-    public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0.32;
+    public static double HOPPER_LOAD_PLATFORM_HEIGHT = 0;
 
     public static double BLUE_LEFT_FAR_LAUNCHER = 0; //changed name
     public static double RED_LEFT_FAR_LAUNCHER = 0;
@@ -72,10 +72,10 @@ public class ModeCore {
     public static int RED_RIGHT_FAR_VEL = 2250;
     public static int RED_RIGHT_FAR_VER = 2250;
 
-    public static int BLUE_LINE_CLOSE_VEL = 1820;
-    public static int BLUE_LINE_CLOSE_VER = 1875;
-    public static int RED_LINE_CLOSE_VEL = 850;
-    public static int RED_LINE_CLOSE_VER = 875;
+    public static int BLUE_LINE_CLOSE_VEL = 1855;
+    public static int BLUE_LINE_CLOSE_VER = 1855;
+    public static int RED_LINE_CLOSE_VEL = 1855;
+    public static int RED_LINE_CLOSE_VER = 1855;
 
     //END VELS
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;
@@ -86,14 +86,26 @@ public class ModeCore {
         if (gamepad2.squareWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.LINE_CLOSE_SHOOT_INTERMITENT_TIME_MS;
+            shooterCore.pidCore.timer.reset();
+            shooterCore.pidCore.previous_error = 0;
+            shooterCore.pidCore.previous_time = 0;
         }
         if (gamepad2.dpadLeftWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LEFT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.FAR_SHOOT_INTERMITENT_TIME_MS;
+            shooterCore.pidCore.timer.reset();
+            shooterCore.pidCore.previous_error = 0;
+            shooterCore.pidCore.previous_time = 0;
         }
         if (gamepad2.dpadRightWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.RIGHT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
+            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.FAR_SHOOT_INTERMITENT_TIME_MS;
+            shooterCore.pidCore.timer.reset();
+            shooterCore.pidCore.previous_error = 0;
+            shooterCore.pidCore.previous_time = 0;
         }
     }
 
