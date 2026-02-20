@@ -71,7 +71,7 @@ public class OpShooterCore {
     public boolean hasSurged = false;
     public long entry_time = 0;
     ElapsedTime shot_timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-    public static double SHOOT_INTERMITENT_TIME_MS = 275;
+    public static double SHOOT_INTERMITENT_TIME_MS = 650;
     public double luigiKick = ModeCore.LUIGI_HOPPER_SHOOT;
     public double luigiLoad = ModeCore.LUIGI_HOPPER_LOAD;
 

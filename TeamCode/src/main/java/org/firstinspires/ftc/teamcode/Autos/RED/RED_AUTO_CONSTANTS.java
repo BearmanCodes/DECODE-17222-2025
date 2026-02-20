@@ -4,9 +4,9 @@ public class RED_AUTO_CONSTANTS {
     public static double TIMEOUT = 750;
     public static double PICKUP_POWER = 0.5; //0.4
 
-    public static int L_VEL = 2125;
+    public static int L_VEL = 2250;
 
-    public static int R_VEL = 2525;
+    public static int R_VEL = 2250;
 
     public static double STARTING_X = 88.0744186;
 
@@ -40,11 +40,11 @@ public class RED_AUTO_CONSTANTS {
 
     public static double COLLECT_BALLS_2_X = 132.5;
 
-    public static double COLLECT_BALLS_2_Y = 63;
+    public static double COLLECT_BALLS_2_Y = 62.75;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 71.75;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 67;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 66.75;
 
     public static double PICKUP_2_TEMPORAL = 0.4333;
 

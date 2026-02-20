@@ -70,8 +70,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
-    public static double X_TOLERANCE = 1;
-    public static double Y_TOLERANCE = 1;
+    public static double X_TOLERANCE = 2;
+    public static double Y_TOLERANCE = 2;
     public static double HEADING_TOLERANCE_DEG = 5;
 
     enum GAMEPAD_COLORS {
@@ -330,7 +330,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     private void updatePathToFollow(){
         targetPath = follower.pathBuilder()
                 .addPath(new BezierCurve(follower::getPose, targetPose))
-                .setConstantHeadingInterpolation(targetPose.getHeading())
+                .setLinearHeadingInterpolation(follower.getHeading(), targetPose.getHeading())
                 .build();
     }
 

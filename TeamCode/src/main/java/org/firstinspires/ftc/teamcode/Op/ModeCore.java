@@ -23,7 +23,8 @@ public class ModeCore {
         MANUAL_DRIVE,
         AUTOMATED_DRIVE,
         SHOOT_MODE,
-        HOLD
+        HOLD,
+        LIMELIGHT
     }
     //END ENUMS
 
@@ -68,8 +69,8 @@ public class ModeCore {
 
     public static int BLUE_RIGHT_FAR_VEL = 1000;
     public static int BLUE_RIGHT_FAR_VER = 1000;
-    public static int RED_RIGHT_FAR_VEL = 975;
-    public static int RED_RIGHT_FAR_VER = 1175;
+    public static int RED_RIGHT_FAR_VEL = 2250;
+    public static int RED_RIGHT_FAR_VER = 2250;
 
     public static int BLUE_LINE_CLOSE_VEL = 1820;
     public static int BLUE_LINE_CLOSE_VER = 1875;
@@ -85,17 +86,14 @@ public class ModeCore {
         if (gamepad2.squareWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
-            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 650;
         }
         if (gamepad2.dpadLeftWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LEFT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
-            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 275;
         }
         if (gamepad2.dpadRightWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.RIGHT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
-            OpShooterCore.SHOOT_INTERMITENT_TIME_MS = 275;
         }
     }
 

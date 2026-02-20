@@ -26,13 +26,13 @@ public class PIDCore {
 
     public static double DESIRED_RPM = 1875;
 
-    public static double kV = 1.0783125; //can tune this more but this works alright. Perfect for 4500 RPM, not so much for others, think should tune kV based on desired speeds.
+    public static double kV = 1.08; //can tune this more but this works alright. Perfect for 4500 RPM, not so much for others, think should tune kV based on desired speeds.
 
     //public static double kV = 1.01; //works better for RPM of 1875 or vel of 875
 
-    public static double kP = 0.000835;
+    public static double kP = 0.000935;
 
-    public static double kD = 0.00431;
+    public static double kD = 0.005;
 
     public static boolean doThing = true;
 

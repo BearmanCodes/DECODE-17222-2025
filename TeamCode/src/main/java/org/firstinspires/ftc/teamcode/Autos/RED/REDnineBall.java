@@ -103,6 +103,7 @@ public class REDnineBall extends OpMode {
         pathTimer.resetTimer();
         shooterAutoCore.spinUpFlys(RED_AUTO_CONSTANTS.L_VEL, RED_AUTO_CONSTANTS.R_VEL);
         shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
@@ -115,6 +116,7 @@ public class REDnineBall extends OpMode {
     public void loop() {
         updatePose();
         autonomousPathUpdate(); // Update autonomous state machine
+        shooterAutoCore.FlysPIDControl();
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);
         // Log values to Panels and Driver Station
@@ -218,6 +220,7 @@ public class REDnineBall extends OpMode {
                     PoseStorage.currentPose = follower.getPose();
                     shooterAutoCore.spinUpFlys(0, 0);
                     telemetry.update();
+                    shooterAutoCore.boot.setPower(0);
                     setPathState(PATH_STATES.FINISHED);
                 }
                 break;
