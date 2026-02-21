@@ -43,7 +43,7 @@ public class ShooterAutoCore {
 
     public static double luigiFlow = ModeCore.LUIGI_HOPPER_LOAD;
 
-    public static int SHOOT_INTERMITENT_TIME_MS = 300;
+    public static int SHOOT_INTERMITENT_TIME_MS = 750;
 
     public static int SHOOT_INTAKE_TIME_MS = 750;
 

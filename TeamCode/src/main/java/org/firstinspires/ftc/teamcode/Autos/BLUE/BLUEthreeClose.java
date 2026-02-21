@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Config
-@Autonomous(name = "BLUE 6 CLOSE", group = "BLUE_CLOSE")
+@Autonomous(name = "BLUE 3 CLOSE", group = "BLUE_CLOSE")
 @Configurable // Panels
 public class BLUEthreeClose extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();

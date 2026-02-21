@@ -33,6 +33,7 @@ public class CleaningMode extends LinearOpMode {
         shooterAutoCore.luigiServo.setPosition(LUIGI_HOPPER_LOAD);
         waitForStart();
         while (!isStopRequested()){
+            shooterAutoCore.FlysPIDControl();
             if (gamepad1.leftStickButtonWasPressed()) {
                 shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
                 shooterAutoCore.setCRPower(0, telemetry);

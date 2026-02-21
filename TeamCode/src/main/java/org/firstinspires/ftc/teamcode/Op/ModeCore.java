@@ -56,26 +56,26 @@ public class ModeCore {
     public static double BLUE_RIGHT_FAR_LAUNCHER = 0;
     public static double RED_RIGHT_FAR_LAUNCHER = 0;
 
-    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.058; //0.08 is max height
-    public static double RED_LINE_CLOSE_LAUNCHER = 0.058; //0.53
+    public static double BLUE_LINE_CLOSE_LAUNCHER = 0.05; //0.08 is max height
+    public static double RED_LINE_CLOSE_LAUNCHER = 0.05; //0.53
 
     //END LAUNCHER POS
 
     //VELS
-    public static int BLUE_LEFT_FAR_VEL = 2125; //1000
-    public static int BLUE_LEFT_FAR_VER = 2525; //1200
-    public static int RED_LEFT_FAR_VEL = 1000;
-    public static int RED_LEFT_FAR_VER = 1000;
+    public static int BLUE_LEFT_FAR_VEL = 2250; //1000
+    public static int BLUE_LEFT_FAR_VER = 2250; //1200
+    public static int RED_LEFT_FAR_VEL = 2250;
+    public static int RED_LEFT_FAR_VER = 2250;
 
-    public static int BLUE_RIGHT_FAR_VEL = 1000;
-    public static int BLUE_RIGHT_FAR_VER = 1000;
+    public static int BLUE_RIGHT_FAR_VEL = 2250;
+    public static int BLUE_RIGHT_FAR_VER = 2250;
     public static int RED_RIGHT_FAR_VEL = 2250;
     public static int RED_RIGHT_FAR_VER = 2250;
 
-    public static int BLUE_LINE_CLOSE_VEL = 1855;
-    public static int BLUE_LINE_CLOSE_VER = 1855;
-    public static int RED_LINE_CLOSE_VEL = 1855;
-    public static int RED_LINE_CLOSE_VER = 1855;
+    public static int BLUE_LINE_CLOSE_VEL = 1825;
+    public static int BLUE_LINE_CLOSE_VER = 1825;
+    public static int RED_LINE_CLOSE_VEL = 1825;
+    public static int RED_LINE_CLOSE_VER = 1825;
 
     //END VELS
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;

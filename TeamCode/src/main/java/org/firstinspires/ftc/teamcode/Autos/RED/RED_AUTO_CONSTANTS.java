@@ -17,17 +17,17 @@ public class RED_AUTO_CONSTANTS {
     public static double SHOOT_FAR_POS_X = 84.5;
     public static double SHOOT_FAR_POS_Y = 12.0; //12
 
-    public static double SHOOT_FAR_POS_HEADING = 69;
+    public static double SHOOT_FAR_POS_HEADING = 66.5;
 
     public static double SHOOT_FAR_2_POS_X = 86.5;
     public static double SHOOT_FAR_2_POS_Y = 15.0;
 
-    public static double SHOOT_FAR_2_HEADING = 67;
+    public static double SHOOT_FAR_2_HEADING = 66.5;
 
     public static double SHOOT_FAR_3_POS_X = 86.5;
     public static double SHOOT_FAR_3_POS_Y = 15.0;
 
-    public static double SHOOT_FAR_3_HEADING = 67;
+    public static double SHOOT_FAR_3_HEADING = 66.5;
 
     public static double COLLECT_BALLS_X = 132.75;
     public static double COLLECT_BALLS_Y = 40;
@@ -40,13 +40,13 @@ public class RED_AUTO_CONSTANTS {
 
     public static double COLLECT_BALLS_2_X = 132.5;
 
-    public static double COLLECT_BALLS_2_Y = 62.75;
+    public static double COLLECT_BALLS_2_Y = 62.35;
 
     public static double COLLECT_BALLS_2_CONTROL_X = 71.75;
 
-    public static double COLLECT_BALLS_2_CONTROL_Y = 66.75;
+    public static double COLLECT_BALLS_2_CONTROL_Y = 66.35;
 
-    public static double PICKUP_2_TEMPORAL = 0.4333;
+    public static double PICKUP_2_TEMPORAL = 0.41111;
 
     public static double PICKUP_HEADING = 180;
 

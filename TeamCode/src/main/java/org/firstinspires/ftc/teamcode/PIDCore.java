@@ -16,15 +16,15 @@ public class PIDCore {
     public final double MAX_RPM = 6000.0;
     public final double TPR = 28.0;
 
-    public final double RHINO_DIAMETER = 72.0; //mm
+    public final double RHINO_DIAMETER = 96.0; //mm
 
-    public final double RHINO_RADIUS = 36.0; //mm
+    public final double RHINO_RADIUS = 48.0; //mm
 
     public double previous_error = 0.0;
 
     public double previous_time = 0.0;
 
-    public static double DESIRED_RPM = 1875;
+    public static double DESIRED_RPM = 1150;
 
     public static double kV = 1.08; //can tune this more but this works alright. Perfect for 4500 RPM, not so much for others, think should tune kV based on desired speeds.
 

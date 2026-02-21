@@ -6,9 +6,9 @@ public class BLUE_AUTO_CONSTANTS {
     public static double TIMEOUT = 750;
     public static double PICKUP_POWER = 0.5; //0.4
 
-    public static int L_VEL = 2125; //2125
+    public static int L_VEL = 2250; //2125
 
-    public static int R_VEL = 2525; //2525
+    public static int R_VEL = 2250; //2525
 
     public static double STARTING_X = 55.92558139534884;
 
@@ -16,20 +16,20 @@ public class BLUE_AUTO_CONSTANTS {
 
     public static double STARTING_HEADING = 180;
 
-    public static double SHOOT_FAR_POS_X = 61.5;
+    public static double SHOOT_FAR_POS_X = 60;
     public static double SHOOT_FAR_POS_Y = 12.0; //12
 
-    public static double SHOOT_FAR_POS_HEADING = 111;
+    public static double SHOOT_FAR_POS_HEADING = 113;
 
-    public static double SHOOT_FAR_2_POS_X = 61.5;
+    public static double SHOOT_FAR_2_POS_X = 60;
     public static double SHOOT_FAR_2_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_2_HEADING = 115;
+    public static double SHOOT_FAR_2_HEADING = 113;
 
-    public static double SHOOT_FAR_3_POS_X = 61.5;
+    public static double SHOOT_FAR_3_POS_X = 60;
     public static double SHOOT_FAR_3_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_3_HEADING = 115;
+    public static double SHOOT_FAR_3_HEADING = 113;
 
     public static double COLLECT_BALLS_X = 11;
     public static double COLLECT_BALLS_Y = 35;
@@ -64,7 +64,6 @@ public class BLUE_AUTO_CONSTANTS {
 
     public static double CLOSE_TIMEOUT = 1500;
     public static double INTAKE_TIMEOUT = 9000;
-
 
     public static double CLOSE_STARTING_X = 15.5;
     public static double CLOSE_STARTING_Y = 111;

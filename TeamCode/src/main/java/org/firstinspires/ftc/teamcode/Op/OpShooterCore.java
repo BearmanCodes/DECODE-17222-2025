@@ -72,9 +72,9 @@ public class OpShooterCore {
     public long entry_time = 0;
     ElapsedTime shot_timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
-    public static double SHOOT_INTERMITENT_TIME_MS = 350;
+    public static double SHOOT_INTERMITENT_TIME_MS = 650;
 
-    public static double FAR_SHOOT_INTERMITENT_TIME_MS = 350;
+    public static double FAR_SHOOT_INTERMITENT_TIME_MS = 650;
 
     public static double LINE_CLOSE_SHOOT_INTERMITENT_TIME_MS = 650;
     public double luigiKick = ModeCore.LUIGI_HOPPER_SHOOT;

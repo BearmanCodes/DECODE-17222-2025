@@ -37,20 +37,20 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double inPower = 0;
 
-    public static double STARTING_X = 88.0744186;
+    public static double STARTING_X = 55.92558139534884;
 
     public static double STARTING_Y = 8.037209302325575;
 
-    public static double STARTING_HEADING = 0;
+    public static double STARTING_HEADING = 180;
 
-    public static double LIMELIGHT_TARGET = -0.5;
+    public static double LIMELIGHT_TARGET = 1.5;
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
 
     public static Pose startingPose;
 
     public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.2;
 
-    public static double AUTO_REDUCER = 0.45; //0.65
+    public static double AUTO_REDUCER = 0.75; //0.65
 
     public static DcMotorEx intake;
 
@@ -62,7 +62,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double RESET_HEADING_DEG = 180;
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.475;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
 
     boolean wasMoved = false;
 
