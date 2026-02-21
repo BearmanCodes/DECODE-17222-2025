@@ -19,17 +19,17 @@ public class BLUE_AUTO_CONSTANTS {
     public static double SHOOT_FAR_POS_X = 60;
     public static double SHOOT_FAR_POS_Y = 12.0; //12
 
-    public static double SHOOT_FAR_POS_HEADING = 113;
+    public static double SHOOT_FAR_POS_HEADING = 113.5;
 
     public static double SHOOT_FAR_2_POS_X = 60;
     public static double SHOOT_FAR_2_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_2_HEADING = 113;
+    public static double SHOOT_FAR_2_HEADING = 115;
 
     public static double SHOOT_FAR_3_POS_X = 60;
     public static double SHOOT_FAR_3_POS_Y = 14.0; //12
 
-    public static double SHOOT_FAR_3_HEADING = 113;
+    public static double SHOOT_FAR_3_HEADING = 115;
 
     public static double COLLECT_BALLS_X = 11;
     public static double COLLECT_BALLS_Y = 35;
