@@ -73,6 +73,7 @@ public class AutoTeleOp_RED extends OpMode {
 
     public Limelight3A limelight;
 
+
     public static double FAILSAFE_STICK_TRIGGER = 0.1;
 
     public static double X_TOLERANCE = 2;
@@ -103,7 +104,11 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static boolean BLUE_ALLIANCE = false;
 
-    public static boolean INTAKE_RUN = false;
+    public static boolean INTAKE_RUN_FWD = false;
+
+    public static boolean INTAKE_RUN_REV = false;
+
+    boolean LIMELIGHT_ALIGNED = false;
 
     public static boolean BOOT_RUN = false;
 
@@ -121,9 +126,14 @@ public class AutoTeleOp_RED extends OpMode {
 
     private static PathChain targetPath;
 
+    PrismCore prismCore = new PrismCore();
+
+    DrivetrainCore dtCore = new DrivetrainCore();
+
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        prismCore.Init(hardwareMap);
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
@@ -140,12 +150,15 @@ public class AutoTeleOp_RED extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, targetPose)))
                 .setHeadingInterpolation(HeadingInterpolator.constant(targetPose.getHeading() + Math.toRadians(PATH_HEADING_OFFSET)))
                 .build();
+        dtCore.Init(hardwareMap);
         follower.update();
     }
 
     @Override
     public void start() {
         follower.startTeleopDrive(true);
+        prismCore.BAR_LIGHT();
+        prismCore.LL_BAD();
         shooterCore.setCRPower(-1);
     }
 
@@ -155,11 +168,16 @@ public class AutoTeleOp_RED extends OpMode {
     }
 
     @Override
+    public void stop(){
+        prismCore.CLEAR();
+    }
+
+    @Override
     public void loop() {
         telemetry.addData("Current Mode: ", ModeCore.currentDriveMode);
         shooterCore.FlysPIDControl();
         updatePose();
-        //shooterCore.updateColors();
+        shooterCore.updateColors();
         telemetry.addData("Vel: ", shooterCore.fly.getVelocity());
         telemetry.addData("Ver: ", shooterCore.fry.getVelocity());
         telemetry.addData("Desired Vel: ", shooterCore.load_fly_expected_vel());
@@ -180,7 +198,7 @@ public class AutoTeleOp_RED extends OpMode {
             case MANUAL_DRIVE:
                 shootingMoveReducer();
                 follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
-                setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
+                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.GREEN, AutoTeleOp_RED.GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPath != null) {
                         gamepad1.rumbleBlips(1);
@@ -205,6 +223,7 @@ public class AutoTeleOp_RED extends OpMode {
                     LLResult llResult = limelight.getLatestResult();
                     if (llResult != null && llResult.isValid()) {
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.LIMELIGHT;
+                        prismCore.LL_BAD();
                     } else {
                         gamepad2.rumbleBlips(4);
                     }
@@ -222,7 +241,7 @@ public class AutoTeleOp_RED extends OpMode {
                 }
                 break;
             case AUTOMATED_DRIVE:
-                setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
+                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.RED, AutoTeleOp_RED.GAMEPAD_COLORS.GREEN);
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);
                     isReduced = false;
@@ -236,6 +255,7 @@ public class AutoTeleOp_RED extends OpMode {
                     LLResult llResult = limelight.getLatestResult();
                     if (llResult != null && llResult.isValid()) {
                         ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.LIMELIGHT;
+                        prismCore.LL_BAD();
                         break;
                     } else {
                         gamepad2.rumbleBlips(4);
@@ -265,7 +285,7 @@ public class AutoTeleOp_RED extends OpMode {
                 break;
             case LIMELIGHT:
                 LLResult llResult = limelight.getLatestResult();
-                if (llResult != null && llResult.isValid()) {
+                if (llResult != null && llResult.isValid() && !LIMELIGHT_ALIGNED) {
                     // - = ccw + = cw
                     //cw is + - + -
                     //ccw is - + - +
@@ -274,30 +294,28 @@ public class AutoTeleOp_RED extends OpMode {
                     double deg_error = tx - target;
                     boolean isLeft = deg_error < 0;
                     if (Math.abs(deg_error) > ALLOWED_HEADING_ERROR_DEG){
-                        double[] powers;
                         if (isLeft) {
-                            powers = new double[]{-DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT};
+                            dtCore.setDrivetrainPower(-DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT);
                         } else {
-                            powers = new double[]{DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT};
+                            dtCore.setDrivetrainPower(DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT);
                         }
-                        follower.drivetrain.runDrive(powers);
                     } else {
+                        LIMELIGHT_ALIGNED = true;
                         gamepad2.rumbleBlips(2);
-                        follower.startTeleOpDrive(true);
-                        follower.setMaxPower(1);
-                        ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
-                        break;
+                        prismCore.LL_GOOD();
                     }
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.startTeleOpDrive(true);
                     follower.setMaxPower(1);
+                    LIMELIGHT_ALIGNED = false;
+                    prismCore.LL_BAD();
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
                 break;
             case HOLD:
-                setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
+                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.RED, AutoTeleOp_RED.GAMEPAD_COLORS.RED);
                 follower.holdPoint(getPoseToHold());
                 boolean still = follower.atPose(getPoseToHold(), X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
                 updateMovedState(still);
@@ -362,23 +380,23 @@ public class AutoTeleOp_RED extends OpMode {
         return one_left_y || one_left_x || one_right_y || one_right_x;
     }
 
-    private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
-        if (oneColor == GAMEPAD_COLORS.RED) {
+    private void setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS oneColor, AutoTeleOp_RED.GAMEPAD_COLORS twoColor){
+        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.RED) {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (oneColor == GAMEPAD_COLORS.BLUE) {
+        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.BLUE) {
             gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (oneColor == GAMEPAD_COLORS.GREEN) {
+        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.GREEN) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == GAMEPAD_COLORS.RED) {
+        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.RED) {
             gamepad2.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == GAMEPAD_COLORS.BLUE) {
+        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.BLUE) {
             gamepad2.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == GAMEPAD_COLORS.GREEN) {
+        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
     }
@@ -407,23 +425,29 @@ public class AutoTeleOp_RED extends OpMode {
 
     private void intakeControls(){
         if (gamepad1.leftBumperWasPressed()) {
-            INTAKE_RUN = !INTAKE_RUN;
-            if (INTAKE_RUN) {
+            INTAKE_RUN_FWD = !INTAKE_RUN_FWD;
+            INTAKE_RUN_REV = false;
+            if (INTAKE_RUN_FWD) {
                 inPower = intakeReducer;
+                prismCore.INTAKE_SUCK();
                 BOOT_RUN = true;
                 shooterCore.boot_fwd();
             } else {
                 inPower = 0;
+                prismCore.INTAKE_NONE();
             }
         }
         if (gamepad1.rightBumperWasPressed()) {
-            INTAKE_RUN = !INTAKE_RUN;
-            if (INTAKE_RUN) {
+            INTAKE_RUN_REV = !INTAKE_RUN_REV;
+            INTAKE_RUN_FWD = false;
+            if (INTAKE_RUN_REV) {
                 inPower = -intakeReducer;
+                prismCore.INTAKE_SPIT();
                 BOOT_RUN = true;
                 shooterCore.boot_rev();
             } else {
                 inPower = 0;
+                prismCore.INTAKE_NONE();
             }
         }
         if (gamepad1.crossWasPressed()) {
