@@ -306,15 +306,16 @@ public class AutoTeleOp_BLUE extends OpMode {
                         }
                     } else {
                         LIMELIGHT_ALIGNED = true;
+                        dtCore.setDrivetrainPower(0, 0, 0, 0);
                         gamepad2.rumbleBlips(2);
                         prismCore.LL_GOOD();
                     }
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
-                    follower.startTeleOpDrive(true);
-                    follower.setMaxPower(1);
                     LIMELIGHT_ALIGNED = false;
                     prismCore.LL_BAD();
+                    follower.startTeleOpDrive(true);
+                    follower.setMaxPower(1);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
