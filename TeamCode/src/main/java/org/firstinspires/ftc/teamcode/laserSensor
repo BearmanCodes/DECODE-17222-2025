@@ -1,0 +1,63 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+
+/**
+ * goBILDA Laser Distance Sensor Example (Digital Mode)
+ *
+ * This example shows how to read the digital output of the goBILDA
+ * Laser Distance Sensor.
+ *
+ * In Digital Mode, the sensor outputs either HIGH or LOW depending on
+ * whether it detects an object in front of it. The onboard potentiometer
+ * adjusts the detection distance from approximately 25mm up to 264mm.
+ *
+ * This sensor is active-HIGH, meaning the output line goes HIGH (3.3V)
+ * when an object is detected, and LOW (0V) when no object is present.
+ *
+ * Wire the sensor to a Digital port on your Hub and name it "laserDigitalInput"
+ * in your Robot Configuration.
+ *
+ * Display:
+ * The current detection state is displayed in telemetry.
+ */
+@TeleOp(name = "laserDigitalExample")
+public class laserSensor extends LinearOpMode {
+
+    private DigitalChannel laserInput;
+
+    @Override
+    public void runOpMode() {
+        // Get the digital sensor from the hardware map
+        laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry())
+
+        // Set the channel as an input
+        laserInput.setMode(DigitalChannel.Mode.INPUT);
+
+        // Wait for the driver to press PLAY
+        waitForStart();
+
+        // Loop while the OpMode is active
+        while (opModeIsActive()) {
+            // Read the sensor state (true = HIGH, false = LOW)
+            boolean stateHigh = laserInput.getState();
+
+            // Active-HIGH: HIGH means an object is detected
+            boolean detected = stateHigh;
+
+            // Display detection state
+            if (detected) {
+                telemetry.addLine("Object detected!");
+            } else {
+                telemetry.addLine("No object detected");
+            }
+
+            // Display the raw HIGH/LOW signal for reference
+            telemetry.addData("Raw (HIGH/LOW)", stateHigh);
+            telemetry.update();
+        }
+    }
+}
