@@ -241,6 +241,7 @@ public class OpShooterCore {
         if (isShooting) {
             if (power_surge()) {
                 hasSurged = true;
+                AutoTeleOp_BLUE.ballCount -= 1;
                 entry_time = shot_timer.now(TimeUnit.MILLISECONDS);
                 setCRPower(-1);
                 luigiLoad();

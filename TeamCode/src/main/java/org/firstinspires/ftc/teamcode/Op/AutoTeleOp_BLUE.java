@@ -22,6 +22,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Laser;
 import org.firstinspires.ftc.teamcode.PIDCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -34,6 +35,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
 
     public static Follower follower;
+
+    Laser laserSensor;
 
     public static double inPower = 0;
 
@@ -71,6 +74,8 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static boolean automatedDrive = false;
 
     public static boolean useDefaultPose = false;
+
+    public static int ballCount = 0;
 
     public static Pose targetPose;
 
@@ -139,6 +144,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         prismCore.Init(hardwareMap);
+        laserSensor = new Laser(hardwareMap, telemetry);
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
@@ -190,12 +196,14 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.addData("Follower X: ", follower.getPose().getX());
         telemetry.addData("Follower Y: ", follower.getPose().getY());
         telemetry.addData("Follower Heading: ", follower.getPose().getHeading());
+        telemetry.addData("Ball Count: ", ballCount);
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
         handleShootingInputs();
         storePositions();
         intakeControls();
+        ballSensorHandler();
         if (targetPose != null) {
             updatePathToFollow();
         }
@@ -359,7 +367,16 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.addData("currentlyStill: ", currentlyStill);
         telemetry.addData("previouslyMoved: ", previouslyMoved);
         telemetry.addData("currentlyMoved: ", currentlyMoved);
+    }
 
+    void ballSensorHandler(){
+        if (laserSensor.isBallDetected()) {
+            double inRevCoefficent = Math.signum(inPower);
+            ballCount += (int) (1 * inRevCoefficent);
+        }
+        if (ballCount > 3){
+            inPower = -intakeReducer;
+        }
     }
 
     public void handleShootingInputs(){
