@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Kickstand;
 import org.firstinspires.ftc.teamcode.Laser;
 import org.firstinspires.ftc.teamcode.PIDCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -48,9 +49,10 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double STARTING_HEADING = 180;
 
-    ElapsedTime ballGrabTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public static double LIMELIGHT_TARGET = 1.5;
+    ElapsedTime ballGrabTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
 
     public static Pose startingPose;
@@ -130,6 +132,8 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static ModeCore.ALLIANCE currAlliance;
 
+    Kickstand kickstand;
+
     public static double INTAKE_THRESHOLD = 0.15;
 
     public static boolean IS_ROBOT_CENTRIC = true;
@@ -151,6 +155,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         prismCore.Init(hardwareMap);
         ballCount = 0;
+        kickstand = new Kickstand(hardwareMap, telemetry, gamepad1);
         laserSensor = new Laser(hardwareMap, telemetry);
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -212,6 +217,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         storePositions();
         intakeControls();
         ballSensorHandler();
+        kickstand.handler();
         if (targetPose != null) {
             updatePathToFollow();
         }

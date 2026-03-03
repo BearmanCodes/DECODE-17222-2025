@@ -20,8 +20,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Kickstand;
+import org.firstinspires.ftc.teamcode.Laser;
 import org.firstinspires.ftc.teamcode.PIDCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -38,7 +41,8 @@ public class AutoTeleOp_RED extends OpMode {
     public static double STARTING_Y = 8.037209302325575;
     public static double STARTING_HEADING = 0;
 
-    public static double LIMELIGHT_TARGET = -1.5;
+    ElapsedTime ballGrabTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
 
     public static Pose startingPose;
@@ -67,9 +71,18 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static boolean useDefaultPose = false;
 
+    public static int ballCount = 0;
+
+    Laser laserSensor;
+
     public static Pose targetPose;
 
+    boolean threeBalls = false;
+
     public static Pose holdingPose;
+
+    public static double LIMELIGHT_TARGET = -1.5;
+
 
     public Limelight3A limelight;
 
@@ -114,6 +127,8 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static ModeCore.ALLIANCE currAlliance;
 
+    Kickstand kickstand;
+
     public static double INTAKE_THRESHOLD = 0.15;
 
     public static boolean IS_ROBOT_CENTRIC = true;
@@ -134,6 +149,9 @@ public class AutoTeleOp_RED extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         prismCore.Init(hardwareMap);
+        ballCount = 0;
+        kickstand = new Kickstand(hardwareMap, telemetry, gamepad1);
+        laserSensor = new Laser(hardwareMap, telemetry);
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DcMotorSimple.Direction inDir = inFWD ? DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
@@ -157,8 +175,9 @@ public class AutoTeleOp_RED extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive(true);
-        prismCore.BAR_LIGHT();
+        ballGrabTimer.reset();
         prismCore.LL_BAD();
+        prismCore.BAR_LIGHT();
         shooterCore.setCRPower(-1);
     }
 
@@ -185,12 +204,15 @@ public class AutoTeleOp_RED extends OpMode {
         telemetry.addData("Follower X: ", follower.getPose().getX());
         telemetry.addData("Follower Y: ", follower.getPose().getY());
         telemetry.addData("Follower Heading: ", follower.getPose().getHeading());
+        telemetry.addData("Ball Count: ", ballCount);
         telemetry.update();
         ModeCore.autoShootHandler(gamepad2, currAlliance, shooterCore);
         shooterCore.shooting_loop();
         handleShootingInputs();
         storePositions();
         intakeControls();
+        ballSensorHandler();
+        kickstand.handler();
         if (targetPose != null) {
             updatePathToFollow();
         }
@@ -301,15 +323,16 @@ public class AutoTeleOp_RED extends OpMode {
                         }
                     } else {
                         LIMELIGHT_ALIGNED = true;
+                        dtCore.setDrivetrainPower(0, 0, 0, 0);
                         gamepad2.rumbleBlips(2);
                         prismCore.LL_GOOD();
                     }
                 }
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
-                    follower.startTeleOpDrive(true);
-                    follower.setMaxPower(1);
                     LIMELIGHT_ALIGNED = false;
                     prismCore.LL_BAD();
+                    follower.startTeleOpDrive(true);
+                    follower.setMaxPower(1);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
                     break;
                 }
@@ -353,7 +376,35 @@ public class AutoTeleOp_RED extends OpMode {
         telemetry.addData("currentlyStill: ", currentlyStill);
         telemetry.addData("previouslyMoved: ", previouslyMoved);
         telemetry.addData("currentlyMoved: ", currentlyMoved);
+    }
 
+    void ballSensorHandler(){
+        if (laserSensor.isBallDetected()) {
+            double inRevCoefficent = Math.signum(inPower);
+            ballCount += (int) (1 * inRevCoefficent);
+            if (ballCount >= 3 && Math.abs(inPower) > 0) {
+                inPower = 0;
+                INTAKE_RUN_FWD = !INTAKE_RUN_FWD;
+                INTAKE_RUN_REV = false;
+            }
+        }
+        /*
+        if (ballCount > 3 && !fourBalls){
+            ballCount -= 1;
+            ballGrabTimer.reset();
+            inPower = 0;
+            fourBalls = true;
+        }
+        if (fourBalls){
+            if (ballGrabTimer.time(TimeUnit.MILLISECONDS) >= 250 && ballGrabTimer.time(TimeUnit.MILLISECONDS) < 750){
+                inPower = -1;
+            }
+            if (ballGrabTimer.time(TimeUnit.MILLISECONDS) >= 750){
+                inPower = 0;
+                fourBalls = false;
+            }
+        }
+         */
     }
 
     public void handleShootingInputs(){
