@@ -62,8 +62,8 @@ public class ModeCore {
     //END LAUNCHER POS
 
     //VELS
-    public static int BLUE_LEFT_FAR_VEL = 2250; //1000
-    public static int BLUE_LEFT_FAR_VER = 2250; //1200
+    public static int BLUE_LEFT_FAR_VEL = 2200; //1000
+    public static int BLUE_LEFT_FAR_VER = 2200; //1200
     public static int RED_LEFT_FAR_VEL = 2250;
     public static int RED_LEFT_FAR_VER = 2250;
 

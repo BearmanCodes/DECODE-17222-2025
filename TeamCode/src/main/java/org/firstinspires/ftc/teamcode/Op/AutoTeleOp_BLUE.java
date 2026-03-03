@@ -50,7 +50,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static double STARTING_HEADING = 180;
 
 
-    public static double LIMELIGHT_TARGET = 1.5;
+    public static double LIMELIGHT_TARGET = 1.55;
     ElapsedTime ballGrabTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
@@ -336,6 +336,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     LIMELIGHT_ALIGNED = false;
                     prismCore.LL_BAD();
+                    ballCount = 0;
                     follower.startTeleOpDrive(true);
                     follower.setMaxPower(1);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
@@ -384,11 +385,13 @@ public class AutoTeleOp_BLUE extends OpMode {
     }
 
     void ballSensorHandler(){
+        if (ballCount < 0) ballCount = 0;
         if (laserSensor.isBallDetected()) {
             double inRevCoefficent = Math.signum(inPower);
             ballCount += (int) (1 * inRevCoefficent);
             if (ballCount >= 3 && Math.abs(inPower) > 0) {
                 inPower = 0;
+                gamepad1.rumbleBlips(4);
                 INTAKE_RUN_FWD = !INTAKE_RUN_FWD;
                 INTAKE_RUN_REV = false;
             }

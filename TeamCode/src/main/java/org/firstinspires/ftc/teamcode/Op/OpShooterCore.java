@@ -242,7 +242,13 @@ public class OpShooterCore {
             if (power_surge()) {
                 hasSurged = true;
                 AutoTeleOp_BLUE.ballCount -= 1;
+                AutoTeleOp_BLUE.inPower = 1;
+                AutoTeleOp_BLUE.INTAKE_RUN_FWD = !AutoTeleOp_BLUE.INTAKE_RUN_FWD;
+                AutoTeleOp_BLUE.INTAKE_RUN_REV = false;
                 AutoTeleOp_RED.ballCount -= 1;
+                AutoTeleOp_RED.inPower = 1;
+                AutoTeleOp_RED.INTAKE_RUN_FWD = !AutoTeleOp_BLUE.INTAKE_RUN_FWD;
+                AutoTeleOp_RED.INTAKE_RUN_REV = false;
                 entry_time = shot_timer.now(TimeUnit.MILLISECONDS);
                 setCRPower(-1);
                 luigiLoad();

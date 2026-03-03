@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.Autos.BLUE;
 import com.pedropathing.geometry.Pose;
 
 public class BLUE_AUTO_CONSTANTS {
-    public static double TIMEOUT = 750;
+    public static double TIMEOUT = 700;
     public static double PICKUP_POWER = 0.5; //0.4
 
-    public static int L_VEL = 2250; //2125
+    public static int L_VEL = 2185; //2125
 
-    public static int R_VEL = 2250; //2525
+    public static int R_VEL = 2185; //2525
 
     public static double STARTING_X = 55.92558139534884;
 
@@ -57,6 +57,12 @@ public class BLUE_AUTO_CONSTANTS {
     public static double PARKING_Y = 11.5;
 
     public static double PARKING_HEADING = 180;
+
+    public static double LIMELIGHT_TARGET = 1.55;
+
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
+
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.2;
     //_________________________________close
     public static int CLOSE_L_VEL = 1855; //2125
 

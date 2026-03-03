@@ -63,6 +63,8 @@ public class PrismCore {
         BAR_LIGHT.setStartIndex(18);
         BAR_LIGHT.setStopIndex(29);
         BAR_LIGHT.setBrightness(100);
+
+        prism.clearAllAnimations();
     }
 
     public void INTAKE_SPIT(){
