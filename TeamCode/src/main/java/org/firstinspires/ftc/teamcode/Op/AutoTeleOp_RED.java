@@ -41,6 +41,11 @@ public class AutoTeleOp_RED extends OpMode {
     public static double STARTING_Y = 8.037209302325575;
     public static double STARTING_HEADING = 0;
 
+    public static double LIMELIGHT_TARGET = -1.5;
+
+
+    Laser laserSensor;
+
     ElapsedTime ballGrabTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     public static Pose defaultStartingPose = new Pose(STARTING_X, STARTING_Y, Math.toRadians(STARTING_HEADING));
@@ -73,16 +78,11 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static int ballCount = 0;
 
-    Laser laserSensor;
-
     public static Pose targetPose;
 
     boolean threeBalls = false;
 
     public static Pose holdingPose;
-
-    public static double LIMELIGHT_TARGET = -1.5;
-
 
     public Limelight3A limelight;
 
@@ -111,9 +111,6 @@ public class AutoTeleOp_RED extends OpMode {
 
     OpShooterCore shooterCore = new OpShooterCore(telemetry);
     public static double intakeGamepad;
-
-    double previousLPM = 0;
-    double previousRPM = 0;
 
     public static boolean BLUE_ALLIANCE = false;
 
@@ -220,7 +217,7 @@ public class AutoTeleOp_RED extends OpMode {
             case MANUAL_DRIVE:
                 shootingMoveReducer();
                 follower.setTeleOpDrive(-gamepad1.left_stick_y * driveReducer, -gamepad1.left_stick_x * driveReducer, -gamepad1.right_stick_x * driveReducer, IS_ROBOT_CENTRIC);
-                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.GREEN, AutoTeleOp_RED.GAMEPAD_COLORS.RED);
+                setGamepadLeds(GAMEPAD_COLORS.GREEN, GAMEPAD_COLORS.RED);
                 if (gamepad2.startWasPressed()) {
                     if (targetPath != null) {
                         gamepad1.rumbleBlips(1);
@@ -263,7 +260,7 @@ public class AutoTeleOp_RED extends OpMode {
                 }
                 break;
             case AUTOMATED_DRIVE:
-                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.RED, AutoTeleOp_RED.GAMEPAD_COLORS.GREEN);
+                setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.GREEN);
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     follower.setMaxPower(1);
                     isReduced = false;
@@ -331,6 +328,7 @@ public class AutoTeleOp_RED extends OpMode {
                 if (gamepad1.circleWasPressed() || STICK_PANIC_FAILSAFE()) {
                     LIMELIGHT_ALIGNED = false;
                     prismCore.LL_BAD();
+                    ballCount = 0;
                     follower.startTeleOpDrive(true);
                     follower.setMaxPower(1);
                     ModeCore.currentDriveMode = ModeCore.DRIVE_MODE.MANUAL_DRIVE;
@@ -338,7 +336,7 @@ public class AutoTeleOp_RED extends OpMode {
                 }
                 break;
             case HOLD:
-                setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS.RED, AutoTeleOp_RED.GAMEPAD_COLORS.RED);
+                setGamepadLeds(GAMEPAD_COLORS.RED, GAMEPAD_COLORS.RED);
                 follower.holdPoint(getPoseToHold());
                 boolean still = follower.atPose(getPoseToHold(), X_TOLERANCE, Y_TOLERANCE, Math.toRadians(HEADING_TOLERANCE_DEG));
                 updateMovedState(still);
@@ -379,11 +377,13 @@ public class AutoTeleOp_RED extends OpMode {
     }
 
     void ballSensorHandler(){
+        if (ballCount < 0) ballCount = 0;
         if (laserSensor.isBallDetected()) {
             double inRevCoefficent = Math.signum(inPower);
             ballCount += (int) (1 * inRevCoefficent);
             if (ballCount >= 3 && Math.abs(inPower) > 0) {
                 inPower = 0;
+                gamepad1.rumbleBlips(4);
                 INTAKE_RUN_FWD = !INTAKE_RUN_FWD;
                 INTAKE_RUN_REV = false;
             }
@@ -431,23 +431,23 @@ public class AutoTeleOp_RED extends OpMode {
         return one_left_y || one_left_x || one_right_y || one_right_x;
     }
 
-    private void setGamepadLeds(AutoTeleOp_RED.GAMEPAD_COLORS oneColor, AutoTeleOp_RED.GAMEPAD_COLORS twoColor){
-        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.RED) {
+    private void setGamepadLeds(GAMEPAD_COLORS oneColor, GAMEPAD_COLORS twoColor){
+        if (oneColor == GAMEPAD_COLORS.RED) {
             gamepad1.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.BLUE) {
+        if (oneColor == GAMEPAD_COLORS.BLUE) {
             gamepad1.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (oneColor == AutoTeleOp_RED.GAMEPAD_COLORS.GREEN) {
+        if (oneColor == GAMEPAD_COLORS.GREEN) {
             gamepad1.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.RED) {
+        if (twoColor == GAMEPAD_COLORS.RED) {
             gamepad2.setLedColor(255, 0, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.BLUE) {
+        if (twoColor == GAMEPAD_COLORS.BLUE) {
             gamepad2.setLedColor(0, 0, 255, Gamepad.LED_DURATION_CONTINUOUS);
         }
-        if (twoColor == AutoTeleOp_RED.GAMEPAD_COLORS.GREEN) {
+        if (twoColor == GAMEPAD_COLORS.GREEN) {
             gamepad2.setLedColor(0, 255, 0, Gamepad.LED_DURATION_CONTINUOUS);
         }
     }

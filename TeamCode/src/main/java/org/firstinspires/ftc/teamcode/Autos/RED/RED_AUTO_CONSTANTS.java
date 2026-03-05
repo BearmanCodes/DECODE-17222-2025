@@ -55,6 +55,13 @@ public class RED_AUTO_CONSTANTS {
     public static double PARKING_Y = 11.5;
 
     public static double PARKING_HEADING = 0;
+
+    public static double LIMELIGHT_TARGET = -1.5;
+
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
+
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.2;
+
     //_________________________________close
     public static int CLOSE_L_VEL = 1855; //2125
 
@@ -86,4 +93,6 @@ public class RED_AUTO_CONSTANTS {
     public static double CLOSE_PARK_X = 105;
     public static double CLOSE_PARK_Y = 133;
     public static double CLOSE_PARK_HEADING = 0;
+
+    public static double CLOSE_LIMELIGHT_TARGET = -0.25;
 }

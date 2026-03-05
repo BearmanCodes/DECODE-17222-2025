@@ -94,4 +94,6 @@ public class BLUE_AUTO_CONSTANTS {
     public static double CLOSE_PARK_X = 39;
     public static double CLOSE_PARK_Y = 133;
     public static double CLOSE_PARK_HEADING = 180;
+
+    public static double CLOSE_LIMELIGHT_TARGET = 0.25;
 }

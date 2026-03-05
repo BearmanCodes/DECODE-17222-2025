@@ -51,6 +51,17 @@ public class OpShooterCore {
     public static double RD = 0.75;
 
     public static double RF = 9.5;
+
+    public static double L_kP = 0.000935;
+    public static double L_kD = 0.0075;
+
+    public static double L_kV = 0.000197633;
+
+    public static double R_kP = 0.000935;
+
+    public static double R_kD = 0.0075;
+
+    public static double R_kV = 0.000187653;
     public double L_RPM = 0;
     public double R_RPM = 0;
     public double flyExpectedVel, fryExpectedVel;
@@ -63,7 +74,9 @@ public class OpShooterCore {
 
     public static Servo laL, laR;
     public static double laInitPos = 0;
-    public PIDCore pidCore;
+    public PIDCore flyController;
+
+    public PIDCore fryController;
     public VoltageSensor voltageSensor;
     public Telemetry telemetry;
 
@@ -104,7 +117,8 @@ public class OpShooterCore {
         fly.setDirection(DcMotorSimple.Direction.REVERSE);
 
         voltageSensor = hwMap.voltageSensor.iterator().next();
-        pidCore = new PIDCore(voltageSensor, telemetry);
+        flyController = new PIDCore(fly, L_kP, L_kD, L_kV, voltageSensor, telemetry);
+        fryController = new PIDCore(fry, R_kP, R_kD, R_kV, voltageSensor, telemetry);
 
         luigiServo = hwMap.get(Servo.class, "WEARE");
 
@@ -123,8 +137,8 @@ public class OpShooterCore {
         //laL.setPosition(laInitPos);
     }
     public void FlysPIDControl(){
-        fly.setPower(pidCore.PID_calc(fly, L_RPM));
-        fry.setPower(pidCore.PID_calc(fry, R_RPM));
+        fly.setPower(flyController.PID_calc(L_RPM));
+        fry.setPower(fryController.PID_calc(R_RPM));
     }
 
     public void updateColors(){

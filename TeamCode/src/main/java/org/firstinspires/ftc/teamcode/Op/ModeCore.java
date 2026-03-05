@@ -87,25 +87,34 @@ public class ModeCore {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
             OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.LINE_CLOSE_SHOOT_INTERMITENT_TIME_MS;
-            shooterCore.pidCore.timer.reset();
-            shooterCore.pidCore.previous_error = 0;
-            shooterCore.pidCore.previous_time = 0;
+            shooterCore.flyController.timer.reset();
+            shooterCore.flyController.previous_error = 0;
+            shooterCore.flyController.previous_time = 0;
+            shooterCore.fryController.timer.reset();
+            shooterCore.fryController.previous_error = 0;
+            shooterCore.fryController.previous_time = 0;
         }
         if (gamepad2.dpadLeftWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LEFT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
             OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.FAR_SHOOT_INTERMITENT_TIME_MS;
-            shooterCore.pidCore.timer.reset();
-            shooterCore.pidCore.previous_error = 0;
-            shooterCore.pidCore.previous_time = 0;
+            shooterCore.flyController.timer.reset();
+            shooterCore.flyController.previous_error = 0;
+            shooterCore.flyController.previous_time = 0;
+            shooterCore.fryController.timer.reset();
+            shooterCore.fryController.previous_error = 0;
+            shooterCore.fryController.previous_time = 0;
         }
         if (gamepad2.dpadRightWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.RIGHT_FAR;
             determineShotVariables(currentAlliance, desiredLocation, shooterCore);
             OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.FAR_SHOOT_INTERMITENT_TIME_MS;
-            shooterCore.pidCore.timer.reset();
-            shooterCore.pidCore.previous_error = 0;
-            shooterCore.pidCore.previous_time = 0;
+            shooterCore.flyController.timer.reset();
+            shooterCore.flyController.previous_error = 0;
+            shooterCore.flyController.previous_time = 0;
+            shooterCore.fryController.timer.reset();
+            shooterCore.fryController.previous_error = 0;
+            shooterCore.fryController.previous_time = 0;
         }
     }
 

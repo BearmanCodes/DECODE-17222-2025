@@ -116,6 +116,7 @@ public class BLUEnineBall extends OpMode {
     public void stop(){
         PoseStorage.currentPose = follower.getPose();
         shooterAutoCore.spinUpFlys(0, 0);
+        prismCore.CLEAR();
     }
 
     @Override
@@ -276,6 +277,7 @@ public class BLUEnineBall extends OpMode {
                     telemetry.update();
                     shooterAutoCore.boot.setPower(0);
                     setPathState(PATH_STATES.FINISHED);
+                    prismCore.CLEAR();
                 }
                 break;
         }

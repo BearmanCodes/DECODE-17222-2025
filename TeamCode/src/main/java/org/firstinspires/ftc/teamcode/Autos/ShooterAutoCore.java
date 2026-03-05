@@ -69,11 +69,24 @@ public class ShooterAutoCore {
 
     public static double RF = 9.5;
 
+    public static double L_kP = 0.000935;
+    public static double L_kD = 0.0075;
+
+    public static double L_kV = 0.000197633;
+
+    public static double R_kP = 0.000935;
+
+    public static double R_kD = 0.0075;
+
+    public static double R_kV = 0.000187653;
+
     public static int SURGE_MEASURE = 150;
 
     public static int RUNNING_MODIFIER = 350;
 
-    PIDCore pidCore;
+    PIDCore flyController;
+
+    PIDCore fryController;
 
     VoltageSensor voltageSensor;
 
@@ -105,7 +118,8 @@ public class ShooterAutoCore {
         boot = hwMap.get(CRServo.class, "boot");
 
         voltageSensor = hwMap.voltageSensor.iterator().next();
-        pidCore = new PIDCore(voltageSensor, telemetry);
+        flyController = new PIDCore(fly, L_kP, L_kD, L_kV, voltageSensor, telemetry);
+        fryController = new PIDCore(fry, R_kP, R_kD, R_kV, voltageSensor, telemetry);
 
         fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fry.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -179,8 +193,8 @@ public class ShooterAutoCore {
     }
 
     public void FlysPIDControl(){
-        fly.setPower(pidCore.PID_calc(fly, L_RPM));
-        fry.setPower(pidCore.PID_calc(fry, R_RPM));
+        fly.setPower(flyController.PID_calc(L_RPM));
+        fry.setPower(fryController.PID_calc(R_RPM));
      }
 
     public boolean power_surge(double surge_measure, Telemetry tele){

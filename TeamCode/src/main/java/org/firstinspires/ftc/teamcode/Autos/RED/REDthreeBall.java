@@ -12,14 +12,20 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
+import org.firstinspires.ftc.teamcode.Op.DrivetrainCore;
 import org.firstinspires.ftc.teamcode.Op.ModeCore;
 import org.firstinspires.ftc.teamcode.Op.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.PrismCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+import java.util.concurrent.TimeUnit;
 
 
 @Config
@@ -28,10 +34,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class REDthreeBall extends OpMode {
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
+    public Limelight3A limelight;
+
     enum PATH_STATES {
         DRIVE_TO_FIRE_FROM_START,
+        LL_ALIGN_FROM_START,
         FIRE_AFTER_START,
-        DRIVE_TO_PARK_FROM_FIRE,
+        DRIVE_TO_PARK_FROM_START,
         END,
         FINISHED
     }
@@ -46,24 +55,35 @@ public class REDthreeBall extends OpMode {
     Timer opmodeTimer;
     private PATH_STATES pathState; // Current autonomous path state (state machine)
 
+    PrismCore prismCore = new PrismCore();
+
+    DrivetrainCore dtCore = new DrivetrainCore();
+
     private final Pose startPose = new Pose(RED_AUTO_CONSTANTS.STARTING_X, RED_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(RED_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose collectBalls1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_Y, Math.toRadians(RED_AUTO_CONSTANTS.PICKUP_HEADING));
     private final Pose collectBalls1ControlPoint1 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_Y);
     private final Pose shootFar2 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_2_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_2_HEADING));
+    private final Pose shootFar3 = new Pose(RED_AUTO_CONSTANTS.SHOOT_FAR_3_POS_X, RED_AUTO_CONSTANTS.SHOOT_FAR_3_POS_Y, Math.toRadians(RED_AUTO_CONSTANTS.SHOOT_FAR_3_HEADING));
     private final Pose parkingPose = new Pose(RED_AUTO_CONSTANTS.PARKING_X, RED_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(RED_AUTO_CONSTANTS.PARKING_HEADING));
+    private final Pose collectBalls2 = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_2_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_2_Y, Math.toRadians(RED_AUTO_CONSTANTS.PICKUP_HEADING));
+    private final Pose collectBalls2ControlPoint = new Pose(RED_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_X, RED_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_Y);
 
-    private PathChain startToFirePath, collect1Path, collect1ToFirePath, parkPath;
+    private PathChain startToFirePath, parkPath;
 
     private void setPathState(PATH_STATES pState) {
         pathState = pState;
         pathTimer.resetTimer();
+        timer.reset();
     }
 
     @Override
     public void init() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
+        dtCore.Init(hardwareMap);
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.start();
         pathTimer.resetTimer();
         opmodeTimer.resetTimer();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -76,6 +96,8 @@ public class REDthreeBall extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
+        prismCore.Init(hardwareMap);
+
         buildPaths();
 
         panelsTelemetry.debug("Status", "Initialized");
@@ -86,15 +108,17 @@ public class REDthreeBall extends OpMode {
     public void stop(){
         PoseStorage.currentPose = follower.getPose();
         shooterAutoCore.spinUpFlys(0, 0);
+        prismCore.CLEAR();
     }
 
     @Override
     public void start() {
         opmodeTimer.resetTimer();
         pathTimer.resetTimer();
+        timer.reset();
         shooterAutoCore.spinUpFlys(RED_AUTO_CONSTANTS.L_VEL, RED_AUTO_CONSTANTS.R_VEL);
-        shooterAutoCore.FlysPIDControl();
         shooterAutoCore.setCRPower(-1, telemetry);
+        shooterAutoCore.boot.setPower(1);
         setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_START);
     }
 
@@ -123,10 +147,20 @@ public class REDthreeBall extends OpMode {
         switch (pathState){
             case DRIVE_TO_FIRE_FROM_START:
                 follower.followPath(startToFirePath);
-                setPathState(PATH_STATES.FIRE_AFTER_START);
+                setPathState(PATH_STATES.LL_ALIGN_FROM_START);
+                break;
+            case LL_ALIGN_FROM_START:
+                if (!follower.isBusy()){
+                    if (!limelightAlign()){
+                        telemetry.update();
+                    }
+                    else{
+                        setPathState(PATH_STATES.FIRE_AFTER_START);
+                    }
+                }
                 break;
             case FIRE_AFTER_START:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.TIMEOUT){
+                if (!follower.isBusy() && timer.time(TimeUnit.MILLISECONDS) > RED_AUTO_CONSTANTS.TIMEOUT){
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -137,11 +171,12 @@ public class REDthreeBall extends OpMode {
                         telemetry.update();
                     } else {
                         isFirstSoShoot = true;
-                        setPathState(PATH_STATES.DRIVE_TO_PARK_FROM_FIRE);
+                        prismCore.LL_BAD();
+                        setPathState(PATH_STATES.DRIVE_TO_PARK_FROM_START);
                     }
                 }
                 break;
-            case DRIVE_TO_PARK_FROM_FIRE:
+            case DRIVE_TO_PARK_FROM_START:
                 if (!follower.isBusy()) {
                     follower.followPath(parkPath);
                     setPathState(PATH_STATES.END);
@@ -154,10 +189,38 @@ public class REDthreeBall extends OpMode {
                     PoseStorage.currentPose = follower.getPose();
                     shooterAutoCore.spinUpFlys(0, 0);
                     telemetry.update();
+                    shooterAutoCore.boot.setPower(0);
                     setPathState(PATH_STATES.FINISHED);
+                    prismCore.CLEAR();
                 }
                 break;
         }
+    }
+
+    boolean limelightAlign(){
+        LLResult llResult = limelight.getLatestResult();
+        if (llResult != null && llResult.isValid()) {
+            // - = ccw + = cw
+            //cw is + - + -
+            //ccw is - + - +
+            double tx = llResult.getTx();
+            double target = RED_AUTO_CONSTANTS.LIMELIGHT_TARGET;
+            double deg_error = tx - target;
+            boolean isLeft = deg_error < 0;
+            if (Math.abs(deg_error) > RED_AUTO_CONSTANTS.ALLOWED_HEADING_ERROR_DEG){
+                if (isLeft) {
+                    dtCore.setDrivetrainPower(-RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT);
+                } else {
+                    dtCore.setDrivetrainPower(RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT);
+                }
+            } else {
+                dtCore.setDrivetrainPower(0, 0, 0, 0);
+                prismCore.LL_GOOD();
+                gamepad2.rumbleBlips(2);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void buildPaths(){
@@ -169,7 +232,7 @@ public class REDthreeBall extends OpMode {
 
         parkPath = follower.pathBuilder()
                 .addPath(new BezierLine(shootFar1, parkingPose))
-                .setLinearHeadingInterpolation(shootFar1.getHeading(), parkingPose.getHeading())
+                .setLinearHeadingInterpolation(shootFar3.getHeading(), parkingPose.getHeading())
                 .build();
     }
 }

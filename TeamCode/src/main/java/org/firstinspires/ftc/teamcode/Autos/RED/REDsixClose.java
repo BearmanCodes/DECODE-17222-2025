@@ -9,31 +9,42 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.callbacks.PathCallback;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autos.ShooterAutoCore;
+import org.firstinspires.ftc.teamcode.Op.DrivetrainCore;
 import org.firstinspires.ftc.teamcode.Op.ModeCore;
 import org.firstinspires.ftc.teamcode.Op.PoseStorage;
+import org.firstinspires.ftc.teamcode.Op.PrismCore;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+import java.util.concurrent.TimeUnit;
 
 
 @Config
 @Autonomous(name = "RED 6 CLOSE", group = "RED_CLOSE")
 @Configurable // Panels
 public class REDsixClose extends OpMode {
+
+    public Limelight3A limelight;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     Telemetry dashTele = dashboard.getTelemetry();
 
     enum PATH_STATES {
         DRIVE_TO_FIRE_FROM_START,
+        LL_ALIGN_FROM_START,
         FIRE_AFTER_START,
         DRIVE_TO_COLLECT_FROM_FIRE,
         DRIVE_TO_FIRE_FROM_COLLECT,
+        LL_ALIGN_FROM_COLLECT,
         FIRE_AFTER_COLLECT,
         DRIVE_TO_PARK_AFTER_FIRE_2,
         END,
@@ -48,6 +59,10 @@ public class REDsixClose extends OpMode {
     Timer pathTimer;
     Timer opmodeTimer;
     private PATH_STATES pathState; // Current autonomous path state (state machine)
+
+    PrismCore prismCore = new PrismCore();
+
+    DrivetrainCore dtCore = new DrivetrainCore();
 
     public static int L_VEL = RED_AUTO_CONSTANTS.CLOSE_L_VEL;
 
@@ -66,6 +81,7 @@ public class REDsixClose extends OpMode {
     private void setPathState(PATH_STATES pState) {
         pathState = pState;
         pathTimer.resetTimer();
+        timer.reset();
     }
 
     @Override
@@ -73,8 +89,11 @@ public class REDsixClose extends OpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
+        dtCore.Init(hardwareMap);
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.start();
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
 
@@ -82,6 +101,7 @@ public class REDsixClose extends OpMode {
         follower.setStartingPose(startPose);
 
         buildPaths();
+        prismCore.Init(hardwareMap);
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
@@ -92,11 +112,13 @@ public class REDsixClose extends OpMode {
         PoseStorage.currentPose = follower.getPose();
         shooterAutoCore.spinUpFlys(0, 0);
         dashTele.update();
+        prismCore.CLEAR();
     }
 
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        timer.reset();
         shooterAutoCore.spinUpFlys(L_VEL, R_VEL);
         shooterAutoCore.setLauncherPos(ModeCore.BLUE_LINE_CLOSE_LAUNCHER);
         shooterAutoCore.boot.setPower(1);
@@ -128,10 +150,20 @@ public class REDsixClose extends OpMode {
         switch (pathState){
             case DRIVE_TO_FIRE_FROM_START:
                 follower.followPath(startToFirePath);
-                setPathState(PATH_STATES.FIRE_AFTER_START);
+                setPathState(PATH_STATES.LL_ALIGN_FROM_START);
+                break;
+            case LL_ALIGN_FROM_START:
+                if (!follower.isBusy()){
+                    if (!limelightAlign()){
+                        telemetry.update();
+                    }
+                    else{
+                        setPathState(PATH_STATES.FIRE_AFTER_START);
+                    }
+                }
                 break;
             case FIRE_AFTER_START:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT){
+                if (!follower.isBusy() && timer.time(TimeUnit.MILLISECONDS) > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT){
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -142,24 +174,35 @@ public class REDsixClose extends OpMode {
                         telemetry.update();
                     } else {
                         isFirstSoShoot = true;
+                        prismCore.LL_BAD();
                         setPathState(PATH_STATES.DRIVE_TO_COLLECT_FROM_FIRE);
                     }
                 }
                 break;
             case DRIVE_TO_COLLECT_FROM_FIRE:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.INTAKE_TIMEOUT) {
+                if (!follower.isBusy() && timer.time(TimeUnit.MILLISECONDS) > RED_AUTO_CONSTANTS.INTAKE_TIMEOUT) {
                     follower.followPath(collectFromFirePath);
                     setPathState(PATH_STATES.DRIVE_TO_FIRE_FROM_COLLECT);
                 }
                 break;
             case DRIVE_TO_FIRE_FROM_COLLECT:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT) {
+                if (!follower.isBusy() && timer.time(TimeUnit.MILLISECONDS) > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT) {
                     follower.followPath(fireFromCollectPath);
-                    setPathState(PATH_STATES.FIRE_AFTER_COLLECT);
+                    setPathState(PATH_STATES.LL_ALIGN_FROM_COLLECT);
+                }
+                break;
+            case LL_ALIGN_FROM_COLLECT:
+                if (!follower.isBusy()){
+                    if (!limelightAlign()){
+                        telemetry.update();
+                    }
+                    else{
+                        setPathState(PATH_STATES.FIRE_AFTER_COLLECT);
+                    }
                 }
                 break;
             case FIRE_AFTER_COLLECT:
-                if (!follower.isBusy() && pathTimer.getElapsedTime() > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT){
+                if (!follower.isBusy() && timer.time(TimeUnit.MILLISECONDS) > RED_AUTO_CONSTANTS.CLOSE_TIMEOUT){
                     if (isFirstSoShoot) {
                         ShooterAutoCore.failsafeTimer.reset();
                         shooterAutoCore.setCRPower(1, telemetry);
@@ -170,6 +213,7 @@ public class REDsixClose extends OpMode {
                         telemetry.update();
                     } else {
                         isFirstSoShoot = true;
+                        prismCore.LL_BAD();
                         setPathState(PATH_STATES.DRIVE_TO_PARK_AFTER_FIRE_2);
                     }
                 }
@@ -187,9 +231,36 @@ public class REDsixClose extends OpMode {
                     PoseStorage.currentPose = follower.getPose();
                     shooterAutoCore.spinUpFlys(0, 0);
                     telemetry.update();
+                    prismCore.CLEAR();
                     setPathState(PATH_STATES.FINISHED);
                 }
         }
+    }
+
+    boolean limelightAlign(){
+        LLResult llResult = limelight.getLatestResult();
+        if (llResult != null && llResult.isValid()) {
+            // - = ccw + = cw
+            //cw is + - + -
+            //ccw is - + - +
+            double tx = llResult.getTx();
+            double target = RED_AUTO_CONSTANTS.CLOSE_LIMELIGHT_TARGET;
+            double deg_error = tx - target;
+            boolean isLeft = deg_error < 0;
+            if (Math.abs(deg_error) > RED_AUTO_CONSTANTS.      ALLOWED_HEADING_ERROR_DEG){
+                if (isLeft) {
+                    dtCore.setDrivetrainPower(-RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT);
+                } else {
+                    dtCore.setDrivetrainPower(RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT, -RED_AUTO_CONSTANTS.DRIVE_SHOOT_REDUCER_COEFFICENT);
+                }
+            } else {
+                dtCore.setDrivetrainPower(0, 0, 0, 0);
+                prismCore.LL_GOOD();
+                gamepad2.rumbleBlips(2);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void buildPaths(){
