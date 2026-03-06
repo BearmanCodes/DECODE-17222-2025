@@ -62,11 +62,11 @@ public class PIDCore {
 
     public double PID_calc(double desired_rpm){
         double current_time = timer.time();
-        //double DESIRED_POWER = desired_rpm / MAX_RPM;
-       // double curr_voltage = voltageSensor.getVoltage();
+        double DESIRED_POWER = desired_rpm / MAX_RPM;
+        double curr_voltage = voltageSensor.getVoltage();
         double curr_velocity = this.fly.getVelocity();
         double curr_rpm = (curr_velocity / TPR) * 60;
-        double feedforward_power = desired_rpm * this.kV;
+        double feedforward_power = ((DESIRED_POWER * 12.0) / curr_voltage) * kV;
         double current_error = desired_rpm - curr_rpm;
         double MOTOR_RPM = (curr_velocity / TPR) * 60;
         double WHEEL_MPS = ((2 * Math.PI * RHINO_RADIUS * MOTOR_RPM) / 1000) / 60;

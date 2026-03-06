@@ -32,9 +32,7 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "BLUE 6 BALL", group = "BLUE_FAR")
 @Configurable // Panels
 public class BLUEsixBall extends OpMode {
-
     public Limelight3A limelight;
-    ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     enum PATH_STATES {
         DRIVE_TO_FIRE_FROM_START,
@@ -54,8 +52,6 @@ public class BLUEsixBall extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
 
     public ShooterAutoCore shooterAutoCore;
-    DrivetrainCore dtCore = new DrivetrainCore();
-
     public Follower follower; // Pedro Pathing follower instance
     Timer pathTimer;
     Timer opmodeTimer;
@@ -63,12 +59,20 @@ public class BLUEsixBall extends OpMode {
 
     PrismCore prismCore = new PrismCore();
 
+    ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
     private final Pose startPose = new Pose(BLUE_AUTO_CONSTANTS.STARTING_X, BLUE_AUTO_CONSTANTS.STARTING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.STARTING_HEADING)); // Start Pose of our robot.
     private final Pose shootFar1 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_POS_HEADING)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose collectBalls1 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PICKUP_HEADING));
     private final Pose collectBalls1ControlPoint1 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_CONTROL_Y);
     private final Pose shootFar2 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_2_HEADING));
+    private final Pose shootFar3 = new Pose(BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_POS_X, BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_POS_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.SHOOT_FAR_3_HEADING));
     private final Pose parkingPose = new Pose(BLUE_AUTO_CONSTANTS.PARKING_X, BLUE_AUTO_CONSTANTS.PARKING_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PARKING_HEADING));
+    private final Pose collectBalls2 = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_Y, Math.toRadians(BLUE_AUTO_CONSTANTS.PICKUP_HEADING));
+    private final Pose collectBalls2ControlPoint = new Pose(BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_X, BLUE_AUTO_CONSTANTS.COLLECT_BALLS_2_CONTROL_Y);
+
+    DrivetrainCore dtCore = new DrivetrainCore();
+
     private PathChain startToFirePath, collect1Path, collect1ToFirePath, parkPath;
 
     private void setPathState(PATH_STATES pState) {
@@ -81,20 +85,24 @@ public class BLUEsixBall extends OpMode {
     public void init() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        pathTimer.resetTimer();
         dtCore.Init(hardwareMap);
+        pathTimer.resetTimer();
         opmodeTimer.resetTimer();
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.start();
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         shooterAutoCore = new ShooterAutoCore(telemetry);
+
         shooterAutoCore.init(hardwareMap);
         shooterAutoCore.luigiServo.setPosition(ModeCore.LUIGI_HOPPER_LOAD);
         shooterAutoCore.setCRPower(0, telemetry);
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
         buildPaths();
+        prismCore.Init(hardwareMap);
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
@@ -104,6 +112,7 @@ public class BLUEsixBall extends OpMode {
     public void stop(){
         PoseStorage.currentPose = follower.getPose();
         shooterAutoCore.spinUpFlys(0, 0);
+        prismCore.CLEAR();
     }
 
     @Override
@@ -126,6 +135,10 @@ public class BLUEsixBall extends OpMode {
     public void loop() {
         updatePose();
         shooterAutoCore.FlysPIDControl();
+        telemetry.addData("Vel: ", shooterAutoCore.fly.getVelocity());
+        telemetry.addData("Ver: ", shooterAutoCore.fry.getVelocity());
+        telemetry.addData("Desired Vel: ", shooterAutoCore.load_fly_expected());
+        telemetry.addData("Desired Ver: ", shooterAutoCore.load_fry_expected());
         autonomousPathUpdate(); // Update autonomous state machine
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);
@@ -224,11 +237,14 @@ public class BLUEsixBall extends OpMode {
                     PoseStorage.currentPose = follower.getPose();
                     shooterAutoCore.spinUpFlys(0, 0);
                     telemetry.update();
+                    shooterAutoCore.boot.setPower(0);
                     setPathState(PATH_STATES.FINISHED);
+                    prismCore.CLEAR();
                 }
                 break;
         }
     }
+
 
     boolean limelightAlign(){
         LLResult llResult = limelight.getLatestResult();

@@ -139,6 +139,10 @@ public class BLUEnineBall extends OpMode {
     public void loop() {
         updatePose();
         shooterAutoCore.FlysPIDControl();
+        telemetry.addData("Vel: ", shooterAutoCore.fly.getVelocity());
+        telemetry.addData("Ver: ", shooterAutoCore.fry.getVelocity());
+        telemetry.addData("Desired Vel: ", shooterAutoCore.load_fly_expected());
+        telemetry.addData("Desired Ver: ", shooterAutoCore.load_fry_expected());
         autonomousPathUpdate(); // Update autonomous state machine
         //shooterAutoCore.power_surge(150);
         telemetry.addData("Path State: ", pathState);

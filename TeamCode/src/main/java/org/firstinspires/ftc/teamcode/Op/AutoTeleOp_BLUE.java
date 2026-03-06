@@ -50,7 +50,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static double STARTING_HEADING = 180;
 
 
-    public static double LIMELIGHT_TARGET = 1.55;
+    public static double LIMELIGHT_TARGET = 1.625;
 
     Laser laserSensor;
 
@@ -83,6 +83,9 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static boolean automatedDrive = false;
 
     public static boolean useDefaultPose = false;
+
+    public static double LL_KP = 0.0095;
+
 
     public static int ballCount = 0;
 
@@ -319,12 +322,13 @@ public class AutoTeleOp_BLUE extends OpMode {
                     double tx = llResult.getTx();
                     double target = LIMELIGHT_TARGET;
                     double deg_error = tx - target;
+                    double P = Math.abs(deg_error) * LL_KP;
                     boolean isLeft = deg_error < 0;
                     if (Math.abs(deg_error) > ALLOWED_HEADING_ERROR_DEG){
                         if (isLeft) {
-                            dtCore.setDrivetrainPower(-DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT);
+                            dtCore.setDrivetrainPower(-(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P);
                         } else {
-                            dtCore.setDrivetrainPower(DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT);
+                            dtCore.setDrivetrainPower(DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P));
                         }
                     } else {
                         LIMELIGHT_ALIGNED = true;

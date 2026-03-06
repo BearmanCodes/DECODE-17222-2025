@@ -53,15 +53,15 @@ public class OpShooterCore {
     public static double RF = 9.5;
 
     public static double L_kP = 0.000935;
-    public static double L_kD = 0.0075;
+    public static double L_kD = 0.005;
 
-    public static double L_kV = 0.000197633;
+    public static double L_kV = 1.08;
 
     public static double R_kP = 0.000935;
 
-    public static double R_kD = 0.0075;
+    public static double R_kD = 0.005;
 
-    public static double R_kV = 0.000187653;
+    public static double R_kV = 1.08;
     public double L_RPM = 0;
     public double R_RPM = 0;
     public double flyExpectedVel, fryExpectedVel;
@@ -256,13 +256,7 @@ public class OpShooterCore {
             if (power_surge()) {
                 hasSurged = true;
                 AutoTeleOp_BLUE.ballCount -= 1;
-                AutoTeleOp_BLUE.inPower = 1;
-                AutoTeleOp_BLUE.INTAKE_RUN_FWD = !AutoTeleOp_BLUE.INTAKE_RUN_FWD;
-                AutoTeleOp_BLUE.INTAKE_RUN_REV = false;
                 AutoTeleOp_RED.ballCount -= 1;
-                AutoTeleOp_RED.inPower = 1;
-                AutoTeleOp_RED.INTAKE_RUN_FWD = !AutoTeleOp_BLUE.INTAKE_RUN_FWD;
-                AutoTeleOp_RED.INTAKE_RUN_REV = false;
                 entry_time = shot_timer.now(TimeUnit.MILLISECONDS);
                 setCRPower(-1);
                 luigiLoad();

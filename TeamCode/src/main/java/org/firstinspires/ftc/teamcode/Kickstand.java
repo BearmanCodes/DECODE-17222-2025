@@ -27,10 +27,10 @@ public class Kickstand {
     }
 
     public void handler(){
-        if (gamepad.squareWasPressed()){
+        if (gamepad.shareWasPressed()){
             kickstand.setPosition(extended_pos);
         }
-        if (gamepad.shareWasPressed()) {
+        if (gamepad.squareWasPressed()) {
             kickstand.setPosition(init_pos);
         }
     }

@@ -70,15 +70,15 @@ public class ShooterAutoCore {
     public static double RF = 9.5;
 
     public static double L_kP = 0.000935;
-    public static double L_kD = 0.0075;
+    public static double L_kD = 0.005;
 
-    public static double L_kV = 0.000197633;
+    public static double L_kV = 1.08;
 
     public static double R_kP = 0.000935;
 
-    public static double R_kD = 0.0075;
+    public static double R_kD = 0.005;
 
-    public static double R_kV = 0.000187653;
+    public static double R_kV = 1.08;
 
     public static int SURGE_MEASURE = 150;
 

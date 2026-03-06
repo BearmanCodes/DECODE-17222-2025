@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Autos.RED;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
 public class RED_AUTO_CONSTANTS {
     public static double TIMEOUT = 750;
     public static double PICKUP_POWER = 0.5; //0.4

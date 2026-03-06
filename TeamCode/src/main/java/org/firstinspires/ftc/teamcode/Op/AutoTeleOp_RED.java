@@ -62,6 +62,8 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double driveReducer = 1;
 
+    public static double LL_KP = 0.0095;
+
     public static boolean isReduced = false;
 
     public static double RESET_HEADING_DEG = 180;
@@ -311,12 +313,13 @@ public class AutoTeleOp_RED extends OpMode {
                     double tx = llResult.getTx();
                     double target = LIMELIGHT_TARGET;
                     double deg_error = tx - target;
+                    double P = Math.abs(deg_error) * LL_KP;
                     boolean isLeft = deg_error < 0;
                     if (Math.abs(deg_error) > ALLOWED_HEADING_ERROR_DEG){
                         if (isLeft) {
-                            dtCore.setDrivetrainPower(-DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT);
+                            dtCore.setDrivetrainPower(-(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P);
                         } else {
-                            dtCore.setDrivetrainPower(DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT, DRIVE_SHOOT_REDUCER_COEFFICENT, -DRIVE_SHOOT_REDUCER_COEFFICENT);
+                            dtCore.setDrivetrainPower(DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P), DRIVE_SHOOT_REDUCER_COEFFICENT + P, -(DRIVE_SHOOT_REDUCER_COEFFICENT + P));
                         }
                     } else {
                         LIMELIGHT_ALIGNED = true;
