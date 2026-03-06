@@ -63,14 +63,14 @@ public class ModeCore {
 
     //VELS
     public static int BLUE_LEFT_FAR_VEL = 2250; //1000
-    public static int BLUE_LEFT_FAR_VER = 2250; //1200
-    public static int RED_LEFT_FAR_VEL = 2250;
-    public static int RED_LEFT_FAR_VER = 2250;
+    public static int BLUE_LEFT_FAR_VER = 2200; //1200
+    public static int RED_LEFT_FAR_VEL = 2325;
+    public static int RED_LEFT_FAR_VER = 2275;
 
-    public static int BLUE_RIGHT_FAR_VEL = 2250;
-    public static int BLUE_RIGHT_FAR_VER = 2250;
+    public static int BLUE_RIGHT_FAR_VEL = 2325;
+    public static int BLUE_RIGHT_FAR_VER = 2275;
     public static int RED_RIGHT_FAR_VEL = 2250;
-    public static int RED_RIGHT_FAR_VER = 2250;
+    public static int RED_RIGHT_FAR_VER = 2200;
 
     public static int BLUE_LINE_CLOSE_VEL = 1825;
     public static int BLUE_LINE_CLOSE_VER = 1825;
@@ -79,7 +79,6 @@ public class ModeCore {
 
     //END VELS
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;
-
     public static DRIVE_MODE currentDriveMode = DRIVE_MODE.MANUAL_DRIVE;
 
     public static void autoShootHandler(Gamepad gamepad2, ALLIANCE currentAlliance, OpShooterCore shooterCore) {
@@ -157,7 +156,7 @@ public class ModeCore {
                     case LEFT_FAR:
                         platformHeight = RED_LEFT_FAR_LAUNCHER;
                         flySpeed = RED_LEFT_FAR_VEL;
-                        frySpeed = RED_RIGHT_FAR_VER;
+                        frySpeed = RED_LEFT_FAR_VER;
                         prepareForShot(platformHeight, flySpeed, frySpeed, shooterCore);
                         AutoTeleOp_RED.targetPose = PoseCore.RED_LEFT_FAR_POSE;
                         break;

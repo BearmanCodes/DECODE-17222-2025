@@ -41,7 +41,7 @@ public class AutoTeleOp_RED extends OpMode {
     public static double STARTING_Y = 8.037209302325575;
     public static double STARTING_HEADING = 0;
 
-    public static double LIMELIGHT_TARGET = -1.5;
+    public static double LIMELIGHT_TARGET = -1.51;
 
 
     Laser laserSensor;
@@ -62,13 +62,13 @@ public class AutoTeleOp_RED extends OpMode {
 
     public static double driveReducer = 1;
 
-    public static double LL_KP = 0.0095;
+    public static double LL_KP = 0.008;
 
     public static boolean isReduced = false;
 
     public static double RESET_HEADING_DEG = 180;
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.15;
 
     boolean wasMoved = false;
 
@@ -210,7 +210,7 @@ public class AutoTeleOp_RED extends OpMode {
         handleShootingInputs();
         storePositions();
         intakeControls();
-        ballSensorHandler();
+       // ballSensorHandler();
         kickstand.handler();
         if (targetPose != null) {
             updatePathToFollow();

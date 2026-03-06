@@ -49,7 +49,7 @@ public class RED_AUTO_CONSTANTS {
 
     public static double COLLECT_BALLS_2_CONTROL_Y = 66.35;
 
-    public static double PICKUP_2_TEMPORAL = 0.41111;
+    public static double PICKUP_2_TEMPORAL = 0.4;
 
     public static double PICKUP_HEADING = 180;
 
@@ -59,11 +59,13 @@ public class RED_AUTO_CONSTANTS {
 
     public static double PARKING_HEADING = 0;
 
-    public static double LIMELIGHT_TARGET = -1.5;
+    public static double LIMELIGHT_TARGET = -1.51;
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
+    public static double LL_KP = 0.008;
 
-    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.2;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.2;
+
+    public static double DRIVE_SHOOT_REDUCER_COEFFICENT = 0.15;
 
     //_________________________________close
     public static int CLOSE_L_VEL = 1855; //2125

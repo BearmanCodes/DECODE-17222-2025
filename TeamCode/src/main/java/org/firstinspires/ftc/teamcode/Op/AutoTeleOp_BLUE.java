@@ -50,7 +50,7 @@ public class AutoTeleOp_BLUE extends OpMode {
     public static double STARTING_HEADING = 180;
 
 
-    public static double LIMELIGHT_TARGET = 1.625;
+    public static double LIMELIGHT_TARGET = 4;
 
     Laser laserSensor;
 
@@ -74,7 +74,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static double RESET_HEADING_DEG = 180;
 
-    public static double ALLOWED_HEADING_ERROR_DEG = 0.285;
+    public static double ALLOWED_HEADING_ERROR_DEG = 0.15;
 
     boolean wasMoved = false;
 
@@ -84,7 +84,7 @@ public class AutoTeleOp_BLUE extends OpMode {
 
     public static boolean useDefaultPose = false;
 
-    public static double LL_KP = 0.0095;
+    public static double LL_KP = 0.008;
 
 
     public static int ballCount = 0;
@@ -219,7 +219,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         handleShootingInputs();
         storePositions();
         intakeControls();
-        ballSensorHandler();
+        //ballSensorHandler();
         kickstand.handler();
         if (targetPose != null) {
             updatePathToFollow();
@@ -388,6 +388,7 @@ public class AutoTeleOp_BLUE extends OpMode {
         telemetry.addData("currentlyMoved: ", currentlyMoved);
     }
 
+    /*
     void ballSensorHandler(){
         if (ballCount < 0) ballCount = 0;
         if (laserSensor.isBallDetected()) {
@@ -400,7 +401,7 @@ public class AutoTeleOp_BLUE extends OpMode {
                 INTAKE_RUN_REV = false;
             }
         }
-        /*
+
         if (ballCount > 3 && !fourBalls){
             ballCount -= 1;
             ballGrabTimer.reset();
@@ -416,8 +417,10 @@ public class AutoTeleOp_BLUE extends OpMode {
                 fourBalls = false;
             }
         }
-         */
+
     }
+
+     */
 
     public void handleShootingInputs(){
         boolean flysAreRunning = shooterCore.fly.getVelocity() >= OpShooterCore.RUNNING_SPEEDS && shooterCore.fry.getVelocity() >= OpShooterCore.RUNNING_SPEEDS;
