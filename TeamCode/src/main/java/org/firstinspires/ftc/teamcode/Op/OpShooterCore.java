@@ -99,6 +99,7 @@ public class OpShooterCore {
         this.telemetry = telemetry;
     }
 
+
     public void init(HardwareMap hwMap) {
 
         rServo = hwMap.get(CRServo.class, "crr");
@@ -261,12 +262,12 @@ public class OpShooterCore {
                 setCRPower(-1);
                 luigiLoad();
             }
-            if (hasSurged && shot_timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS) {
-                hasSurged = false;
-                entry_time = 0;
-                setCRPower(1);
-                luigiKick();
-            }
+           // if (hasSurged && shot_timer.now(TimeUnit.MILLISECONDS) - entry_time >= SHOOT_INTERMITENT_TIME_MS) {
+             //   hasSurged = false;
+               // entry_time = 0;
+                //setCRPower(1);
+                //luigiKick();
+            //}
         }
     }
 }

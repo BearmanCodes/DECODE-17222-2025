@@ -81,6 +81,18 @@ public class ModeCore {
     public static ROBOTS_SHOOTING_LOCATION desiredLocation;
     public static DRIVE_MODE currentDriveMode = DRIVE_MODE.MANUAL_DRIVE;
 
+    public static void BabyModeCoreHandler(OpShooterCore shooterCore){
+        desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
+        determineShotVariables(ALLIANCE.RED, desiredLocation, shooterCore);
+        OpShooterCore.SHOOT_INTERMITENT_TIME_MS = OpShooterCore.LINE_CLOSE_SHOOT_INTERMITENT_TIME_MS;
+        shooterCore.flyController.timer.reset();
+        shooterCore.flyController.previous_error = 0;
+        shooterCore.flyController.previous_time = 0;
+        shooterCore.fryController.timer.reset();
+        shooterCore.fryController.previous_error = 0;
+        shooterCore.fryController.previous_time = 0;
+    }
+
     public static void autoShootHandler(Gamepad gamepad2, ALLIANCE currentAlliance, OpShooterCore shooterCore) {
         if (gamepad2.squareWasPressed()) {
             desiredLocation = ROBOTS_SHOOTING_LOCATION.LINE_CLOSE;
